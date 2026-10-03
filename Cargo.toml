@@ -1,0 +1,25 @@
+[package]
+name = "ayvu"
+version = "0.1.0-dev.1"
+edition = "2021"
+authors = ["Lumen Pink <hi@lumen.pink>"]
+description = "Declarative comic strip generator inspired by Microsoft Comic Chat"
+license = "GPL-3.0-or-later"
+homepage = "https://ayvu.2lp.in"
+repository = "https://codeberg.org/lumenpink/ayvu"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive", "env"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tiny_http = "0.12"
+
+[dev-dependencies]
+tempfile = "3.17"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

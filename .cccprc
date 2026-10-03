@@ -1,0 +1,10 @@
+# CCCP Local Configuration for Ayvu
+theme=ussr
+strict=true
+forge_type=codeberg
+forge_host=codeberg.org
+forge_owner=lumenpink
+forge_repo=ayvu
+default_branch=main
+auto_sync=true
+lang=en-US
