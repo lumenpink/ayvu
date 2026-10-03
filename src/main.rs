@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use std::io::Read;
 
 #[derive(Parser, Debug)]
 #[command(name = "ayvu")]
@@ -43,10 +44,38 @@ fn main() {
             output,
             title,
         }) => {
-            println!(
-                "Rendering comic to {} (input: {:?}, title: {:?})",
-                output, input, title
-            );
+            let content = match input {
+                Some(ref path) if path != "-" => match std::fs::read_to_string(path) {
+                    Ok(c) => c,
+                    Err(e) => {
+                        eprintln!("Error reading input file '{}': {}", path, e);
+                        std::process::exit(1);
+                    }
+                },
+                _ => {
+                    let mut buffer = String::new();
+                    if let Err(e) = std::io::stdin().read_to_string(&mut buffer) {
+                        eprintln!("Error reading from stdin: {}", e);
+                        std::process::exit(1);
+                    }
+                    buffer
+                }
+            };
+
+            let strip = match ayvu::parser::parse_dialogue_script(&content, title.as_deref()) {
+                Ok(s) => s,
+                Err(e) => {
+                    eprintln!("Error parsing dialogue script: {}", e);
+                    std::process::exit(1);
+                }
+            };
+
+            let svg = ayvu::renderer::render_comic_strip_to_svg(&strip);
+            if let Err(e) = std::fs::write(&output, svg) {
+                eprintln!("Error writing output file '{}': {}", output, e);
+                std::process::exit(1);
+            }
+            println!("✓ Comic strip successfully rendered to {}", output);
         }
         Some(Commands::Serve { host, port }) => {
             println!("Ayvu HTTP daemon listening on http://{}:{}", host, port);

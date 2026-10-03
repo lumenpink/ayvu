@@ -3,8 +3,10 @@
 //!
 //! Transforms conversational plain text into expressive multi-panel comic strips.
 
+pub mod balloon;
 pub mod model;
 pub mod parser;
+pub mod renderer;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 
