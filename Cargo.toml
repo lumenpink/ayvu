@@ -16,6 +16,7 @@ tiny_http = "0.12"
 
 [dev-dependencies]
 tempfile = "3.17"
+ureq = "2.12"
 
 [profile.release]
 opt-level = "z"

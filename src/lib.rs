@@ -7,6 +7,7 @@ pub mod balloon;
 pub mod model;
 pub mod parser;
 pub mod renderer;
+pub mod server;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 

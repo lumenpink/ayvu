@@ -78,7 +78,10 @@ fn main() {
             println!("✓ Comic strip successfully rendered to {}", output);
         }
         Some(Commands::Serve { host, port }) => {
-            println!("Ayvu HTTP daemon listening on http://{}:{}", host, port);
+            if let Err(e) = ayvu::server::run_server(&host, port) {
+                eprintln!("HTTP server error: {}", e);
+                std::process::exit(1);
+            }
         }
         None => {
             println!(
