@@ -13,3 +13,6 @@
 
 # Metadados de agentes locais
 .antigravity/
+
+# Cloudflare Wrangler
+.wrangler/

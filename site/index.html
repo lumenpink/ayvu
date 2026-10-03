@@ -1,18 +1,714 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ayvu — Documentação</title>
-<style>
-body { font-family: monospace, sans-serif; max-width: 800px; margin: 40px auto; padding: 0 20px; line-height: 1.6; }
-h1 { border-bottom: 2px solid #333; padding-bottom: 8px; }
-.badge { display: inline-block; padding: 2px 8px; background: #eee; border: 1px solid #ccc; font-size: 0.9em; }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ayvu — Declarative Comic Strip Playground & Cheatsheet</title>
+  <meta name="description" content="Gerador declarativo de tirinhas em quadrinhos inspirado no Microsoft Comic Chat (1996). Playground interativo, presets, dicas e documentação.">
+  <link rel="canonical" href="https://ayvu.2lp.in/">
+
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://ayvu.2lp.in/">
+  <meta property="og:title" content="Ayvu — Declarative Comic Strip Playground">
+  <meta property="og:description" content="Transform conversational plain text into expressive vector comic strips with vintage comic chat characters.">
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --border: #30363d;
+      --text: #c9d1d9;
+      --text-bright: #f0f6fc;
+      --primary: #f59e0b;
+      --primary-hover: #d97706;
+      --accent: #38bdf8;
+      --danger: #ef4444;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      --font-comic: 'Comic Sans MS', 'Comic Relief', cursive, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo {
+      font-size: 1.8rem;
+    }
+
+    .brand-title {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.5px;
+    }
+
+    .brand-tag {
+      font-size: 0.75rem;
+      background-color: #238636;
+      color: #fff;
+      padding: 0.2rem 0.5rem;
+      border-radius: 9999px;
+      font-weight: 700;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    .container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      flex: 1;
+      height: calc(100vh - 65px);
+    }
+
+    @media (max-width: 900px) {
+      .container {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+    }
+
+    .panel-left, .panel-right {
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      padding: 1.25rem;
+      gap: 1rem;
+    }
+
+    .panel-left {
+      border-right: 1px solid var(--border);
+      background-color: #0b0f14;
+    }
+
+    .toolbar-row {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .row-label {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      font-weight: 700;
+      color: #8b949e;
+      letter-spacing: 0.5px;
+    }
+
+    .chips-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    button.chip {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: var(--font-mono);
+    }
+
+    button.chip:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    button.chip.active {
+      background-color: var(--primary);
+      border-color: var(--primary);
+      color: #000;
+      font-weight: bold;
+    }
+
+    .control-row {
+      display: flex;
+      gap: 0.75rem;
+      align-items: center;
+    }
+
+    select, input[type="text"] {
+      background-color: var(--card-bg);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 0.5rem 0.75rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      outline: none;
+      flex: 1;
+    }
+
+    select:focus, input[type="text"]:focus {
+      border-color: var(--accent);
+    }
+
+    textarea#editor {
+      flex: 1;
+      min-height: 280px;
+      background-color: #010409;
+      border: 1px solid var(--border);
+      color: #7ee787;
+      font-family: var(--font-mono);
+      font-size: 0.95rem;
+      padding: 1rem;
+      border-radius: 6px;
+      resize: vertical;
+      line-height: 1.5;
+      outline: none;
+    }
+
+    textarea#editor:focus {
+      border-color: var(--accent);
+    }
+
+    .action-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+
+    .btn {
+      padding: 0.6rem 1rem;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1px solid transparent;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: background 0.15s ease;
+    }
+
+    .btn-primary {
+      background-color: var(--primary);
+      color: #111;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: var(--card-bg);
+      border-color: var(--border);
+      color: var(--text-bright);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--text);
+    }
+
+    /* Right column tabs */
+    .tabs-header {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+      gap: 0.5rem;
+    }
+
+    .tab-btn {
+      background: none;
+      border: none;
+      color: #8b949e;
+      padding: 0.5rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+    }
+
+    .tab-btn.active {
+      color: var(--text-bright);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-content {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .tab-content.active {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    #preview-container {
+      background-color: #fdfbf7;
+      border: 2px dashed #444;
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 340px;
+      overflow: auto;
+      box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+    }
+
+    #preview-container svg {
+      max-width: 100%;
+      height: auto;
+      border-radius: 4px;
+    }
+
+    /* Cheatsheet styles */
+    .cheatsheet-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      margin-top: 0.5rem;
+    }
+
+    .cheatsheet-table th, .cheatsheet-table td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+
+    .cheatsheet-table th {
+      background-color: var(--card-bg);
+      color: var(--text-bright);
+    }
+
+    .code-snippet {
+      background-color: #010409;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.75rem;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      overflow-x: auto;
+      color: #79c0ff;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 1.5rem;
+      right: 1.5rem;
+      background-color: #238636;
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 6px;
+      font-weight: 600;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      display: none;
+      z-index: 1000;
+    }
+  </style>
 </head>
 <body>
-<h1>ayvu</h1>
-<p>Declarative comic strip generator inspired by Microsoft Comic Chat</p>
-<p><span class="badge">GOST v1.1.0</span> <span class="badge">GPL-3.0</span></p>
+
+  <header>
+    <div class="brand">
+      <span class="logo">🗨️</span>
+      <h1 class="brand-title">Ayvu</h1>
+      <span class="brand-tag">v0.1.0</span>
+      <span style="font-size: 0.8rem; color: #8b949e;">Declarative Comic Chat Generator</span>
+    </div>
+    <nav class="nav-links">
+      <a href="https://codeberg.org/lumenpink/ayvu" target="_blank" rel="noopener">Codeberg ↗</a>
+      <a href="https://codeberg.org/lumenpink/ayvu/src/branch/main/docs/api.md" target="_blank" rel="noopener">API Docs ↗</a>
+      <a href="https://codeberg.org/lumenpink/ayvu/src/branch/main/docs/deployment.md" target="_blank" rel="noopener">Obsidian Guide ↗</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <!-- Left Column: Controls & Textarea Editor -->
+    <section class="panel-left">
+      <div class="control-row">
+        <select id="preset-selector">
+          <option value="" disabled selected>⚡ Escolha um preset...</option>
+          <option value="classic">1. Classic Duo (Tuffy & Jordan)</option>
+          <option value="sfx">2. Briga Comic com SFX ([POW!], [CRASH!])</option>
+          <option value="stickers">3. Emoções & Stickers ([heart], [sweat])</option>
+          <option value="grid">4. Layout Quadrado (Grid 2x2)</option>
+          <option value="vertical">5. Layout Webtoon (Vertical Mobile)</option>
+        </select>
+        <input type="text" id="title-input" placeholder="Título da Tirinha (opcional)..." value="Ayvu Comic Chat">
+      </div>
+
+      <!-- Quick Chips: Layout -->
+      <div class="toolbar-row">
+        <span class="row-label">📐 Disposição dos Painéis</span>
+        <div class="chips-group" id="layout-chips">
+          <button type="button" class="chip active" data-insert="[layout: strip]">horizontal (padrão)</button>
+          <button type="button" class="chip" data-insert="[layout: grid]">grid (2x2)</button>
+          <button type="button" class="chip" data-insert="[layout: vertical]">vertical (webtoon)</button>
+        </div>
+      </div>
+
+      <!-- Quick Chips: Characters & Emotions -->
+      <div class="toolbar-row">
+        <span class="row-label">🎭 Personagens & Expressões</span>
+        <div class="chips-group">
+          <button type="button" class="chip" data-insert="Tuffy (happy): ">🐶 Tuffy</button>
+          <button type="button" class="chip" data-insert="Jordan (thinking): ">🕶️ Jordan</button>
+          <button type="button" class="chip" data-insert="Peep (laughing): ">🐥 Peep</button>
+          <button type="button" class="chip" data-insert="(happy)">(happy)</button>
+          <button type="button" class="chip" data-insert="(angry)">(angry)</button>
+          <button type="button" class="chip" data-insert="(sad)">(sad)</button>
+          <button type="button" class="chip" data-insert="(shouting)">(shouting)</button>
+          <button type="button" class="chip" data-insert="(thinking)">(thinking)</button>
+          <button type="button" class="chip" data-insert="(surprised)">(surprised)</button>
+        </div>
+      </div>
+
+      <!-- Quick Chips: Onomatopoeia & Stickers -->
+      <div class="toolbar-row">
+        <span class="row-label">💥 Onomatopeias & Stickers</span>
+        <div class="chips-group">
+          <button type="button" class="chip" data-insert="[POW!]">💥 [POW!]</button>
+          <button type="button" class="chip" data-insert="[CRASH!]">⚡ [CRASH!]</button>
+          <button type="button" class="chip" data-insert="[BOOM!]">💣 [BOOM!]</button>
+          <button type="button" class="chip" data-insert="[ZAP!]">⚡ [ZAP!]</button>
+          <button type="button" class="chip" data-insert="[heart]">💖 [heart]</button>
+          <button type="button" class="chip" data-insert="[sweat]">💧 [sweat]</button>
+          <button type="button" class="chip" data-insert="[shock]">❗ [shock]</button>
+          <button type="button" class="chip" data-insert="[idea]">💡 [idea]</button>
+          <button type="button" class="chip" data-insert="---">&#10134; Novo Painel (---)</button>
+        </div>
+      </div>
+
+      <!-- Editor Textarea -->
+      <textarea id="editor" spellcheck="false">Tuffy (happy): Bem-vindo ao Ayvu! [heart]
+Jordan (thinking): Como funciona a geração de tirinhas?
+---
+Tuffy (laughing): É só escrever quem fala e o diálogo!
+Jordan (surprised): E ele cria os balões e os personagens sozinho?
+---
+[POW!]
+Peep (shouting): É exatamente como o MS Comic Chat de 1996!
+Jordan (shock): Uau, sensacional! [idea]</textarea>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-primary" id="btn-render">✨ Atualizar Tirinha</button>
+        <button class="btn btn-secondary" id="btn-download">💾 Baixar SVG</button>
+        <button class="btn btn-secondary" id="btn-copy-svg">📋 Copiar SVG</button>
+        <button class="btn btn-secondary" id="btn-obsidian">📓 Link p/ Obsidian</button>
+      </div>
+    </section>
+
+    <!-- Right Column: Tabs (Preview & Cheatsheet) -->
+    <section class="panel-right">
+      <div class="tabs-header">
+        <button class="tab-btn active" data-tab="preview-tab">Visualização ao Vivo</button>
+        <button class="tab-btn" data-tab="cheatsheet-tab">Dicas & Cheatsheet</button>
+        <button class="tab-btn" data-tab="api-tab">Exemplo cURL & Integração</button>
+      </div>
+
+      <!-- Preview Tab -->
+      <div class="tab-content active" id="preview-tab">
+        <div id="preview-container">
+          <div id="preview">Carregando preview...</div>
+        </div>
+      </div>
+
+      <!-- Cheatsheet Tab -->
+      <div class="tab-content" id="cheatsheet-tab">
+        <h3 style="color: var(--primary);">📖 Guia Rápido de Marcação (Markup)</h3>
+        <p style="font-size: 0.9rem; line-height: 1.5;">O Ayvu aceita scripts conversacionais intuitivos. Cada linha representa um balão de fala.</p>
+
+        <table class="cheatsheet-table">
+          <thead>
+            <tr>
+              <th>Elemento</th>
+              <th>Sintaxe</th>
+              <th>Efeito Visual</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Fala Normal</td>
+              <td><code>Nome: texto</code></td>
+              <td>Balão elíptico com rabo direcionado à boca.</td>
+            </tr>
+            <tr>
+              <td>Expressão Explícita</td>
+              <td><code>Nome (happy): texto</code></td>
+              <td>Altera os olhos, boca e orelhas do avatar.</td>
+            </tr>
+            <tr>
+              <td>Pensamento</td>
+              <td><code>Nome (thinking): texto</code> ou <code>oO texto</code></td>
+              <td>Balão em formato de nuvem com círculos.</td>
+            </tr>
+            <tr>
+              <td>Grito / Alerta</td>
+              <td><code>Nome: TEXTO EM MAIÚSCULAS!</code></td>
+              <td>Balão pontiagudo com raio de explosão.</td>
+            </tr>
+            <tr>
+              <td>Novo Painel</td>
+              <td><code>---</code></td>
+              <td>Fecha o painel atual e inicia o próximo.</td>
+            </tr>
+            <tr>
+              <td>Onomatopeia</td>
+              <td><code>[POW!]</code>, <code>[CRASH!]</code>, <code>[BOOM!]</code></td>
+              <td>Estrela de impacto de 16 pontas com tipografia retrô.</td>
+            </tr>
+            <tr>
+              <td>Stickers</td>
+              <td><code>[heart]</code>, <code>[sweat]</code>, <code>[shock]</code>, <code>[idea]</code></td>
+              <td>Ícones flutuantes manga/comic sobre os personagens.</td>
+            </tr>
+            <tr>
+              <td>Layout</td>
+              <td><code>[layout: grid]</code>, <code>[layout: vertical]</code></td>
+              <td>Formata em grade 2x2 para redes ou vertical para mobile.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- API Tab -->
+      <div class="tab-content" id="api-tab">
+        <h3 style="color: var(--primary);">🔌 Integração via API REST</h3>
+        <p style="font-size: 0.9rem;">Exemplo de chamada direta para o daemon local (<code>ayvu serve</code>) ou endpoint remoto:</p>
+
+        <div class="code-snippet" id="curl-snippet">curl -X POST http://localhost:3100/render \
+  -H "Content-Type: application/json" \
+  -d '{
+    "text": "Tuffy (happy): Olá!\n---\nJordan: Funciona!",
+    "title": "Minha Tirinha",
+    "layout": "grid"
+  }' > tirinha.svg</div>
+
+        <h4 style="margin-top: 1rem; color: var(--accent);">Como Embutir no Obsidian</h4>
+        <p style="font-size: 0.9rem;">Basta colar o link de renderização com a diretiva de imagem markdown:</p>
+        <div class="code-snippet">![Tirinha Ayvu](http://localhost:3100/render?text=Tuffy+(happy):+Oi!%0A---%0AJordan:+E+ai!&title=Obsidian+Sync&layout=grid)</div>
+      </div>
+    </section>
+  </main>
+
+  <div class="toast" id="toast">Copiado para a área de transferência!</div>
+
+  <script>
+    const PRESETS = {
+      classic: `Tuffy (happy): Olá, Jordan! Como vai o dia?
+Jordan: Tudo tranquilo, Tuffy! Apenas trabalhando no código.
+---
+Tuffy (thinking): Você acha que podemos lançar hoje?
+Jordan (laughing): Com todos os 28 testes passando? Com certeza!`,
+
+      sfx: `[layout: strip]
+Tuffy (angry): Cuidado com o vilão atrás de você!
+[POW!]
+---
+Jordan (surprised): O que aconteceu?!
+[CRASH!]
+---
+Peep (shouting): EU RESOLVI TUDO! [BOOM!]
+Jordan (laughing): Mandou bem, Peep!`,
+
+      stickers: `Tuffy (happy): Eu amo desenvolver software livre! [heart]
+Jordan (thinking): Mas precisamos de uma boa ideia... [idea]
+---
+Peep (angry): Quem apagou o banco de testes?! [shock]
+Jordan (sad): Foi sem querer... [sweat]`,
+
+      grid: `[layout: grid]
+Tuffy (happy): Painel um: bem-vindo ao formato quadrado!
+---
+Jordan (thinking): Perfeito para feeds do Instagram e Mastodon.
+---
+Peep (laughing): Painel três: cabe muito conteúdo aqui!
+---
+Tuffy (happy): Painel quatro: e encerramos com chave de ouro! [heart]`,
+
+      vertical: `[layout: vertical]
+Tuffy (happy): Formato webtoon para leitura em celular!
+---
+Jordan (thinking): Você vai rolando para baixo suavemente.
+---
+Peep (laughing): E a tirinha flui perfeitamente na vertical! [idea]`
+    };
+
+    const editor = document.getElementById('editor');
+    const titleInput = document.getElementById('title-input');
+    const preview = document.getElementById('preview');
+    const presetSelector = document.getElementById('preset-selector');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    // Tabs logic
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Preset selector
+    presetSelector.addEventListener('change', (e) => {
+      const val = e.target.value;
+      if (PRESETS[val]) {
+        editor.value = PRESETS[val];
+        renderStrip();
+      }
+    });
+
+    // Chip inserter
+    document.querySelectorAll('.chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        const text = chip.dataset.insert;
+        if (chip.closest('#layout-chips')) {
+          document.querySelectorAll('#layout-chips .chip').forEach(c => c.classList.remove('active'));
+          chip.classList.add('active');
+          // Add or replace layout at top
+          let current = editor.value;
+          current = current.replace(/\[layout:[^\]]+\]\n?/g, '');
+          editor.value = text + '\n' + current.trim();
+        } else {
+          // Insert at cursor
+          const start = editor.selectionStart;
+          const end = editor.selectionEnd;
+          const before = editor.value.substring(0, start);
+          const after = editor.value.substring(end);
+          editor.value = before + text + (text === '---' ? '\n' : '') + after;
+          editor.focus();
+          editor.selectionStart = editor.selectionEnd = start + text.length + (text === '---' ? 1 : 0);
+        }
+        renderStrip();
+      });
+    });
+
+    // Determine render endpoint
+    function getRenderEndpoint() {
+      // If hosted on localhost or 127.0.0.1, use /render
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        return '/render';
+      }
+      // If hosted on ayvu.2lp.in or other host, default to local daemon
+      return 'http://127.0.0.1:3100/render';
+    }
+
+    let renderTimeout = null;
+    function scheduleRender() {
+      clearTimeout(renderTimeout);
+      renderTimeout = setTimeout(renderStrip, 250);
+    }
+
+    async function renderStrip() {
+      const script = editor.value;
+      const title = titleInput.value.trim() || undefined;
+
+      try {
+        const endpoint = getRenderEndpoint();
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ text: script, title: title })
+        });
+
+        if (res.ok) {
+          const svg = await res.text();
+          preview.innerHTML = svg;
+        } else {
+          const err = await res.text();
+          preview.innerHTML = `<div style="color: #ef4444; font-family: monospace; padding: 1rem;">⚠️ Erro na renderização:<br>${err}</div>`;
+        }
+      } catch (e) {
+        // Fallback message if local daemon is not running when accessing from remote
+        preview.innerHTML = `<div style="color: #333; text-align: center; padding: 2rem;">
+          <p style="font-weight: bold; font-size: 1.1rem; color: #111;">Para renderizar a tirinha ao vivo:</p>
+          <p style="margin: 0.5rem 0; font-family: monospace; background: #eee; padding: 0.5rem; border-radius: 4px;">ayvu serve</p>
+          <p style="font-size: 0.85rem; color: #666;">Inicie o daemon HTTP na porta 3100 em sua máquina local para comunicação via CORS.</p>
+        </div>`;
+      }
+    }
+
+    editor.addEventListener('input', scheduleRender);
+    titleInput.addEventListener('input', scheduleRender);
+    document.getElementById('btn-render').addEventListener('click', renderStrip);
+
+    // Download SVG
+    document.getElementById('btn-download').addEventListener('click', () => {
+      const svgEl = preview.querySelector('svg');
+      if (!svgEl) return;
+      const blob = new Blob([svgEl.outerHTML], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = (titleInput.value.trim() || 'comic').toLowerCase().replace(/\s+/g, '_') + '.svg';
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Download do SVG iniciado!');
+    });
+
+    // Copy SVG
+    document.getElementById('btn-copy-svg').addEventListener('click', () => {
+      const svgEl = preview.querySelector('svg');
+      if (!svgEl) return;
+      navigator.clipboard.writeText(svgEl.outerHTML).then(() => {
+        showToast('SVG copiado para a área de transferência!');
+      });
+    });
+
+    // Copy Obsidian Link
+    document.getElementById('btn-obsidian').addEventListener('click', () => {
+      const script = encodeURIComponent(editor.value);
+      const title = encodeURIComponent(titleInput.value.trim() || 'Ayvu');
+      const markdown = `![Ayvu Comic](http://localhost:3100/render?text=${script}&title=${title})`;
+      navigator.clipboard.writeText(markdown).then(() => {
+        showToast('Link do Obsidian copiado!');
+      });
+    });
+
+    // Initial render
+    renderStrip();
+  </script>
 </body>
 </html>

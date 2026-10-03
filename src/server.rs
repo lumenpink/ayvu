@@ -138,6 +138,15 @@ fn handle_request(mut request: tiny_http::Request) {
     };
 
     match (request.method(), path) {
+        (&Method::Get, "/") | (&Method::Get, "/index.html") => {
+            let html = include_str!("../site/index.html");
+            let header =
+                Header::from_bytes(&b"Content-Type"[..], &b"text/html; charset=utf-8"[..]).unwrap();
+            let res = Response::from_string(html)
+                .with_header(header)
+                .with_header(cors_header);
+            let _ = request.respond(res);
+        }
         (&Method::Get, "/health") => {
             let json = serde_json::to_string(&HealthResponse {
                 status: "ok",
