@@ -38,14 +38,24 @@ fn main() {
     let cli = Cli::parse();
 
     match cli.command {
-        Some(Commands::Render { input, output, title }) => {
-            println!("Rendering comic to {} (input: {:?}, title: {:?})", output, input, title);
+        Some(Commands::Render {
+            input,
+            output,
+            title,
+        }) => {
+            println!(
+                "Rendering comic to {} (input: {:?}, title: {:?})",
+                output, input, title
+            );
         }
         Some(Commands::Serve { host, port }) => {
             println!("Ayvu HTTP daemon listening on http://{}:{}", host, port);
         }
         None => {
-            println!("Ayvu v{} - Declarative Comic Strip Generator", ayvu::VERSION);
+            println!(
+                "Ayvu v{} - Declarative Comic Strip Generator",
+                ayvu::VERSION
+            );
             println!("Use --help for available commands.");
         }
     }
