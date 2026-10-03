@@ -1,4 +1,5 @@
 use crate::character::CharacterRegistry;
+use crate::model::StripLayout;
 use crate::parser::parse_dialogue_script;
 use crate::renderer::render_comic_strip_to_svg;
 use serde::{Deserialize, Serialize};
@@ -31,6 +32,8 @@ struct RenderRequest {
     text: String,
     #[serde(default)]
     title: Option<String>,
+    #[serde(default)]
+    layout: Option<String>,
 }
 
 #[derive(Serialize)]
@@ -192,9 +195,9 @@ fn handle_request(mut request: tiny_http::Request) {
                 return;
             }
 
-            let (text, title) = if body.trim_start().starts_with('{') {
+            let (text, title, layout) = if body.trim_start().starts_with('{') {
                 match serde_json::from_str::<RenderRequest>(&body) {
-                    Ok(req) => (req.text, req.title),
+                    Ok(req) => (req.text, req.title, req.layout),
                     Err(e) => {
                         let res = Response::from_string(format!("Invalid JSON payload: {}", e))
                             .with_status_code(StatusCode(400));
@@ -203,14 +206,21 @@ fn handle_request(mut request: tiny_http::Request) {
                     }
                 }
             } else {
-                (body, None)
+                (body, None, None)
             };
 
-            respond_with_svg(request, &text, title.as_deref(), cors_header);
+            respond_with_svg(
+                request,
+                &text,
+                title.as_deref(),
+                layout.as_deref(),
+                cors_header,
+            );
         }
         (&Method::Get, "/render") | (&Method::Get, "/comic") => {
             let mut text = String::new();
             let mut title = None;
+            let mut layout = None;
 
             if let Some(q) = query {
                 for pair in q.split('&') {
@@ -220,6 +230,8 @@ fn handle_request(mut request: tiny_http::Request) {
                             text = decoded;
                         } else if k == "title" {
                             title = Some(decoded);
+                        } else if k == "layout" {
+                            layout = Some(decoded);
                         }
                     }
                 }
@@ -233,7 +245,13 @@ fn handle_request(mut request: tiny_http::Request) {
                 return;
             }
 
-            respond_with_svg(request, &text, title.as_deref(), cors_header);
+            respond_with_svg(
+                request,
+                &text,
+                title.as_deref(),
+                layout.as_deref(),
+                cors_header,
+            );
         }
         _ => {
             let res = Response::from_string("Not Found")
@@ -248,10 +266,14 @@ fn respond_with_svg(
     request: tiny_http::Request,
     text: &str,
     title: Option<&str>,
+    layout_override: Option<&str>,
     cors_header: Header,
 ) {
     match parse_dialogue_script(text, title) {
-        Ok(strip) => {
+        Ok(mut strip) => {
+            if let Some(l) = layout_override {
+                strip.layout = StripLayout::from_str_loose(l);
+            }
             let svg = render_comic_strip_to_svg(&strip);
             let content_type =
                 Header::from_bytes(&b"Content-Type"[..], &b"image/svg+xml; charset=utf-8"[..])

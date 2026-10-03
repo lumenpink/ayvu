@@ -23,6 +23,9 @@ enum Commands {
         /// Strip title
         #[arg(short, long)]
         title: Option<String>,
+        /// Strip layout (horizontal, grid, vertical)
+        #[arg(short, long)]
+        layout: Option<String>,
     },
     /// Start HTTP microservice daemon (Joaju-style API)
     Serve {
@@ -43,6 +46,7 @@ fn main() {
             input,
             output,
             title,
+            layout,
         }) => {
             let content = match input {
                 Some(ref path) if path != "-" => match std::fs::read_to_string(path) {
@@ -62,13 +66,17 @@ fn main() {
                 }
             };
 
-            let strip = match ayvu::parser::parse_dialogue_script(&content, title.as_deref()) {
+            let mut strip = match ayvu::parser::parse_dialogue_script(&content, title.as_deref()) {
                 Ok(s) => s,
                 Err(e) => {
                     eprintln!("Error parsing dialogue script: {}", e);
                     std::process::exit(1);
                 }
             };
+
+            if let Some(ref l) = layout {
+                strip.layout = ayvu::model::StripLayout::from_str_loose(l);
+            }
 
             let svg = ayvu::renderer::render_comic_strip_to_svg(&strip);
             if let Err(e) = std::fs::write(&output, svg) {

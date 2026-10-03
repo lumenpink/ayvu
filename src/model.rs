@@ -57,6 +57,64 @@ pub enum BalloonType {
     Whisper,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum StripLayout {
+    #[default]
+    Horizontal,
+    Grid,
+    Vertical,
+}
+
+impl StripLayout {
+    pub fn from_str_loose(s: &str) -> Self {
+        match s.trim().to_lowercase().as_str() {
+            "grid" | "2x2" | "quad" => StripLayout::Grid,
+            "vertical" | "webtoon" | "column" => StripLayout::Vertical,
+            _ => StripLayout::Horizontal,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum StickerType {
+    Sweat,
+    Shock,
+    Heart,
+    Idea,
+    Question,
+}
+
+impl StickerType {
+    pub fn from_str_loose(s: &str) -> Option<Self> {
+        match s.trim().to_lowercase().as_str() {
+            "sweat" | "gota" => Some(StickerType::Sweat),
+            "shock" | "raio" | "alert" | "exclamation" => Some(StickerType::Shock),
+            "heart" | "coracao" | "love" => Some(StickerType::Heart),
+            "idea" | "lampada" | "eureka" => Some(StickerType::Idea),
+            "question" | "duvida" | "interrogacao" => Some(StickerType::Question),
+            _ => None,
+        }
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            StickerType::Sweat => "sweat",
+            StickerType::Shock => "shock",
+            StickerType::Heart => "heart",
+            StickerType::Idea => "idea",
+            StickerType::Question => "question",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum VisualEffect {
+    Onomatopoeia(String),
+    Sticker(StickerType),
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DialogueLine {
     pub speaker: String,
@@ -69,10 +127,14 @@ pub struct DialogueLine {
 pub struct Panel {
     pub id: usize,
     pub dialogues: Vec<DialogueLine>,
+    #[serde(default)]
+    pub effects: Vec<VisualEffect>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct ComicStrip {
     pub title: Option<String>,
+    #[serde(default)]
+    pub layout: StripLayout,
     pub panels: Vec<Panel>,
 }

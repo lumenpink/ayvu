@@ -1,10 +1,14 @@
-use crate::model::{BalloonType, ComicStrip, DialogueLine, Emotion, Panel};
+use crate::model::{
+    BalloonType, ComicStrip, DialogueLine, Emotion, Panel, StickerType, StripLayout, VisualEffect,
+};
 
 /// Parse plain text dialogue script into a structured ComicStrip
 pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicStrip, String> {
     let mut panels: Vec<Panel> = Vec::new();
     let mut current_dialogues: Vec<DialogueLine> = Vec::new();
+    let mut current_effects: Vec<VisualEffect> = Vec::new();
     let mut explicit_panels = false;
+    let mut strip_layout = StripLayout::Horizontal;
 
     for raw_line in script.lines() {
         let line = raw_line.trim();
@@ -12,16 +16,37 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
             continue;
         }
 
+        // Layout directive: [layout: grid] or [layout: vertical] or [layout: horizontal]
+        if line.to_lowercase().starts_with("[layout:") && line.ends_with(']') {
+            let inner = &line[8..line.len() - 1].trim();
+            strip_layout = StripLayout::from_str_loose(inner);
+            continue;
+        }
+
         // Panel boundaries: '---' or '[panel...]'
         if line == "---" || line.starts_with("[panel") {
             explicit_panels = true;
-            if !current_dialogues.is_empty() {
+            if !current_dialogues.is_empty() || !current_effects.is_empty() {
                 panels.push(Panel {
                     id: panels.len() + 1,
                     dialogues: std::mem::take(&mut current_dialogues),
+                    effects: std::mem::take(&mut current_effects),
                 });
             }
             continue;
+        }
+
+        // Standalone onomatopoeia line: e.g. [POW!], [CRASH!], [BOOM!]
+        if line.starts_with('[') && line.ends_with(']') {
+            let inner = &line[1..line.len() - 1].trim();
+            if inner.ends_with('!') {
+                current_effects.push(VisualEffect::Onomatopoeia(inner.to_string()));
+                continue;
+            }
+            if let Some(sticker) = StickerType::from_str_loose(inner) {
+                current_effects.push(VisualEffect::Sticker(sticker));
+                continue;
+            }
         }
 
         // Parse speaker and speech: "Speaker (emotion): speech" or "Speaker: speech"
@@ -32,6 +57,9 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
             if speaker_raw.is_empty() || speech.is_empty() {
                 continue;
             }
+
+            // Extract inline onomatopoeia or stickers from speech
+            extract_inline_effects(&mut speech, &mut current_effects);
 
             let (speaker, explicit_emotion) = if let Some(open_idx) = speaker_raw.find('(') {
                 if let Some(close_idx) = speaker_raw[open_idx..].find(')') {
@@ -69,16 +97,19 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
         }
     }
 
-    if !current_dialogues.is_empty() {
+    if !current_dialogues.is_empty() || !current_effects.is_empty() {
         panels.push(Panel {
             id: panels.len() + 1,
             dialogues: current_dialogues,
+            effects: current_effects,
         });
     }
 
     // If no explicit panel boundaries were specified, auto-group into panels of up to 2 dialogues
     let final_panels = if !explicit_panels && panels.len() == 1 {
-        let all_dialogues = panels.remove(0).dialogues;
+        let first = panels.remove(0);
+        let all_dialogues = first.dialogues;
+        let mut effects = first.effects;
         let mut grouped = Vec::new();
         let mut chunk = Vec::new();
 
@@ -88,13 +119,15 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                 grouped.push(Panel {
                     id: grouped.len() + 1,
                     dialogues: std::mem::take(&mut chunk),
+                    effects: std::mem::take(&mut effects),
                 });
             }
         }
-        if !chunk.is_empty() {
+        if !chunk.is_empty() || !effects.is_empty() {
             grouped.push(Panel {
                 id: grouped.len() + 1,
                 dialogues: chunk,
+                effects,
             });
         }
         grouped
@@ -104,8 +137,39 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
 
     Ok(ComicStrip {
         title: title.map(|t| t.to_string()),
+        layout: strip_layout,
         panels: final_panels,
     })
+}
+
+fn extract_inline_effects(speech: &mut String, effects: &mut Vec<VisualEffect>) {
+    let mut modified = speech.clone();
+    let mut found_stickers = Vec::new();
+    let mut found_sfx = Vec::new();
+
+    let words: Vec<&str> = speech.split_whitespace().collect();
+    for word in words {
+        if word.starts_with('[') && word.ends_with(']') {
+            let inner = &word[1..word.len() - 1].trim();
+            if inner.ends_with('!') {
+                found_sfx.push((word.to_string(), inner.to_string()));
+            } else if let Some(sticker) = StickerType::from_str_loose(inner) {
+                found_stickers.push((word.to_string(), sticker));
+            }
+        }
+    }
+
+    for (token, sfx) in found_sfx {
+        modified = modified.replace(&token, "").trim().to_string();
+        effects.push(VisualEffect::Onomatopoeia(sfx));
+    }
+
+    for (token, sticker) in found_stickers {
+        modified = modified.replace(&token, "").trim().to_string();
+        effects.push(VisualEffect::Sticker(sticker));
+    }
+
+    *speech = modified;
 }
 
 fn detect_emotion_and_balloon(text: &mut String) -> (Emotion, BalloonType) {
@@ -121,44 +185,35 @@ fn detect_emotion_and_balloon(text: &mut String) -> (Emotion, BalloonType) {
         return (Emotion::Thinking, BalloonType::Thought);
     }
 
-    // 2. Shout: ALL CAPS + '!' or '!!!'
-    let letters: String = trimmed.chars().filter(|c| c.is_alphabetic()).collect();
-    let is_caps = letters.len() >= 3 && letters.chars().all(|c| c.is_uppercase());
-    if (is_caps && trimmed.contains('!')) || trimmed.ends_with("!!!") {
+    // 2. Shout prefix or suffix: multiple exclamation marks or ALL CAPS with !
+    if trimmed.ends_with("!!!")
+        || trimmed.ends_with("!!")
+        || (trimmed.ends_with('!')
+            && trimmed
+                .chars()
+                .all(|c| !c.is_alphabetic() || c.is_uppercase()))
+    {
         return (Emotion::Shouting, BalloonType::Shout);
     }
 
-    // 3. Emoticons & Keywords
-    if trimmed.contains(":D")
-        || trimmed.contains("xD")
-        || trimmed.contains("haha")
-        || trimmed.contains("kkk")
-    {
+    // 3. Emoticons heuristics
+    if trimmed.contains(":D") || trimmed.contains("xD") || trimmed.contains("XD") {
         return (Emotion::Laughing, BalloonType::Speech);
     }
-
-    if trimmed.contains(":'(") {
-        return (Emotion::Crying, BalloonType::Speech);
-    }
-
-    if trimmed.contains(":(") || trimmed.contains(":-(") {
-        return (Emotion::Sad, BalloonType::Speech);
-    }
-
-    if trimmed.contains(">:") || trimmed.contains("x(") {
-        return (Emotion::Angry, BalloonType::Speech);
-    }
-
-    if trimmed.contains(":)") || trimmed.contains(":-)") || trimmed.contains(r"\o/") {
+    if trimmed.contains(":) ") || trimmed.ends_with(":)") || trimmed.contains(":-)") {
         return (Emotion::Happy, BalloonType::Speech);
     }
-
-    if trimmed.contains("???") {
-        return (Emotion::Surprised, BalloonType::Speech);
+    if trimmed.contains(":( ") || trimmed.ends_with(":(") || trimmed.contains(":-(") {
+        return (Emotion::Sad, BalloonType::Speech);
     }
-
-    if trimmed.starts_with("...") || trimmed.contains("hmm") {
-        return (Emotion::Thinking, BalloonType::Thought);
+    if trimmed.contains(":'(") || trimmed.contains("T_T") || trimmed.contains(";\n") {
+        return (Emotion::Crying, BalloonType::Speech);
+    }
+    if trimmed.contains(">:( ") || trimmed.ends_with(">:(") {
+        return (Emotion::Angry, BalloonType::Speech);
+    }
+    if trimmed.contains(":o") || trimmed.contains(":O") || trimmed.contains("=O") {
+        return (Emotion::Surprised, BalloonType::Speech);
     }
 
     (Emotion::Neutral, BalloonType::Speech)
