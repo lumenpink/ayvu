@@ -1,3 +1,4 @@
+use crate::character::CharacterRegistry;
 use crate::parser::parse_dialogue_script;
 use crate::renderer::render_comic_strip_to_svg;
 use serde::{Deserialize, Serialize};
@@ -14,6 +15,10 @@ pub struct ServerHandle {
 }
 
 impl ServerHandle {
+    pub fn port(&self) -> u16 {
+        self.port
+    }
+
     pub fn stop(&self) {
         self.shutdown.store(true, Ordering::SeqCst);
         // Ping server to unblock recv() loop
@@ -37,6 +42,14 @@ struct HealthResponse {
 #[derive(Serialize)]
 struct VersionResponse {
     version: &'static str,
+}
+
+/// Helper to start HTTP server on an OS-assigned random port for tests or embedding
+pub fn run_server_on_random_port() -> Result<ServerHandle, Box<dyn std::error::Error>> {
+    let (_, handle) =
+        start_server_in_background("127.0.0.1", 0).map_err(Box::<dyn std::error::Error>::from)?;
+    thread::sleep(Duration::from_millis(50));
+    Ok(handle)
 }
 
 /// Start HTTP server in a background thread for tests and embedded usage
@@ -83,7 +96,7 @@ pub fn run_server(host: &str, port: u16) -> Result<(), String> {
         "Ayvu HTTP microservice listening on http://{}:{}",
         host, port
     );
-    println!("Endpoints available: POST /render, GET /render?text=..., GET /health, GET /version");
+    println!("Endpoints available: POST /render, GET /render?text=..., GET /characters, GET /health, GET /version");
 
     for request in server.incoming_requests() {
         handle_request(request);
@@ -129,8 +142,11 @@ fn handle_request(mut request: tiny_http::Request) {
             })
             .unwrap();
 
-            let header =
-                Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap();
+            let header = Header::from_bytes(
+                &b"Content-Type"[..],
+                &b"application/json; charset=utf-8"[..],
+            )
+            .unwrap();
             let res = Response::from_string(json)
                 .with_header(header)
                 .with_header(cors_header);
@@ -142,8 +158,26 @@ fn handle_request(mut request: tiny_http::Request) {
             })
             .unwrap();
 
-            let header =
-                Header::from_bytes(&b"Content-Type"[..], &b"application/json"[..]).unwrap();
+            let header = Header::from_bytes(
+                &b"Content-Type"[..],
+                &b"application/json; charset=utf-8"[..],
+            )
+            .unwrap();
+            let res = Response::from_string(json)
+                .with_header(header)
+                .with_header(cors_header);
+            let _ = request.respond(res);
+        }
+        (&Method::Get, "/characters") => {
+            let registry = CharacterRegistry::default();
+            let metadata = registry.list_metadata();
+            let json = serde_json::to_string(&metadata).unwrap();
+
+            let header = Header::from_bytes(
+                &b"Content-Type"[..],
+                &b"application/json; charset=utf-8"[..],
+            )
+            .unwrap();
             let res = Response::from_string(json)
                 .with_header(header)
                 .with_header(cors_header);
@@ -222,22 +256,20 @@ fn respond_with_svg(
             let content_type =
                 Header::from_bytes(&b"Content-Type"[..], &b"image/svg+xml; charset=utf-8"[..])
                     .unwrap();
-
             let res = Response::from_string(svg)
                 .with_header(content_type)
                 .with_header(cors_header);
             let _ = request.respond(res);
         }
         Err(e) => {
-            let res = Response::from_string(format!("Error parsing dialogue script: {}", e))
-                .with_status_code(StatusCode(422))
+            let res = Response::from_string(format!("Script parsing error: {}", e))
+                .with_status_code(StatusCode(400))
                 .with_header(cors_header);
             let _ = request.respond(res);
         }
     }
 }
 
-/// Simple percent-decoding helper for query parameters
 fn decode_percent(s: &str) -> String {
     let replaced = s.replace('+', " ");
     let mut bytes = Vec::new();
@@ -245,19 +277,21 @@ fn decode_percent(s: &str) -> String {
 
     while let Some(c) = chars.next() {
         if c == '%' {
-            let h1 = chars.next();
-            let h2 = chars.next();
-            if let (Some(c1), Some(c2)) = (h1, h2) {
-                let hex_str = format!("{}{}", c1, c2);
+            let hex_high = chars.next();
+            let hex_low = chars.next();
+            if let (Some(h1), Some(h2)) = (hex_high, hex_low) {
+                let hex_str = format!("{}{}", h1, h2);
                 if let Ok(b) = u8::from_str_radix(&hex_str, 16) {
                     bytes.push(b);
                     continue;
                 }
             }
+            bytes.push(b'%');
+        } else {
+            let mut buf = [0; 4];
+            let encoded = c.encode_utf8(&mut buf);
+            bytes.extend_from_slice(encoded.as_bytes());
         }
-        let mut buf = [0; 4];
-        let encoded = c.encode_utf8(&mut buf);
-        bytes.extend_from_slice(encoded.as_bytes());
     }
 
     String::from_utf8_lossy(&bytes).to_string()

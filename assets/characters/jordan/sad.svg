@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="100" height="120">
+  <!-- Jacket -->
+  <path d="M 22 84 L 50 80 L 78 84 L 90 120 L 10 120 Z" fill="#1b4965" stroke="#222" stroke-width="2.5" />
+  <polygon points="50,80 43,105 57,105" fill="#62b6cb" stroke="#222" stroke-width="1.5" />
+  <!-- Spiky hair back -->
+  <polygon points="20,48 12,25 32,32 45,12 55,28 72,16 78,32 90,26 80,50" fill="#2b2d42" stroke="#222" stroke-width="2" />
+  <!-- Head -->
+  <ellipse cx="50" cy="54" rx="28" ry="32" fill="#ffd1b3" stroke="#222" stroke-width="2.5" />
+  <rect x="25" y="46" width="50" height="15" rx="3" fill="#4a7c87" stroke="#111" stroke-width="2" />
+  <path d="M 42 74 Q 50 68 58 74" stroke="#222" stroke-width="2" fill="none" />
+</svg>

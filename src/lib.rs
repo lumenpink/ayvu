@@ -4,6 +4,7 @@
 //! Transforms conversational plain text into expressive multi-panel comic strips.
 
 pub mod balloon;
+pub mod character;
 pub mod model;
 pub mod parser;
 pub mod renderer;

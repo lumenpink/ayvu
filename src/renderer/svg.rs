@@ -1,12 +1,23 @@
 use crate::balloon::{escape_xml, render_balloon_svg, Point};
+use crate::character::CharacterRegistry;
 use crate::model::{ComicStrip, Emotion, Panel};
 
 pub const PANEL_WIDTH: f64 = 280.0;
 pub const PANEL_HEIGHT: f64 = 280.0;
 pub const PANEL_MARGIN: f64 = 16.0;
 
-/// Render an entire ComicStrip to a standalone SVG string
+/// Render an entire ComicStrip to a standalone SVG string using the default embedded character registry
 pub fn render_comic_strip_to_svg(strip: &ComicStrip) -> String {
+    let registry = CharacterRegistry::default();
+    render_comic_strip_to_svg_with_registry(strip, &registry)
+}
+
+/// Render an entire ComicStrip to a standalone SVG string using a provided CharacterRegistry
+pub fn render_comic_strip_to_svg_with_registry(
+    strip: &ComicStrip,
+    registry: &CharacterRegistry,
+) -> String {
+    let mut registry_clone = registry.clone();
     let panel_count = strip.panels.len().max(1);
     let title_height = if strip.title.is_some() { 48.0 } else { 0.0 };
 
@@ -49,14 +60,31 @@ pub fn render_comic_strip_to_svg(strip: &ComicStrip) -> String {
         let px = PANEL_MARGIN + (idx as f64 * (PANEL_WIDTH + PANEL_MARGIN));
         let py = PANEL_MARGIN + title_height;
 
-        render_single_panel(&mut out, panel, px, py, idx + 1);
+        render_single_panel(&mut out, panel, px, py, idx + 1, &mut registry_clone);
     }
 
     out.push_str("</svg>");
     out
 }
 
-fn render_single_panel(out: &mut String, panel: &Panel, px: f64, py: f64, panel_num: usize) {
+struct CharacterSlot {
+    speaker: String,
+    char_id: String,
+    char_x: f64,
+    char_y: f64,
+    mouth: Point,
+    pose_svg: String,
+    emotion: Emotion,
+}
+
+fn render_single_panel(
+    out: &mut String,
+    panel: &Panel,
+    px: f64,
+    py: f64,
+    panel_num: usize,
+    registry: &mut CharacterRegistry,
+) {
     // 1. Panel frame
     out.push_str(&format!(r##"<g id="panel-{panel_num}">"##));
     out.push_str(&format!(
@@ -78,57 +106,98 @@ fn render_single_panel(out: &mut String, panel: &Panel, px: f64, py: f64, panel_
         }
     }
 
-    // Positions for up to 2 characters (left and right)
-    let char_left_pos = Point {
-        x: px + 65.0,
-        y: py + 220.0,
-    };
-    let char_right_pos = Point {
-        x: px + PANEL_WIDTH - 65.0,
-        y: py + 220.0,
-    };
+    // 3. Resolve characters and positioning
+    let mut slots: Vec<CharacterSlot> = Vec::new();
+    let num_speakers = speakers.len();
 
-    let get_char_anchor = |speaker: &str| -> Point {
-        if speakers.len() > 1 && speaker == speakers[1] {
-            char_right_pos
+    for (idx, speaker) in speakers.iter().enumerate() {
+        let pack = registry.resolve_speaker(speaker);
+        let char_id = pack.id.clone();
+        let anchor = pack.balloon_anchor;
+
+        let (char_x, char_y) = if num_speakers == 1 {
+            (px + 95.0, py + 145.0)
+        } else if idx == 0 {
+            (px + 15.0, py + 145.0)
         } else {
-            char_left_pos
-        }
-    };
+            (px + 175.0, py + 145.0)
+        };
 
-    // 3. Render Characters
-    for speaker in &speakers {
-        let anchor = get_char_anchor(speaker);
+        let mouth = Point {
+            x: char_x + (anchor.x * 90.0),
+            y: char_y + (anchor.y * 108.0),
+        };
+
         let emotion = panel
             .dialogues
             .iter()
             .rev()
             .find(|d| &d.speaker == speaker)
-            .map(|d| &d.emotion)
-            .unwrap_or(&Emotion::Neutral);
+            .map(|d| d.emotion.clone())
+            .unwrap_or(Emotion::Neutral);
 
-        render_character_avatar(out, speaker, emotion, anchor);
+        let pose_svg = pack.get_pose_svg(&emotion).to_string();
+
+        slots.push(CharacterSlot {
+            speaker: speaker.clone(),
+            char_id,
+            char_x,
+            char_y,
+            mouth,
+            pose_svg,
+            emotion,
+        });
     }
 
-    // 4. Render Balloons
+    // 4. Render Character Avatars
+    for slot in &slots {
+        out.push_str(&format!(
+            r##"<g class="character-pose" id="char-{}" transform="translate({:.1}, {:.1}) scale(0.9)">"##,
+            escape_xml(&slot.char_id),
+            slot.char_x,
+            slot.char_y
+        ));
+        out.push_str(&slot.pose_svg);
+        out.push_str("</g>");
+
+        // Speaker label below avatar
+        out.push_str(&format!(
+            r##"<text x="{:.1}" y="{:.1}" class="speaker-label">{}</text>"##,
+            slot.char_x + 45.0,
+            slot.char_y + 116.0,
+            escape_xml(&slot.speaker)
+        ));
+        out.push_str(&format!(
+            r##"<text x="{:.1}" y="{:.1}" class="emotion-badge">({})</text>"##,
+            slot.char_x + 45.0,
+            slot.char_y + 127.0,
+            escape_xml(slot.emotion.as_str())
+        ));
+    }
+
+    // 5. Render Balloons
     let mut balloon_y = py + 16.0;
     for (i, d) in panel.dialogues.iter().enumerate() {
-        let anchor = get_char_anchor(&d.speaker);
-        let origin = if anchor.x < (px + PANEL_WIDTH / 2.0) {
+        let slot = slots.iter().find(|s| s.speaker == d.speaker);
+        let mouth_target = if let Some(s) = slot {
+            s.mouth
+        } else {
+            Point {
+                x: px + 65.0,
+                y: py + 180.0,
+            }
+        };
+
+        let origin = if mouth_target.x < (px + PANEL_WIDTH / 2.0) {
             Point {
                 x: px + 12.0,
                 y: balloon_y,
             }
         } else {
             Point {
-                x: px + 40.0,
+                x: px + 35.0,
                 y: balloon_y,
             }
-        };
-
-        let mouth_target = Point {
-            x: anchor.x,
-            y: anchor.y - 35.0,
         };
 
         let balloon_svg = render_balloon_svg(
@@ -145,108 +214,6 @@ fn render_single_panel(out: &mut String, panel: &Panel, px: f64, py: f64, panel_
             break;
         }
     }
-
-    out.push_str("</g>");
-}
-
-fn render_character_avatar(out: &mut String, name: &str, emotion: &Emotion, pos: Point) {
-    let cx = pos.x;
-    let cy = pos.y;
-
-    out.push_str(&format!(
-        r##"<g class="character" id="char-{}">"##,
-        escape_xml(name)
-    ));
-
-    // Head
-    out.push_str(&format!(
-        r##"<circle cx="{cx:.1}" cy="{:.1}" r="22" fill="#ffd1b3" stroke="#111111" stroke-width="2" />"##,
-        cy - 20.0
-    ));
-
-    // Simple expressive facial features based on emotion
-    match emotion {
-        Emotion::Happy | Emotion::Laughing => {
-            // Smile
-            out.push_str(&format!(
-                r##"<path d="M {:.1} {:.1} Q {cx:.1} {:.1} {:.1} {:.1}" stroke="#111111" stroke-width="2" fill="none" />"##,
-                cx - 8.0, cy - 16.0,
-                cy - 8.0,
-                cx + 8.0, cy - 16.0
-            ));
-            // Eyes
-            out.push_str(&format!(
-                r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" stroke="#111111" stroke-width="2" fill="none" />"##,
-                cx - 10.0, cy - 23.0, cx - 7.0, cy - 27.0, cx - 4.0, cy - 23.0
-            ));
-            out.push_str(&format!(
-                r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" stroke="#111111" stroke-width="2" fill="none" />"##,
-                cx + 4.0, cy - 23.0, cx + 7.0, cy - 27.0, cx + 10.0, cy - 23.0
-            ));
-        }
-        Emotion::Sad | Emotion::Crying => {
-            // Frown
-            out.push_str(&format!(
-                r##"<path d="M {:.1} {:.1} Q {cx:.1} {:.1} {:.1} {:.1}" stroke="#111111" stroke-width="2" fill="none" />"##,
-                cx - 7.0, cy - 12.0,
-                cy - 18.0,
-                cx + 7.0, cy - 12.0
-            ));
-            // Eyes
-            out.push_str(&format!(
-                r##"<circle cx="{:.1}" cy="{:.1}" r="2" fill="#111111" /><circle cx="{:.1}" cy="{:.1}" r="2" fill="#111111" />"##,
-                cx - 7.0, cy - 23.0, cx + 7.0, cy - 23.0
-            ));
-        }
-        Emotion::Angry | Emotion::Shouting => {
-            // Open shout mouth
-            out.push_str(&format!(
-                r##"<ellipse cx="{cx:.1}" cy="{:.1}" rx="6" ry="5" fill="#aa0000" stroke="#111111" stroke-width="1.5" />"##,
-                cy - 13.0
-            ));
-            // Slanted angry eyebrows
-            out.push_str(&format!(
-                r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2" />"##,
-                cx - 10.0, cy - 28.0, cx - 3.0, cy - 24.0
-            ));
-            out.push_str(&format!(
-                r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2" />"##,
-                cx + 10.0, cy - 28.0, cx + 3.0, cy - 24.0
-            ));
-        }
-        _ => {
-            // Neutral face
-            out.push_str(&format!(
-                r##"<circle cx="{:.1}" cy="{:.1}" r="2.5" fill="#111111" /><circle cx="{:.1}" cy="{:.1}" r="2.5" fill="#111111" />"##,
-                cx - 7.0, cy - 23.0, cx + 7.0, cy - 23.0
-            ));
-            out.push_str(&format!(
-                r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2" />"##,
-                cx - 6.0, cy - 13.0, cx + 6.0, cy - 13.0
-            ));
-        }
-    }
-
-    // Torso / Shoulders
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {cy:.1} C {:.1} {:.1}, {:.1} {:.1}, {:.1} {cy:.1} Z" fill="#4466aa" stroke="#111111" stroke-width="2" />"##,
-        cx - 24.0,
-        cx - 18.0, cy + 2.0,
-        cx + 18.0, cy + 2.0,
-        cx + 24.0
-    ));
-
-    // Name Badge
-    out.push_str(&format!(
-        r##"<text x="{cx:.1}" y="{:.1}" class="speaker-label">{}</text>"##,
-        cy + 18.0,
-        escape_xml(name)
-    ));
-    out.push_str(&format!(
-        r##"<text x="{cx:.1}" y="{:.1}" class="emotion-badge">({})</text>"##,
-        cy + 29.0,
-        escape_xml(emotion.as_str())
-    ));
 
     out.push_str("</g>");
 }

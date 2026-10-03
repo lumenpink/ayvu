@@ -1,0 +1,22 @@
+{
+  "id": "tuffy",
+  "name": "Tuffy",
+  "author": "Ayvu Project (inspired by Jim Woodring / MS Comic Chat)",
+  "license": "GPL-3.0-or-later",
+  "description": "Expressive vintage cartoon dog with floppy ears and snout",
+  "balloon_anchor": {
+    "x": 0.5,
+    "y": 0.35
+  },
+  "poses": {
+    "neutral": "neutral.svg",
+    "happy": "happy.svg",
+    "sad": "sad.svg",
+    "angry": "angry.svg",
+    "surprised": "surprised.svg",
+    "shouting": "shouting.svg",
+    "thinking": "thinking.svg",
+    "laughing": "laughing.svg",
+    "whispering": "whispering.svg"
+  }
+}
