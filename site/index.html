@@ -363,7 +363,7 @@
       <div class="control-row">
         <select id="preset-selector">
           <option value="" disabled selected>⚡ Escolha um preset...</option>
-          <option value="classic">1. Classic Duo (Tuffy & Jordan)</option>
+          <option value="classic">1. Trio Comic Chat (Tiki, Jordan & Armando)</option>
           <option value="sfx">2. Briga Comic com SFX ([POW!], [CRASH!])</option>
           <option value="stickers">3. Emoções & Stickers ([heart], [sweat])</option>
           <option value="grid">4. Layout Quadrado (Grid 2x2)</option>
@@ -386,8 +386,9 @@
       <div class="toolbar-row">
         <span class="row-label">🎭 Personagens & Expressões</span>
         <div class="chips-group">
-          <button type="button" class="chip" data-insert="Tuffy (happy): ">🐶 Tuffy</button>
-          <button type="button" class="chip" data-insert="Jordan (thinking): ">🕶️ Jordan</button>
+          <button type="button" class="chip" data-insert="Tiki (happy): ">🐶 Tiki</button>
+          <button type="button" class="chip" data-insert="Jordan (thinking): ">👓 Jordan</button>
+          <button type="button" class="chip" data-insert="Armando (whispering): ">🕶️ Armando</button>
           <button type="button" class="chip" data-insert="Peep (laughing): ">🐥 Peep</button>
           <button type="button" class="chip" data-insert="(happy)">(happy)</button>
           <button type="button" class="chip" data-insert="(angry)">(angry)</button>
@@ -415,15 +416,15 @@
       </div>
 
       <!-- Editor Textarea -->
-      <textarea id="editor" spellcheck="false">Tuffy (happy): Bem-vindo ao Ayvu! [heart]
+      <textarea id="editor" spellcheck="false">Tiki (happy): Bem-vindo ao Ayvu! [heart]
 Jordan (thinking): Como funciona a geração de tirinhas?
 ---
-Tuffy (laughing): É só escrever quem fala e o diálogo!
+Armando (whispering): É só escrever quem fala e o diálogo!
 Jordan (surprised): E ele cria os balões e os personagens sozinho?
 ---
 [POW!]
-Peep (shouting): É exatamente como o MS Comic Chat de 1996!
-Jordan (shock): Uau, sensacional! [idea]</textarea>
+Tiki (laughing): É exatamente como o MS Comic Chat clássico de 1996!
+Jordan (happy): Uau, traço de gibi e balões perfeitos! [idea]</textarea>
 
       <!-- Action Buttons -->
       <div class="action-buttons">
@@ -554,11 +555,13 @@ Jordan (shock): Uau, sensacional! [idea]</textarea>
       });
 
     const PRESETS = {
-      classic: `Tuffy (happy): Olá, Jordan! Como vai o dia?
-Jordan: Tudo tranquilo, Tuffy! Apenas trabalhando no código.
+      classic: `Tiki (happy): Olá, Jordan! Como vai o dia?
+Jordan: Tudo tranquilo, Tiki! Apenas desenhando os novos quadrinhos.
 ---
-Tuffy (thinking): Você acha que podemos lançar hoje?
-Jordan (laughing): Com todos os 28 testes passando? Com certeza!`,
+Armando (whispering): Vocês ouviram falar do Comic Chat em Rust?
+Jordan (laughing): O próprio Ayvu! Traço orgânico e sem cruzamento de balões!
+---
+Tiki (happy): E agora com chão, nanquim e toda a turma original!`,
 
       sfx: `[layout: strip]
 Tuffy (angry): Cuidado com o vilão atrás de você!

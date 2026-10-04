@@ -242,10 +242,114 @@ pub fn clean_or_extract_svg(raw_svg: &str) -> String {
 
 fn load_embedded_presets() -> Vec<CharacterPack> {
     vec![
-        load_preset_tuffy(),
+        load_preset_tiki(),
         load_preset_jordan(),
+        load_preset_armando(),
+        load_preset_tuffy(),
         load_preset_peep(),
     ]
+}
+
+fn load_preset_tiki() -> CharacterPack {
+    let mut poses = HashMap::new();
+    poses.insert(
+        "neutral".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/tiki/neutral.svg")),
+    );
+    poses.insert(
+        "happy".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/tiki/happy.svg")),
+    );
+    poses.insert(
+        "sad".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/tiki/sad.svg")),
+    );
+    poses.insert(
+        "angry".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/tiki/angry.svg")),
+    );
+    poses.insert(
+        "surprised".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/tiki/surprised.svg")),
+    );
+    poses.insert(
+        "shouting".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/tiki/shouting.svg")),
+    );
+    poses.insert(
+        "thinking".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/tiki/thinking.svg")),
+    );
+    poses.insert(
+        "laughing".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/tiki/laughing.svg")),
+    );
+    poses.insert(
+        "whispering".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/tiki/whispering.svg")),
+    );
+
+    CharacterPack {
+        id: "tiki".into(),
+        name: "Tiki".into(),
+        author: "Jim Woodring / Microsoft Comic Chat / Ayvu".into(),
+        license: "MIT".into(),
+        description:
+            "The iconic Comic Chat dog with expressive floppy ears, warm fur, and cartoon gestures"
+                .into(),
+        balloon_anchor: Anchor { x: 0.5, y: 0.35 },
+        poses,
+    }
+}
+
+fn load_preset_armando() -> CharacterPack {
+    let mut poses = HashMap::new();
+    poses.insert(
+        "neutral".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/armando/neutral.svg")),
+    );
+    poses.insert(
+        "happy".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/armando/happy.svg")),
+    );
+    poses.insert(
+        "sad".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/armando/sad.svg")),
+    );
+    poses.insert(
+        "angry".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/armando/angry.svg")),
+    );
+    poses.insert(
+        "surprised".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/armando/surprised.svg")),
+    );
+    poses.insert(
+        "shouting".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/armando/shouting.svg")),
+    );
+    poses.insert(
+        "thinking".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/armando/thinking.svg")),
+    );
+    poses.insert(
+        "laughing".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/armando/laughing.svg")),
+    );
+    poses.insert(
+        "whispering".into(),
+        clean_or_extract_svg(include_str!("../assets/characters/armando/whispering.svg")),
+    );
+
+    CharacterPack {
+        id: "armando".into(),
+        name: "Armando".into(),
+        author: "Jim Woodring / Microsoft Comic Chat / Ayvu".into(),
+        license: "MIT".into(),
+        description: "Suave, sharp-dressed comic avatar with sunglasses and tailored suit".into(),
+        balloon_anchor: Anchor { x: 0.5, y: 0.4 },
+        poses,
+    }
 }
 
 fn load_preset_tuffy() -> CharacterPack {
@@ -340,9 +444,10 @@ fn load_preset_jordan() -> CharacterPack {
     CharacterPack {
         id: "jordan".into(),
         name: "Jordan".into(),
-        author: "Ayvu Project".into(),
-        license: "GPL-3.0-or-later".into(),
-        description: "Cool retro-futuristic character with shades and spiky hair".into(),
+        author: "Jim Woodring / Microsoft Comic Chat / Ayvu".into(),
+        license: "MIT".into(),
+        description:
+            "Intellectual comic character with round spectacles, shaggy hair and green coat".into(),
         balloon_anchor: Anchor { x: 0.5, y: 0.45 },
         poses,
     }

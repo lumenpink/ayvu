@@ -1,12 +1,19 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="100" height="120">
-  <!-- Jacket -->
-  <path d="M 22 84 L 50 80 L 78 84 L 90 120 L 10 120 Z" fill="#1b4965" stroke="#222" stroke-width="2.5" />
-  <polygon points="50,80 43,105 57,105" fill="#62b6cb" stroke="#222" stroke-width="1.5" />
-  <!-- Spiky hair back -->
-  <polygon points="20,48 12,25 32,32 45,12 55,28 72,16 78,32 90,26 80,50" fill="#2b2d42" stroke="#222" stroke-width="2" />
-  <!-- Head -->
-  <ellipse cx="50" cy="54" rx="28" ry="32" fill="#ffd1b3" stroke="#222" stroke-width="2.5" />
-  <rect x="25" y="44" width="50" height="15" rx="3" fill="#00bb99" stroke="#111" stroke-width="2" />
-  <ellipse cx="50" cy="71" rx="3" ry="3" fill="#222" />
-  <path d="M 32 68 Q 38 62 44 70" stroke="#222" stroke-width="3" fill="#ffd1b3" />
+  <!-- Jordan Whispering -->
+  <path d="M 22 120 L 26 86 Q 52 80 80 86 L 84 120 Z" fill="#2d6a4f" stroke="#111" stroke-width="2.5" />
+  <path d="M 44 82 L 52 96 L 60 82 Z" fill="#f4f1de" stroke="#111" stroke-width="1.8" />
+  <!-- Body leaning right & hand cupped -->
+  <path d="M 46 76 L 46 84 L 58 84 L 58 76 Z" fill="#e0b288" stroke="#111" stroke-width="2" />
+  <path d="M 35 48 Q 32 70 42 78 Q 52 82 62 78 Q 72 70 69 48 Z" fill="#f0caa0" stroke="#111" stroke-width="2.5" />
+  <path d="M 30 46 C 26 30 36 18 52 18 C 68 18 78 30 74 46 C 70 42 66 32 52 32 C 38 32 34 42 30 46 Z" fill="#583101" stroke="#111" stroke-width="2.5" />
+  <!-- Spectacles looking sideways -->
+  <circle cx="41" cy="50" r="7.5" fill="#ffffff" fill-opacity="0.3" stroke="#111" stroke-width="2" />
+  <circle cx="63" cy="50" r="7.5" fill="#ffffff" fill-opacity="0.3" stroke="#111" stroke-width="2" />
+  <line x1="48.5" y1="50" x2="55.5" y2="50" stroke="#111" stroke-width="2" />
+  <circle cx="43" cy="50" r="2.5" fill="#111" />
+  <circle cx="65" cy="50" r="2.5" fill="#111" />
+  <!-- Hand cupped near mouth -->
+  <circle cx="68" cy="66" r="6" fill="#f0caa0" stroke="#111" stroke-width="2" />
+  <!-- Small whispering smile -->
+  <path d="M 46 66 Q 50 68 54 65" stroke="#111" stroke-width="2" stroke-linecap="round" fill="none" />
 </svg>

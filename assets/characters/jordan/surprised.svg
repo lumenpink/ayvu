@@ -1,11 +1,24 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="100" height="120">
-  <!-- Jacket -->
-  <path d="M 22 84 L 50 80 L 78 84 L 90 120 L 10 120 Z" fill="#1b4965" stroke="#222" stroke-width="2.5" />
-  <polygon points="50,80 43,105 57,105" fill="#62b6cb" stroke="#222" stroke-width="1.5" />
-  <!-- Spiky hair back -->
-  <polygon points="20,48 12,25 32,32 45,12 55,28 72,16 78,32 90,26 80,50" fill="#2b2d42" stroke="#222" stroke-width="2" />
-  <!-- Head -->
-  <ellipse cx="50" cy="54" rx="28" ry="32" fill="#ffd1b3" stroke="#222" stroke-width="2.5" />
-  <rect x="25" y="40" width="50" height="15" rx="3" fill="#fee440" stroke="#111" stroke-width="2" />
-  <ellipse cx="50" cy="72" rx="5" ry="7" fill="#222" />
+  <!-- Jordan Surprised -->
+  <path d="M 20 120 L 22 84 Q 50 76 78 84 L 80 120 Z" fill="#2d6a4f" stroke="#111" stroke-width="2.5" />
+  <path d="M 42 78 L 50 92 L 58 78 Z" fill="#f4f1de" stroke="#111" stroke-width="1.8" />
+  <!-- Hands up in shock -->
+  <circle cx="16" cy="76" r="6" fill="#f0caa0" stroke="#111" stroke-width="1.8" />
+  <circle cx="84" cy="76" r="6" fill="#f0caa0" stroke="#111" stroke-width="1.8" />
+  <!-- Head & Hair standing up -->
+  <path d="M 44 72 L 44 80 L 56 80 L 56 72 Z" fill="#e0b288" stroke="#111" stroke-width="2" />
+  <path d="M 33 42 Q 30 66 40 74 Q 50 78 60 74 Q 70 66 67 42 Z" fill="#f0caa0" stroke="#111" stroke-width="2.5" />
+  <path d="M 28 40 C 22 22 34 10 50 10 C 66 10 78 22 72 40 C 68 36 64 26 50 26 C 36 26 32 36 28 40 Z" fill="#583101" stroke="#111" stroke-width="2.5" />
+  <!-- High round spectacles -->
+  <circle cx="39" cy="44" r="8" fill="#ffffff" fill-opacity="0.3" stroke="#111" stroke-width="2" />
+  <circle cx="61" cy="44" r="8" fill="#ffffff" fill-opacity="0.3" stroke="#111" stroke-width="2" />
+  <line x1="47" y1="44" x2="53" y2="44" stroke="#111" stroke-width="2" />
+  <!-- Wide eyes behind glasses with tiny pupils -->
+  <circle cx="39" cy="44" r="2.5" fill="#111" />
+  <circle cx="61" cy="44" r="2.5" fill="#111" />
+  <!-- Eyebrows raised high -->
+  <path d="M 32 30 Q 39 26 46 29" stroke="#111" stroke-width="1.8" fill="none" />
+  <path d="M 68 30 Q 61 26 54 29" stroke="#111" stroke-width="1.8" fill="none" />
+  <!-- 'O' mouth -->
+  <ellipse cx="50" cy="63" rx="5" ry="7" fill="#111" />
 </svg>

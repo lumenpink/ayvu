@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="100" height="120">
+  <!-- Armando Laughing -->
+  <path d="M 18 120 L 20 84 Q 34 76 50 78 Q 66 76 80 84 L 82 120 Z" fill="#2b2d42" stroke="#111" stroke-width="2.5" />
+  <path d="M 42 78 L 50 92 L 58 78 Z" fill="#ffffff" stroke="#111" stroke-width="1.8" />
+  <path d="M 48 90 L 52 90 L 54 112 L 50 116 L 46 112 Z" fill="#c1121f" stroke="#111" stroke-width="1.5" />
+  <!-- Head thrown back -->
+  <path d="M 44 70 L 44 78 L 56 78 L 56 70 Z" fill="#e0b288" stroke="#111" stroke-width="2" />
+  <path d="M 33 38 Q 30 60 40 68 Q 50 73 60 68 Q 70 60 67 38 Z" fill="#f0caa0" stroke="#111" stroke-width="2.5" />
+  <path d="M 30 38 C 28 24 36 14 50 12 C 64 14 72 24 70 38 C 67 36 65 29 50 28 C 35 29 33 36 30 38 Z" fill="#1b1c24" stroke="#111" stroke-width="2.5" />
+  <!-- Sunglasses tilted up with laugh tears -->
+  <path d="M 34 40 L 48 40 L 47 48 L 36 48 Z" fill="#111" stroke="#111" stroke-width="2" />
+  <path d="M 52 40 L 66 40 L 64 48 L 53 48 Z" fill="#111" stroke="#111" stroke-width="2" />
+  <!-- Crescent laugh eye arches -->
+  <path d="M 30 46 Q 32 42 34 46" stroke="#48cae4" stroke-width="2" fill="none" />
+  <path d="M 66 46 Q 68 42 70 46" stroke="#48cae4" stroke-width="2" fill="none" />
+  <!-- Huge open laughing mouth -->
+  <path d="M 40 56 Q 50 52 60 56 Q 62 70 50 70 Q 38 70 40 56 Z" fill="#590d22" stroke="#111" stroke-width="2" />
+  <path d="M 42 56 Q 50 60 58 56 Z" fill="#ffffff" />
+  <path d="M 44 65 Q 50 61 56 65 Q 50 69 44 65 Z" fill="#ff4d6d" />
+</svg>

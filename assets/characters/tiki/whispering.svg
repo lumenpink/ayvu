@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="100" height="120">
+  <!-- Tiki Whispering (Paw cupped to snout, conspiratorial tilt) -->
+  <path d="M 22 120 L 26 84 Q 50 78 74 84 L 78 120 Z" fill="#cf4a30" stroke="#111" stroke-width="2.5" />
+  <path d="M 28 84 Q 50 92 72 84" stroke="#1d3557" stroke-width="5" fill="none" />
+  <circle cx="50" cy="91" r="4.5" fill="#fca311" stroke="#111" stroke-width="1.5" />
+  <!-- Ears leaning right -->
+  <path d="M 22 40 C 8 46 8 68 18 72 C 26 74 28 60 28 48 Z" fill="#9e6638" stroke="#111" stroke-width="2.5" />
+  <path d="M 76 36 C 88 42 90 64 82 70 C 74 72 72 58 72 46 Z" fill="#9e6638" stroke="#111" stroke-width="2.5" />
+  <!-- Head tilted right -->
+  <path d="M 28 48 C 26 30 40 22 52 22 C 64 22 78 30 76 48 C 78 66 68 76 52 76 C 36 76 26 66 28 48 Z" fill="#e8c07d" stroke="#111" stroke-width="2.5" />
+  <!-- Muzzle -->
+  <path d="M 40 58 C 38 50 66 50 64 58 C 64 70 40 70 40 58 Z" fill="#fdf0cd" stroke="#111" stroke-width="2" />
+  <path d="M 47 52 Q 52 49 57 52 Q 57 57 52 58 Q 47 57 47 52 Z" fill="#111" />
+  <!-- Eyes looking sideways -->
+  <ellipse cx="40" cy="40" rx="4.5" ry="5.5" fill="#111" />
+  <circle cx="43" cy="40" r="1.5" fill="#ffffff" />
+  <ellipse cx="64" cy="40" rx="4.5" ry="5.5" fill="#111" />
+  <circle cx="67" cy="40" r="1.5" fill="#ffffff" />
+  <!-- Cupped Paw beside muzzle -->
+  <ellipse cx="68" cy="62" rx="7" ry="8" fill="#e8c07d" stroke="#111" stroke-width="2" />
+  <line x1="68" y1="56" x2="68" y2="64" stroke="#111" stroke-width="1.2" />
+  <!-- Small whispering smile -->
+  <path d="M 46 64 Q 50 66 54 64" stroke="#111" stroke-width="2" stroke-linecap="round" fill="none" />
+</svg>

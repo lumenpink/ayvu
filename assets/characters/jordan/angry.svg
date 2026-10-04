@@ -1,11 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 120" width="100" height="120">
-  <!-- Jacket -->
-  <path d="M 22 84 L 50 80 L 78 84 L 90 120 L 10 120 Z" fill="#1b4965" stroke="#222" stroke-width="2.5" />
-  <polygon points="50,80 43,105 57,105" fill="#62b6cb" stroke="#222" stroke-width="1.5" />
-  <!-- Spiky hair back -->
-  <polygon points="20,48 12,25 32,32 45,12 55,28 72,16 78,32 90,26 80,50" fill="#2b2d42" stroke="#222" stroke-width="2" />
-  <!-- Head -->
-  <ellipse cx="50" cy="54" rx="28" ry="32" fill="#ffd1b3" stroke="#222" stroke-width="2.5" />
-  <polygon points="25,43 75,47 75,59 25,55" fill="#f72585" stroke="#111" stroke-width="2" />
-  <line x1="40" y1="71" x2="60" y2="71" stroke="#222" stroke-width="3" />
+  <!-- Jordan Angry -->
+  <path d="M 18 120 L 22 84 Q 50 78 78 84 L 82 120 Z" fill="#2d6a4f" stroke="#111" stroke-width="2.5" />
+  <path d="M 42 80 L 50 94 L 58 80 Z" fill="#f4f1de" stroke="#111" stroke-width="1.8" />
+  <!-- Pointing finger -->
+  <path d="M 80 86 Q 92 82 94 90 Q 88 96 82 96 Z" fill="#f0caa0" stroke="#111" stroke-width="2" />
+  <!-- Head & Hair -->
+  <path d="M 44 74 L 44 82 L 56 82 L 56 74 Z" fill="#e0b288" stroke="#111" stroke-width="2" />
+  <path d="M 33 46 Q 30 68 40 76 Q 50 80 60 76 Q 70 68 67 46 Z" fill="#f0caa0" stroke="#111" stroke-width="2.5" />
+  <path d="M 28 44 C 24 28 34 16 50 16 C 66 16 76 28 72 44 C 68 40 64 30 50 30 C 36 30 32 40 28 44 Z" fill="#583101" stroke="#111" stroke-width="2.5" />
+  <!-- Round Spectacles with sharp glint -->
+  <circle cx="39" cy="48" r="7.5" fill="#ffffff" fill-opacity="0.3" stroke="#111" stroke-width="2" />
+  <circle cx="61" cy="48" r="7.5" fill="#ffffff" fill-opacity="0.3" stroke="#111" stroke-width="2" />
+  <line x1="46.5" y1="48" x2="53.5" y2="48" stroke="#111" stroke-width="2" />
+  <!-- Piercing angry eyes -->
+  <circle cx="40" cy="48" r="3" fill="#111" />
+  <circle cx="60" cy="48" r="3" fill="#111" />
+  <!-- Slanted angry eyebrows -->
+  <line x1="32" y1="36" x2="45" y2="42" stroke="#111" stroke-width="2.5" stroke-linecap="round" />
+  <line x1="68" y1="36" x2="55" y2="42" stroke="#111" stroke-width="2.5" stroke-linecap="round" />
+  <!-- Clenched teeth mouth -->
+  <rect x="42" y="65" width="16" height="6" rx="2" fill="#ffffff" stroke="#111" stroke-width="1.8" />
+  <line x1="47" y1="65" x2="47" y2="71" stroke="#111" stroke-width="1" />
+  <line x1="53" y1="65" x2="53" y2="71" stroke="#111" stroke-width="1" />
 </svg>

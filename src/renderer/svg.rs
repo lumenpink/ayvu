@@ -45,9 +45,11 @@ pub fn render_comic_strip_to_svg_with_registry(
 
     out.push_str(r##"<defs><style>
         .strip-title { font-family: 'Comic Sans MS', 'Comic Relief', 'Impact', sans-serif; font-size: 18px; font-weight: bold; text-anchor: middle; text-transform: uppercase; fill: #111111; letter-spacing: 1.5px; }
-        .panel-bg { fill: #ffffff; stroke: #111111; stroke-width: 2.5; rx: 4px; }
-        .speaker-label { font-family: 'Comic Sans MS', sans-serif; font-size: 11px; font-weight: bold; fill: #222222; text-anchor: middle; }
-        .emotion-badge { font-family: sans-serif; font-size: 9px; fill: #666666; font-style: italic; text-anchor: middle; }
+        .panel-bg { fill: #ffffff; }
+        .panel-floor { stroke: #444444; stroke-width: 1.8; stroke-linecap: round; }
+        .panel-floor-wash { fill: #f8f6f0; opacity: 0.75; }
+        .panel-frame-ink { stroke: #111111; stroke-width: 2.5; stroke-linecap: square; }
+        .panel-corner-tick { stroke: #111111; stroke-width: 2.5; }
         .sfx-text { font-family: 'Impact', 'Arial Black', sans-serif; font-size: 24px; font-weight: 900; text-anchor: middle; fill: #d90429; stroke: #ffffff; stroke-width: 1.5; letter-spacing: 2px; }
     </style></defs>"##);
 
@@ -91,7 +93,6 @@ struct CharacterSlot {
     char_y: f64,
     mouth: Point,
     pose_svg: String,
-    emotion: Emotion,
 }
 
 fn render_single_panel(
@@ -102,15 +103,53 @@ fn render_single_panel(
     panel_num: usize,
     registry: &mut CharacterRegistry,
 ) {
-    // 1. Panel frame
+    let floor_y = py + PANEL_HEIGHT - 38.0;
+
+    // 1. Panel background and floor staging
     out.push_str(&format!(r##"<g id="panel-{panel_num}">"##));
     out.push_str(&format!(
         r##"<rect x="{px:.1}" y="{py:.1}" width="{PANEL_WIDTH:.1}" height="{PANEL_HEIGHT:.1}" class="panel-bg" />"##
     ));
 
+    // Floor area wash & floor line
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{floor_y:.1}" width="{PANEL_WIDTH:.1}" height="38.0" class="panel-floor-wash" />"##
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" class="panel-floor" stroke-dasharray="12,3" />"##,
+        px + PANEL_WIDTH
+    ));
+
+    // Hand-inked panel frame with draft corner ticks (extending 4px beyond vertices)
+    let tick = 4.0;
+    out.push_str(&format!(
+        r##"<g class="panel-frame-ink">
+<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" class="panel-corner-tick" />
+<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" class="panel-corner-tick" />
+<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" class="panel-corner-tick" />
+<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" class="panel-corner-tick" />
+</g>"##,
+        px - tick,
+        py,
+        px + PANEL_WIDTH + tick,
+        py,
+        px - tick,
+        py + PANEL_HEIGHT,
+        px + PANEL_WIDTH + tick,
+        py + PANEL_HEIGHT,
+        px,
+        py - tick,
+        px,
+        py + PANEL_HEIGHT + tick,
+        px + PANEL_WIDTH,
+        py - tick,
+        px + PANEL_WIDTH,
+        py + PANEL_HEIGHT + tick
+    ));
+
     // Panel number in top-right corner
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-size="10" fill="#999999" font-family="sans-serif">{panel_num}</text>"##,
+        r##"<text x="{:.1}" y="{:.1}" font-size="10" font-weight="bold" fill="#aaaaaa" font-family="sans-serif">{panel_num}</text>"##,
         px + PANEL_WIDTH - 14.0,
         py + 14.0
     ));
@@ -127,17 +166,20 @@ fn render_single_panel(
     let mut slots: Vec<CharacterSlot> = Vec::new();
     let num_speakers = speakers.len();
 
+    // Characters stand grounded on the floor_y (Avatar height is 120 scaled at 0.9 = 108 px)
+    let char_y = floor_y - 108.0;
+
     for (idx, speaker) in speakers.iter().enumerate() {
         let pack = registry.resolve_speaker(speaker);
         let char_id = pack.id.clone();
         let anchor = pack.balloon_anchor;
 
-        let (char_x, char_y) = if num_speakers == 1 {
-            (px + 95.0, py + 145.0)
+        let char_x = if num_speakers == 1 {
+            px + 95.0
         } else if idx == 0 {
-            (px + 15.0, py + 145.0)
+            px + 15.0
         } else {
-            (px + 175.0, py + 145.0)
+            px + 175.0
         };
 
         let mouth = Point {
@@ -162,34 +204,28 @@ fn render_single_panel(
             char_y,
             mouth,
             pose_svg,
-            emotion,
         });
     }
 
-    // 4. Render Character Avatars
+    // 4. Render Contact Shadows & Character Avatars
     for slot in &slots {
+        // Ground shadow under feet/base
         out.push_str(&format!(
-            r##"<g class="character-pose" id="char-{}" transform="translate({:.1}, {:.1}) scale(0.9)">"##,
+            r##"<ellipse cx="{:.1}" cy="{:.1}" rx="38" ry="6" class="contact-shadow" fill="rgba(0,0,0,0.12)" />"##,
+            slot.char_x + 45.0,
+            floor_y + 1.0
+        ));
+
+        out.push_str(&format!(
+            r##"<g class="character-pose" id="char-{}" data-speaker="{}" aria-label="{}" transform="translate({:.1}, {:.1}) scale(0.9)">"##,
             escape_xml(&slot.char_id),
+            escape_xml(&slot.speaker),
+            escape_xml(&slot.speaker),
             slot.char_x,
             slot.char_y
         ));
         out.push_str(&slot.pose_svg);
         out.push_str("</g>");
-
-        // Speaker label below avatar
-        out.push_str(&format!(
-            r##"<text x="{:.1}" y="{:.1}" class="speaker-label">{}</text>"##,
-            slot.char_x + 45.0,
-            slot.char_y + 116.0,
-            escape_xml(&slot.speaker)
-        ));
-        out.push_str(&format!(
-            r##"<text x="{:.1}" y="{:.1}" class="emotion-badge">({})</text>"##,
-            slot.char_x + 45.0,
-            slot.char_y + 127.0,
-            escape_xml(slot.emotion.as_str())
-        ));
     }
 
     // 5. Render Visual Effects (Onomatopoeia & Stickers)
@@ -206,9 +242,10 @@ fn render_single_panel(
         }
     }
 
-    // 6. Render Balloons
-    let mut balloon_y = py + 16.0;
-    for (i, d) in panel.dialogues.iter().enumerate() {
+    // 6. Render Balloons with Comic Chat Anti-Crossing Algorithm
+    let num_dialogues = panel.dialogues.len();
+    if num_dialogues == 1 {
+        let d = &panel.dialogues[0];
         let slot = slots.iter().find(|s| s.speaker == d.speaker);
         let mouth_target = if let Some(s) = slot {
             s.mouth
@@ -222,15 +259,16 @@ fn render_single_panel(
         let origin = if mouth_target.x < (px + PANEL_WIDTH / 2.0) {
             Point {
                 x: px + 12.0,
-                y: balloon_y,
+                y: py + 14.0,
             }
         } else {
             Point {
-                x: px + 35.0,
-                y: balloon_y,
+                x: px + 40.0,
+                y: py + 14.0,
             }
         };
 
+        out.push_str(r##"<g class="balloon-container anti-crossing balloon-left">"##);
         let balloon_svg = render_balloon_svg(
             &d.text,
             d.balloon_type,
@@ -238,12 +276,86 @@ fn render_single_panel(
             mouth_target,
             PANEL_WIDTH - 40.0,
         );
-
         out.push_str(&balloon_svg);
-        balloon_y += 75.0;
-        if i >= 1 {
-            break;
-        }
+        out.push_str("</g>");
+    } else if num_dialogues >= 2 {
+        // Multi-speaker layout: Comic Chat Rule (No crossing tails)
+        let d0 = &panel.dialogues[0];
+        let d1 = &panel.dialogues[1];
+
+        let slot0 = slots.iter().find(|s| s.speaker == d0.speaker);
+        let slot1 = slots.iter().find(|s| s.speaker == d1.speaker);
+
+        let mouth0 = slot0.map(|s| s.mouth).unwrap_or(Point {
+            x: px + 50.0,
+            y: py + 170.0,
+        });
+        let mouth1 = slot1.map(|s| s.mouth).unwrap_or(Point {
+            x: px + 220.0,
+            y: py + 170.0,
+        });
+
+        let is_d0_left = mouth0.x <= mouth1.x;
+
+        let max_balloon_w = 210.0;
+
+        // Compute approximate widths to snuggly align balloons
+        let approx_chars1 = f64::max((max_balloon_w - 24.0) / 7.2, 12.0) as usize;
+        let lines1 = crate::balloon::wrap_text(&d1.text, approx_chars1);
+        let max_len1 = lines1.iter().map(|l| l.chars().count()).max().unwrap_or(1);
+        let bw1 = ((max_len1 as f64 * 7.5) + 24.0).clamp(60.0, max_balloon_w);
+
+        let lines0 = crate::balloon::wrap_text(&d0.text, approx_chars1);
+        let max_len0 = lines0.iter().map(|l| l.chars().count()).max().unwrap_or(1);
+        let bw0 = ((max_len0 as f64 * 7.5) + 24.0).clamp(60.0, max_balloon_w);
+
+        let (origin0, origin1) = if is_d0_left {
+            // First speaker on left (top-left), second on right (staggered right)
+            (
+                Point {
+                    x: px + 10.0,
+                    y: py + 12.0,
+                },
+                Point {
+                    x: px + PANEL_WIDTH - bw1 - 10.0,
+                    y: py + 68.0,
+                },
+            )
+        } else {
+            // First speaker on right (top-right), second on left (staggered left)
+            (
+                Point {
+                    x: px + PANEL_WIDTH - bw0 - 10.0,
+                    y: py + 12.0,
+                },
+                Point {
+                    x: px + 10.0,
+                    y: py + 68.0,
+                },
+            )
+        };
+
+        // Render first balloon
+        out.push_str(r##"<g class="balloon-container anti-crossing balloon-left">"##);
+        out.push_str(&render_balloon_svg(
+            &d0.text,
+            d0.balloon_type,
+            origin0,
+            mouth0,
+            max_balloon_w,
+        ));
+        out.push_str("</g>");
+
+        // Render second balloon
+        out.push_str(r##"<g class="balloon-container anti-crossing balloon-right">"##);
+        out.push_str(&render_balloon_svg(
+            &d1.text,
+            d1.balloon_type,
+            origin1,
+            mouth1,
+            max_balloon_w,
+        ));
+        out.push_str("</g>");
     }
 
     out.push_str("</g>");
