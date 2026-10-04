@@ -9,6 +9,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
     let mut current_effects: Vec<VisualEffect> = Vec::new();
     let mut explicit_panels = false;
     let mut strip_layout = StripLayout::Horizontal;
+    let mut strip_backdrop: Option<String> = None;
 
     for raw_line in script.lines() {
         let line = raw_line.trim();
@@ -20,6 +21,13 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
         if line.to_lowercase().starts_with("[layout:") && line.ends_with(']') {
             let inner = &line[8..line.len() - 1].trim();
             strip_layout = StripLayout::from_str_loose(inner);
+            continue;
+        }
+
+        // Backdrop directive: [backdrop: pastoral] or [backdrop: room]
+        if line.to_lowercase().starts_with("[backdrop:") && line.ends_with(']') {
+            let inner = line[10..line.len() - 1].trim().to_lowercase();
+            strip_backdrop = Some(inner);
             continue;
         }
 
@@ -138,6 +146,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
     Ok(ComicStrip {
         title: title.map(|t| t.to_string()),
         layout: strip_layout,
+        backdrop: strip_backdrop,
         panels: final_panels,
     })
 }

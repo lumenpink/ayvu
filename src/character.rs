@@ -82,6 +82,16 @@ impl CharacterPack {
 
         ""
     }
+
+    pub fn dimensions(&self) -> (f64, f64) {
+        match self.id.to_lowercase().as_str() {
+            "armando" => (150.0, 390.0),
+            "dan" => (200.0, 390.0),
+            "tiki" => (180.0, 440.0),
+            "tongtyed" => (210.0, 450.0),
+            _ => (100.0, 120.0),
+        }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -130,6 +140,10 @@ impl CharacterRegistry {
 
     pub fn get(&self, id: &str) -> Option<&CharacterPack> {
         self.packs.get(&id.to_lowercase())
+    }
+
+    pub fn list_character_ids(&self) -> Vec<String> {
+        self.ordered_ids.clone()
     }
 
     pub fn list_metadata(&self) -> Vec<CharacterMetadata> {
@@ -205,16 +219,18 @@ impl CharacterRegistry {
                                     );
                                 }
                             }
-                            self.register_pack(CharacterPack {
-                                id: manifest.id,
-                                name: manifest.name,
-                                author: manifest.author,
-                                license: manifest.license,
-                                description: manifest.description,
-                                balloon_anchor: manifest.balloon_anchor,
-                                poses,
-                            });
-                            loaded += 1;
+                            if !self.contains_id(&manifest.id) {
+                                self.register_pack(CharacterPack {
+                                    id: manifest.id,
+                                    name: manifest.name,
+                                    author: manifest.author,
+                                    license: manifest.license,
+                                    description: manifest.description,
+                                    balloon_anchor: manifest.balloon_anchor,
+                                    poses,
+                                });
+                                loaded += 1;
+                            }
                         }
                     }
                 }
@@ -241,116 +257,13 @@ pub fn clean_or_extract_svg(raw_svg: &str) -> String {
 }
 
 fn load_embedded_presets() -> Vec<CharacterPack> {
-    vec![
-        load_preset_tiki(),
-        load_preset_jordan(),
-        load_preset_armando(),
-        load_preset_tuffy(),
-        load_preset_peep(),
-    ]
+    let mut presets = crate::assets::load_woodring_characters();
+    presets.push(load_preset_jordan());
+    presets.push(load_preset_tuffy());
+    presets.push(load_preset_peep());
+    presets
 }
 
-fn load_preset_tiki() -> CharacterPack {
-    let mut poses = HashMap::new();
-    poses.insert(
-        "neutral".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tiki/neutral.svg")),
-    );
-    poses.insert(
-        "happy".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tiki/happy.svg")),
-    );
-    poses.insert(
-        "sad".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tiki/sad.svg")),
-    );
-    poses.insert(
-        "angry".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tiki/angry.svg")),
-    );
-    poses.insert(
-        "surprised".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tiki/surprised.svg")),
-    );
-    poses.insert(
-        "shouting".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tiki/shouting.svg")),
-    );
-    poses.insert(
-        "thinking".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tiki/thinking.svg")),
-    );
-    poses.insert(
-        "laughing".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tiki/laughing.svg")),
-    );
-    poses.insert(
-        "whispering".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tiki/whispering.svg")),
-    );
-
-    CharacterPack {
-        id: "tiki".into(),
-        name: "Tiki".into(),
-        author: "Jim Woodring / Microsoft Comic Chat / Ayvu".into(),
-        license: "MIT".into(),
-        description:
-            "The iconic Comic Chat dog with expressive floppy ears, warm fur, and cartoon gestures"
-                .into(),
-        balloon_anchor: Anchor { x: 0.5, y: 0.35 },
-        poses,
-    }
-}
-
-fn load_preset_armando() -> CharacterPack {
-    let mut poses = HashMap::new();
-    poses.insert(
-        "neutral".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/armando/neutral.svg")),
-    );
-    poses.insert(
-        "happy".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/armando/happy.svg")),
-    );
-    poses.insert(
-        "sad".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/armando/sad.svg")),
-    );
-    poses.insert(
-        "angry".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/armando/angry.svg")),
-    );
-    poses.insert(
-        "surprised".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/armando/surprised.svg")),
-    );
-    poses.insert(
-        "shouting".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/armando/shouting.svg")),
-    );
-    poses.insert(
-        "thinking".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/armando/thinking.svg")),
-    );
-    poses.insert(
-        "laughing".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/armando/laughing.svg")),
-    );
-    poses.insert(
-        "whispering".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/armando/whispering.svg")),
-    );
-
-    CharacterPack {
-        id: "armando".into(),
-        name: "Armando".into(),
-        author: "Jim Woodring / Microsoft Comic Chat / Ayvu".into(),
-        license: "MIT".into(),
-        description: "Suave, sharp-dressed comic avatar with sunglasses and tailored suit".into(),
-        balloon_anchor: Anchor { x: 0.5, y: 0.4 },
-        poses,
-    }
-}
 
 fn load_preset_tuffy() -> CharacterPack {
     let mut poses = HashMap::new();

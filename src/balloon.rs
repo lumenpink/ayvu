@@ -54,7 +54,7 @@ pub fn render_balloon_svg(
     let lines = wrap_text(text, approx_chars);
 
     let max_line_len = lines.iter().map(|l| l.chars().count()).max().unwrap_or(1);
-    let bubble_width = ((max_line_len as f64 * 7.5) + 24.0).clamp(60.0, max_width);
+    let bubble_width = ((max_line_len as f64 * 7.8) + 24.0).clamp(60.0, max_width);
     let bubble_height = (lines.len() as f64 * line_height) + 16.0;
 
     let bx = origin.x;
@@ -145,7 +145,7 @@ pub fn render_balloon_svg(
     let text_y = by + 16.0;
 
     out.push_str(&format!(
-        r##"<text x="{text_x:.1}" y="{text_y:.1}" font-family="Comic Sans MS, Comic Relief, Action Man, sans-serif" font-size="{font_size}" font-weight="bold" fill="#000000">"##
+        r##"<text x="{text_x:.1}" y="{text_y:.1}" font-family="'Comic Sans MS', 'Comic Relief', 'Comic Neue', cursive, sans-serif" font-size="{font_size}" font-weight="bold" fill="#000000" style="text-transform: uppercase;">"##
     ));
 
     for (i, line) in lines.iter().enumerate() {

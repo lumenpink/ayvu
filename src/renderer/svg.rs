@@ -79,7 +79,15 @@ pub fn render_comic_strip_to_svg_with_registry(
         let px = PANEL_MARGIN + (col as f64 * (PANEL_WIDTH + PANEL_MARGIN));
         let py = PANEL_MARGIN + title_height + (row as f64 * (PANEL_HEIGHT + PANEL_MARGIN));
 
-        render_single_panel(&mut out, panel, px, py, idx + 1, &mut registry_clone);
+        render_single_panel(
+            &mut out,
+            panel,
+            px,
+            py,
+            idx + 1,
+            strip.backdrop.as_deref(),
+            &mut registry_clone,
+        );
     }
 
     out.push_str("</svg>");
@@ -91,6 +99,8 @@ struct CharacterSlot {
     char_id: String,
     char_x: f64,
     char_y: f64,
+    scale: f64,
+    scaled_w: f64,
     mouth: Point,
     pose_svg: String,
 }
@@ -101,24 +111,45 @@ fn render_single_panel(
     px: f64,
     py: f64,
     panel_num: usize,
+    backdrop: Option<&str>,
     registry: &mut CharacterRegistry,
 ) {
-    let floor_y = py + PANEL_HEIGHT - 38.0;
-
     // 1. Panel background and floor staging
     out.push_str(&format!(r##"<g id="panel-{panel_num}">"##));
     out.push_str(&format!(
         r##"<rect x="{px:.1}" y="{py:.1}" width="{PANEL_WIDTH:.1}" height="{PANEL_HEIGHT:.1}" class="panel-bg" />"##
     ));
 
-    // Floor area wash & floor line
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{floor_y:.1}" width="{PANEL_WIDTH:.1}" height="38.0" class="panel-floor-wash" />"##
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" class="panel-floor" stroke-dasharray="12,3" />"##,
-        px + PANEL_WIDTH
-    ));
+    // Optional authentic Jim Woodring backdrop
+    let has_backdrop = if let Some(bg_name) = backdrop {
+        if let Some(b64) = crate::assets::get_backdrop_b64(bg_name) {
+            out.push_str(&format!(
+                r##"<image href="data:image/png;base64,{b64}" x="{px:.1}" y="{py:.1}" width="{PANEL_WIDTH:.1}" height="{PANEL_HEIGHT:.1}" preserveAspectRatio="xMidYMid slice" opacity="0.95" />"##
+            ));
+            true
+        } else {
+            false
+        }
+    } else {
+        false
+    };
+
+    let floor_y = if has_backdrop {
+        py + PANEL_HEIGHT - 12.0
+    } else {
+        py + PANEL_HEIGHT - 38.0
+    };
+
+    if !has_backdrop {
+        // Floor area wash & floor line
+        out.push_str(&format!(
+            r##"<rect x="{px:.1}" y="{floor_y:.1}" width="{PANEL_WIDTH:.1}" height="38.0" class="panel-floor-wash" />"##
+        ));
+        out.push_str(&format!(
+            r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" class="panel-floor" stroke-dasharray="12,3" />"##,
+            px + PANEL_WIDTH
+        ));
+    }
 
     // Hand-inked panel frame with draft corner ticks (extending 4px beyond vertices)
     let tick = 4.0;
@@ -162,67 +193,78 @@ fn render_single_panel(
         }
     }
 
-    // 3. Resolve characters and positioning
+    // 3. Resolve characters and positioning according to Comic Chat LayoutAvatars
     let mut slots: Vec<CharacterSlot> = Vec::new();
-    let num_speakers = speakers.len();
+    let target_height = 150.0; // maxBodyHeight in Comic Chat (unitHeight / 1.9)
 
-    // Characters stand grounded on the floor_y (Avatar height is 120 scaled at 0.9 = 108 px)
-    let char_y = floor_y - 108.0;
-
-    for (idx, speaker) in speakers.iter().enumerate() {
+    let mut resolved = Vec::new();
+    for speaker in &speakers {
         let pack = registry.resolve_speaker(speaker);
+        let dims = pack.dimensions();
+        let scale = target_height / dims.1;
+        let scaled_w = dims.0 * scale;
+        let scaled_h = dims.1 * scale;
+        resolved.push((speaker.clone(), pack, scale, scaled_w, scaled_h));
+    }
+
+    let total_avatar_w: f64 = resolved.iter().map(|r| r.3).sum();
+    let margin = (PANEL_WIDTH - total_avatar_w) / (resolved.len() + 1).max(1) as f64;
+    let mut cur_x = px + margin;
+
+    for (speaker, pack, scale, scaled_w, scaled_h) in resolved {
         let char_id = pack.id.clone();
         let anchor = pack.balloon_anchor;
-
-        let char_x = if num_speakers == 1 {
-            px + 95.0
-        } else if idx == 0 {
-            px + 15.0
-        } else {
-            px + 175.0
-        };
+        let char_x = cur_x;
+        let char_y = floor_y - scaled_h;
 
         let mouth = Point {
-            x: char_x + (anchor.x * 90.0),
-            y: char_y + (anchor.y * 108.0),
+            x: char_x + (anchor.x * scaled_w),
+            y: char_y + (anchor.y * scaled_h),
         };
 
         let emotion = panel
             .dialogues
             .iter()
             .rev()
-            .find(|d| &d.speaker == speaker)
+            .find(|d| d.speaker == speaker)
             .map(|d| d.emotion.clone())
             .unwrap_or(Emotion::Neutral);
 
         let pose_svg = pack.get_pose_svg(&emotion).to_string();
 
         slots.push(CharacterSlot {
-            speaker: speaker.clone(),
+            speaker,
             char_id,
             char_x,
             char_y,
+            scale,
+            scaled_w,
             mouth,
             pose_svg,
         });
+
+        cur_x += scaled_w + margin;
     }
 
     // 4. Render Contact Shadows & Character Avatars
     for slot in &slots {
-        // Ground shadow under feet/base
-        out.push_str(&format!(
-            r##"<ellipse cx="{:.1}" cy="{:.1}" rx="38" ry="6" class="contact-shadow" fill="rgba(0,0,0,0.12)" />"##,
-            slot.char_x + 45.0,
-            floor_y + 1.0
-        ));
+        if !has_backdrop {
+            out.push_str(&format!(
+                r##"<ellipse cx="{:.1}" cy="{:.1}" rx="{:.1}" ry="6" class="contact-shadow" fill="rgba(0,0,0,0.12)" />"##,
+                slot.char_x + (slot.scaled_w / 2.0),
+                floor_y + 1.0,
+                (slot.scaled_w * 0.45).clamp(20.0, 45.0)
+            ));
+        }
 
         out.push_str(&format!(
-            r##"<g class="character-pose" id="char-{}" data-speaker="{}" aria-label="{}" transform="translate({:.1}, {:.1}) scale(0.9)">"##,
+            r##"<g class="character-pose" id="char-{}" data-speaker="{}" aria-label="{}" transform="translate({:.1}, {:.1}) scale({:.4})">"##,
             escape_xml(&slot.char_id),
             escape_xml(&slot.speaker),
             escape_xml(&slot.speaker),
             slot.char_x,
-            slot.char_y
+            slot.char_y,
+            slot.scale
         ));
         out.push_str(&slot.pose_svg);
         out.push_str("</g>");

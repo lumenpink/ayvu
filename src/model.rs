@@ -136,5 +136,8 @@ pub struct ComicStrip {
     pub title: Option<String>,
     #[serde(default)]
     pub layout: StripLayout,
+    #[serde(default)]
+    pub backdrop: Option<String>,
     pub panels: Vec<Panel>,
 }
+
