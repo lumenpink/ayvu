@@ -1,0 +1,25 @@
+{
+  "name": "ayvu",
+  "type": "module",
+  "collaborators": [
+    "Lumen Pink <hi@lumen.pink>"
+  ],
+  "description": "Declarative comic strip generator inspired by Microsoft Comic Chat",
+  "version": "0.1.0-dev.1",
+  "license": "GPL-3.0-or-later",
+  "repository": {
+    "type": "git",
+    "url": "https://codeberg.org/lumenpink/ayvu"
+  },
+  "files": [
+    "ayvu_bg.wasm",
+    "ayvu.js",
+    "ayvu.d.ts"
+  ],
+  "main": "ayvu.js",
+  "homepage": "https://ayvu.2lp.in",
+  "types": "ayvu.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}

@@ -25,6 +25,9 @@ lint:
 fmt:
 	$(CARGO) fmt
 
+wasm:
+	wasm-pack build --target web --out-dir site/pkg --release -- --no-default-features --features wasm
+
 install: release
 	install -d "$(DESTDIR)$(BINDIR)"
 	install -m 0755 target/release/ayvu "$(DESTDIR)$(BINDIR)/ayvu" 2>/dev/null || \

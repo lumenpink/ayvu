@@ -8,7 +8,12 @@ pub mod character;
 pub mod model;
 pub mod parser;
 pub mod renderer;
+
+#[cfg(not(target_arch = "wasm32"))]
 pub mod server;
+
+#[cfg(feature = "wasm")]
+pub mod wasm;
 
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
 

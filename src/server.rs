@@ -147,6 +147,38 @@ fn handle_request(mut request: tiny_http::Request) {
                 .with_header(cors_header);
             let _ = request.respond(res);
         }
+        (&Method::Get, p) if p.starts_with("/pkg/") => {
+            let candidate1 = format!("./site{}", p);
+            let candidate2 = format!(".{}", p);
+
+            let file_path = if std::path::Path::new(&candidate1).is_file() {
+                candidate1
+            } else {
+                candidate2
+            };
+
+            if let Ok(bytes) = std::fs::read(&file_path) {
+                let mime = if p.ends_with(".wasm") {
+                    "application/wasm"
+                } else if p.ends_with(".js") {
+                    "application/javascript; charset=utf-8"
+                } else {
+                    "application/octet-stream"
+                };
+
+                let header = Header::from_bytes(&b"Content-Type"[..], mime.as_bytes()).unwrap();
+                let res = Response::from_data(bytes)
+                    .with_header(header)
+                    .with_header(cors_header);
+                let _ = request.respond(res);
+                return;
+            }
+
+            let res = Response::from_string("Not Found")
+                .with_status_code(StatusCode(404))
+                .with_header(cors_header);
+            let _ = request.respond(res);
+        }
         (&Method::Get, "/health") => {
             let json = serde_json::to_string(&HealthResponse {
                 status: "ok",

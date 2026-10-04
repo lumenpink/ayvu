@@ -347,6 +347,7 @@
       <span class="logo">🗨️</span>
       <h1 class="brand-title">Ayvu</h1>
       <span class="brand-tag">v0.1.0</span>
+      <span class="brand-tag" id="wasm-status" style="background-color: #6e7681;">⚡ WebAssembly</span>
       <span style="font-size: 0.8rem; color: #8b949e;">Declarative Comic Chat Generator</span>
     </div>
     <nav class="nav-links">
@@ -528,7 +529,30 @@ Jordan (shock): Uau, sensacional! [idea]</textarea>
 
   <div class="toast" id="toast">Copiado para a área de transferência!</div>
 
-  <script>
+  <script type="module">
+    import init, { render_comic } from './pkg/ayvu.js';
+
+    let wasmReady = false;
+
+    init()
+      .then(() => {
+        wasmReady = true;
+        const badge = document.getElementById('wasm-status');
+        if (badge) {
+          badge.textContent = '⚡ WebAssembly: Ativo (Client-side)';
+          badge.style.backgroundColor = '#1f6feb';
+        }
+        renderStrip();
+      })
+      .catch((err) => {
+        console.warn('WASM could not load, falling back to HTTP daemon:', err);
+        const badge = document.getElementById('wasm-status');
+        if (badge) {
+          badge.textContent = '🌐 Modo HTTP';
+          badge.style.backgroundColor = '#8957e5';
+        }
+      });
+
     const PRESETS = {
       classic: `Tuffy (happy): Olá, Jordan! Como vai o dia?
 Jordan: Tudo tranquilo, Tuffy! Apenas trabalhando no código.
@@ -645,6 +669,20 @@ Peep (laughing): E a tirinha flui perfeitamente na vertical! [idea]`
       const script = editor.value;
       const title = titleInput.value.trim() || undefined;
 
+      // 1. Prioritize Client-side WebAssembly execution
+      if (wasmReady) {
+        try {
+          const svg = render_comic(script, title, undefined);
+          preview.innerHTML = svg;
+          return;
+        } catch (err) {
+          console.error("WASM render error:", err);
+          preview.innerHTML = `<div style="color: #ef4444; font-family: monospace; padding: 1rem;">⚠️ Erro no WebAssembly:<br>${err}</div>`;
+          return;
+        }
+      }
+
+      // 2. Fallback to HTTP daemon
       try {
         const endpoint = getRenderEndpoint();
         const res = await fetch(endpoint, {
