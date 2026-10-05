@@ -10,7 +10,7 @@ Character packs are discovered at runtime from the `assets/characters/` director
 
 ```text
 assets/characters/
-├── tuffy/
+├── tiki/
 │   ├── manifest.json
 │   ├── neutral.svg
 │   ├── happy.svg
@@ -23,7 +23,7 @@ assets/characters/
 │   └── whispering.svg
 ├── jordan/
 │   └── ...
-└── peep/
+└── armando/
     └── ...
 ```
 
@@ -36,11 +36,11 @@ Each character directory must contain a valid `manifest.json`:
 ```json
 {
   "$schema": "https://raw.githubusercontent.com/lumenpink/ayvu/main/schemas/character-manifest.json",
-  "id": "tuffy",
-  "name": "Tuffy",
-  "author": "Ayvu Project (inspired by Jim Woodring / MS Comic Chat)",
-  "license": "GPL-3.0-or-later",
-  "description": "Expressive vintage cartoon dog with expressive floppy ears",
+  "id": "tiki",
+  "name": "Tiki",
+  "author": "Jim Woodring / Microsoft Research (1996)",
+  "license": "MIT",
+  "description": "Surreal multi-eyed spirit character in Polynesian-inspired straw skirt",
   "balloon_anchor": {
     "x": 0.5,
     "y": 0.25
@@ -109,11 +109,11 @@ Accept: application/json
 ```json
 [
   {
-    "id": "tuffy",
-    "name": "Tuffy",
-    "author": "Ayvu Project (inspired by Jim Woodring / MS Comic Chat)",
-    "license": "GPL-3.0-or-later",
-    "description": "Expressive vintage cartoon dog with expressive floppy ears",
+    "id": "armando",
+    "name": "Armando",
+    "author": "Jim Woodring / Microsoft Research (1996)",
+    "license": "MIT",
+    "description": "Bohemian beatnik artist with beret, goatee and dark shades",
     "emotions": [
       "angry",
       "happy",
@@ -121,17 +121,15 @@ Accept: application/json
       "neutral",
       "sad",
       "shouting",
-      "surprised",
-      "thinking",
-      "whispering"
+      "thinking"
     ]
   },
   {
-    "id": "jordan",
-    "name": "Jordan",
-    "author": "Ayvu Project",
-    "license": "GPL-3.0-or-later",
-    "description": "Cool retro-futuristic character with visor shades",
+    "id": "dan",
+    "name": "Dan",
+    "author": "Jim Woodring / Microsoft Research (1996)",
+    "license": "MIT",
+    "description": "Sharp business gentleman in necktie with expressive grimaces",
     "emotions": [
       "angry",
       "happy",
@@ -139,17 +137,15 @@ Accept: application/json
       "neutral",
       "sad",
       "shouting",
-      "surprised",
-      "thinking",
-      "whispering"
+      "thinking"
     ]
   },
   {
-    "id": "peep",
-    "name": "Peep",
-    "author": "Ayvu Project",
-    "license": "GPL-3.0-or-later",
-    "description": "Cheerful curious avian cartoon character",
+    "id": "tiki",
+    "name": "Tiki",
+    "author": "Jim Woodring / Microsoft Research (1996)",
+    "license": "MIT",
+    "description": "Surreal multi-eyed spirit character in Polynesian straw skirt",
     "emotions": [
       "angry",
       "happy",
@@ -157,9 +153,7 @@ Accept: application/json
       "neutral",
       "sad",
       "shouting",
-      "surprised",
-      "thinking",
-      "whispering"
+      "thinking"
     ]
   }
 ]
