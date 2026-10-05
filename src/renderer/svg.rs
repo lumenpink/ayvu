@@ -78,6 +78,7 @@ pub fn render_comic_strip_to_svg_with_registry(
 
         let px = PANEL_MARGIN + (col as f64 * (PANEL_WIDTH + PANEL_MARGIN));
         let py = PANEL_MARGIN + title_height + (row as f64 * (PANEL_HEIGHT + PANEL_MARGIN));
+        let effective_backdrop = panel.backdrop.as_deref().or(strip.backdrop.as_deref());
 
         render_single_panel(
             &mut out,
@@ -85,7 +86,7 @@ pub fn render_comic_strip_to_svg_with_registry(
             px,
             py,
             idx + 1,
-            strip.backdrop.as_deref(),
+            effective_backdrop,
             &mut registry_clone,
         );
     }
@@ -121,9 +122,12 @@ fn render_single_panel(
         r##"<rect x="{px:.1}" y="{py:.1}" width="{PANEL_WIDTH:.1}" height="{PANEL_HEIGHT:.1}" class="panel-bg" />"##
     ));
 
-    // Optional authentic Jim Woodring backdrop
+    // Optional vector backdrop (UFSC academic / vector pastoral / room) or authentic Jim Woodring bitmap
     let has_backdrop = if let Some(bg_name) = backdrop {
-        if let Some(b64) = crate::assets::get_backdrop_b64(bg_name) {
+        if let Some(vector_svg) = crate::backdrop::get_vector_backdrop_svg(bg_name, px, py, PANEL_WIDTH, PANEL_HEIGHT) {
+            out.push_str(&vector_svg);
+            true
+        } else if let Some(b64) = crate::assets::get_backdrop_b64(bg_name) {
             out.push_str(&format!(
                 r##"<image href="data:image/png;base64,{b64}" x="{px:.1}" y="{py:.1}" width="{PANEL_WIDTH:.1}" height="{PANEL_HEIGHT:.1}" preserveAspectRatio="xMidYMid slice" opacity="0.95" />"##
             ));
@@ -187,13 +191,16 @@ fn render_single_panel(
     ));
 
     // 2. Identify characters present in this panel
-    let mut speakers: Vec<String> = if !panel.characters.is_empty() {
-        panel.characters.clone()
-    } else {
-        Vec::new()
-    };
+    let mut speakers: Vec<String> = Vec::new();
+    if !panel.characters.is_empty() {
+        for c in &panel.characters {
+            if !speakers.iter().any(|s| s.eq_ignore_ascii_case(c)) {
+                speakers.push(c.clone());
+            }
+        }
+    }
     for d in &panel.dialogues {
-        if !speakers.contains(&d.speaker) {
+        if !speakers.iter().any(|s| s.eq_ignore_ascii_case(&d.speaker)) {
             speakers.push(d.speaker.clone());
         }
     }
@@ -354,7 +361,7 @@ fn render_single_panel(
     let num_dialogues = panel.dialogues.len();
     if num_dialogues == 1 {
         let d = &panel.dialogues[0];
-        let slot = slots.iter().find(|s| s.speaker == d.speaker);
+        let slot = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d.speaker));
         let mouth_target = if let Some(s) = slot {
             s.mouth
         } else {
@@ -391,8 +398,8 @@ fn render_single_panel(
         let d0 = &panel.dialogues[0];
         let d1 = &panel.dialogues[1];
 
-        let slot0 = slots.iter().find(|s| s.speaker == d0.speaker);
-        let slot1 = slots.iter().find(|s| s.speaker == d1.speaker);
+        let slot0 = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d0.speaker));
+        let slot1 = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d1.speaker));
 
         let mouth0 = slot0.map(|s| s.mouth).unwrap_or(Point {
             x: px + 50.0,
@@ -473,7 +480,7 @@ fn render_single_panel(
             .iter()
             .enumerate()
             .map(|(i, d)| {
-                let slot = slots.iter().find(|s| s.speaker == d.speaker);
+                let slot = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d.speaker));
                 let mouth = slot.map(|s| s.mouth).unwrap_or(Point {
                     x: px + 40.0 + (i as f64 * 100.0),
                     y: py + 170.0,
@@ -542,7 +549,7 @@ fn render_single_panel(
             .take(4)
             .enumerate()
             .map(|(i, d)| {
-                let slot = slots.iter().find(|s| s.speaker == d.speaker);
+                let slot = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d.speaker));
                 let mouth = slot.map(|s| s.mouth).unwrap_or(Point {
                     x: px + 50.0 + ((i % 2) as f64 * 180.0),
                     y: py + 170.0,

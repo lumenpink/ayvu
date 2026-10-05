@@ -131,6 +131,8 @@ pub struct Panel {
     pub effects: Vec<VisualEffect>,
     #[serde(default)]
     pub characters: Vec<String>,
+    #[serde(default)]
+    pub backdrop: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

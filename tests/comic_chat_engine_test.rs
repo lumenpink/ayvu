@@ -26,6 +26,7 @@ fn test_comic_chat_backdrops_rendering() {
     let panel = Panel {
         id: 1,
         characters: vec![],
+        backdrop: None,
         dialogues: vec![DialogueLine {
             speaker: "armando".to_string(),
             emotion: Emotion::Neutral,
@@ -53,6 +54,7 @@ fn test_comic_chat_layout_proportions() {
     let panel = Panel {
         id: 1,
         characters: vec![],
+        backdrop: None,
         dialogues: vec![
             DialogueLine {
                 speaker: "armando".to_string(),
@@ -108,6 +110,7 @@ fn test_balloon_arrow_stops_above_character_head() {
     let panel = Panel {
         id: 1,
         characters: vec![],
+        backdrop: None,
         dialogues: vec![DialogueLine {
             speaker: "dan".to_string(),
             emotion: Emotion::Neutral,
@@ -138,6 +141,7 @@ fn test_characters_face_each_other() {
     let panel = Panel {
         id: 1,
         characters: vec!["armando".to_string(), "tiki".to_string()],
+        backdrop: None,
         dialogues: vec![
             DialogueLine {
                 speaker: "armando".to_string(),
@@ -176,6 +180,7 @@ fn test_three_characters_in_single_panel() {
     let panel = Panel {
         id: 1,
         characters: vec!["armando".to_string(), "dan".to_string(), "tiki".to_string()],
+        backdrop: None,
         dialogues: vec![
             DialogueLine {
                 speaker: "armando".to_string(),
@@ -217,4 +222,17 @@ fn test_three_characters_in_single_panel() {
     assert!(svg.contains("balloon-col-0"), "First balloon column rendered");
     assert!(svg.contains("balloon-col-1"), "Second balloon column rendered");
     assert!(svg.contains("balloon-col-2"), "Third balloon column rendered");
+}
+
+#[test]
+fn test_vector_academic_backdrops() {
+    let script = "[backdrop: sala_de_aula]\nDan: Boa tarde turma!\n---\n[backdrop: cafe_ccs]\nArmando: Vamos tomar um café!\n---\n[backdrop: laboratorio]\nTiki: Hora do experimento!";
+    let strip = ayvu::parser::parse_dialogue_script(script, Some("UFSC Strip")).expect("Parse script");
+
+    let svg = render_comic_strip_to_svg(&strip);
+    assert!(svg.contains("backdrop-classroom"), "Must render classroom vector backdrop");
+    assert!(svg.contains("UFSC - CALCULO I"), "Must contain classroom chalkboard formula");
+    assert!(svg.contains("backdrop-cafe-ccs"), "Must render café CCS vector backdrop");
+    assert!(svg.contains("CAFÉ CCS"), "Must contain café CCS sign");
+    assert!(svg.contains("backdrop-laboratory"), "Must render lab vector backdrop");
 }

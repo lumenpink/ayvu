@@ -10,6 +10,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
     let mut explicit_panels = false;
     let mut strip_layout = StripLayout::Horizontal;
     let mut strip_backdrop: Option<String> = None;
+    let mut current_backdrop: Option<String> = None;
     let mut current_characters: Vec<String> = Vec::new();
     let mut global_characters: Vec<String> = Vec::new();
 
@@ -26,10 +27,15 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
             continue;
         }
 
-        // Backdrop directive: [backdrop: pastoral] or [backdrop: room]
+        // Backdrop directive: [backdrop: pastoral] or [backdrop: sala_de_aula]
         if line.to_lowercase().starts_with("[backdrop:") && line.ends_with(']') {
             let inner = line[10..line.len() - 1].trim().to_lowercase();
-            strip_backdrop = Some(inner);
+            if explicit_panels || !panels.is_empty() {
+                current_backdrop = Some(inner);
+            } else {
+                strip_backdrop = Some(inner.clone());
+                current_backdrop = Some(inner);
+            }
             continue;
         }
 
@@ -54,17 +60,19 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
         // Panel boundaries: '---' or '[panel...]'
         if line == "---" || line.starts_with("[panel") {
             explicit_panels = true;
-            if !current_dialogues.is_empty() || !current_effects.is_empty() || !current_characters.is_empty() {
+            if !current_dialogues.is_empty() || !current_effects.is_empty() || !current_characters.is_empty() || current_backdrop.is_some() {
                 let chars = if !current_characters.is_empty() {
                     std::mem::take(&mut current_characters)
                 } else {
                     global_characters.clone()
                 };
+                let bg = current_backdrop.take().or_else(|| strip_backdrop.clone());
                 panels.push(Panel {
                     id: panels.len() + 1,
                     dialogues: std::mem::take(&mut current_dialogues),
                     effects: std::mem::take(&mut current_effects),
                     characters: chars,
+                    backdrop: bg,
                 });
             }
             continue;
@@ -131,17 +139,19 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
         }
     }
 
-    if !current_dialogues.is_empty() || !current_effects.is_empty() || !current_characters.is_empty() {
+    if !current_dialogues.is_empty() || !current_effects.is_empty() || !current_characters.is_empty() || current_backdrop.is_some() {
         let chars = if !current_characters.is_empty() {
             std::mem::take(&mut current_characters)
         } else {
             global_characters.clone()
         };
+        let bg = current_backdrop.take().or_else(|| strip_backdrop.clone());
         panels.push(Panel {
             id: panels.len() + 1,
             dialogues: current_dialogues,
             effects: current_effects,
             characters: chars,
+            backdrop: bg,
         });
     }
 
@@ -151,6 +161,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
         let all_dialogues = first.dialogues;
         let mut effects = first.effects;
         let p_chars = first.characters;
+        let p_bg = first.backdrop;
         let mut grouped = Vec::new();
         let mut chunk = Vec::new();
 
@@ -164,6 +175,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                     dialogues: std::mem::take(&mut chunk),
                     effects: std::mem::take(&mut effects),
                     characters: p_chars.clone(),
+                    backdrop: p_bg.clone(),
                 });
             }
         }
@@ -173,6 +185,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                 dialogues: chunk,
                 effects,
                 characters: p_chars,
+                backdrop: p_bg,
             });
         }
         grouped
