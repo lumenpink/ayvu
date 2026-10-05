@@ -25,6 +25,7 @@ fn test_authentic_jim_woodring_characters_in_registry() {
 fn test_comic_chat_backdrops_rendering() {
     let panel = Panel {
         id: 1,
+        characters: vec![],
         dialogues: vec![DialogueLine {
             speaker: "armando".to_string(),
             emotion: Emotion::Neutral,
@@ -51,6 +52,7 @@ fn test_comic_chat_backdrops_rendering() {
 fn test_comic_chat_layout_proportions() {
     let panel = Panel {
         id: 1,
+        characters: vec![],
         dialogues: vec![
             DialogueLine {
                 speaker: "armando".to_string(),
@@ -105,6 +107,7 @@ fn test_all_31_official_comic_chat_characters_present() {
 fn test_balloon_arrow_stops_above_character_head() {
     let panel = Panel {
         id: 1,
+        characters: vec![],
         dialogues: vec![DialogueLine {
             speaker: "dan".to_string(),
             emotion: Emotion::Neutral,
@@ -128,4 +131,90 @@ fn test_balloon_arrow_stops_above_character_head() {
     // Verify that the speech balloon path does not penetrate deep into character
     // In our algorithm, target_y = char_y - 2.0 (above the character apex)
     assert!(svg.contains("class=\"character-pose\" id=\"char-dan\""));
+}
+
+#[test]
+fn test_characters_face_each_other() {
+    let panel = Panel {
+        id: 1,
+        characters: vec!["armando".to_string(), "tiki".to_string()],
+        dialogues: vec![
+            DialogueLine {
+                speaker: "armando".to_string(),
+                emotion: Emotion::Neutral,
+                balloon_type: BalloonType::Speech,
+                text: "Facing you!".to_string(),
+            },
+            DialogueLine {
+                speaker: "tiki".to_string(),
+                emotion: Emotion::Neutral,
+                balloon_type: BalloonType::Speech,
+                text: "Facing you too!".to_string(),
+            },
+        ],
+        effects: vec![],
+    };
+
+    let strip = ComicStrip {
+        title: None,
+        layout: StripLayout::Horizontal,
+        backdrop: None,
+        panels: vec![panel],
+    };
+
+    let svg = render_comic_strip_to_svg(&strip);
+
+    // Armando on the left faces right (unflipped)
+    assert!(svg.contains(r#"class="character-pose" id="char-armando""#), "Left character must not be flipped");
+    // Tiki on the right faces left (flipped with negative horizontal scale)
+    assert!(svg.contains(r#"class="character-pose flipped" id="char-tiki""#), "Right character must have flipped class");
+    assert!(svg.contains("scale(-"), "Flipped character transform must use negative scale X");
+}
+
+#[test]
+fn test_three_characters_in_single_panel() {
+    let panel = Panel {
+        id: 1,
+        characters: vec!["armando".to_string(), "dan".to_string(), "tiki".to_string()],
+        dialogues: vec![
+            DialogueLine {
+                speaker: "armando".to_string(),
+                emotion: Emotion::Neutral,
+                balloon_type: BalloonType::Speech,
+                text: "First!".to_string(),
+            },
+            DialogueLine {
+                speaker: "dan".to_string(),
+                emotion: Emotion::Neutral,
+                balloon_type: BalloonType::Speech,
+                text: "Second!".to_string(),
+            },
+            DialogueLine {
+                speaker: "tiki".to_string(),
+                emotion: Emotion::Neutral,
+                balloon_type: BalloonType::Speech,
+                text: "Third!".to_string(),
+            },
+        ],
+        effects: vec![],
+    };
+
+    let strip = ComicStrip {
+        title: None,
+        layout: StripLayout::Horizontal,
+        backdrop: None,
+        panels: vec![panel],
+    };
+
+    let svg = render_comic_strip_to_svg(&strip);
+
+    // Check all three characters rendered
+    assert!(svg.contains(r#"id="char-armando""#), "Armando rendered");
+    assert!(svg.contains(r#"id="char-dan""#), "Dan rendered");
+    assert!(svg.contains(r#"id="char-tiki""#), "Tiki rendered");
+
+    // Check 3 balloon columns rendered
+    assert!(svg.contains("balloon-col-0"), "First balloon column rendered");
+    assert!(svg.contains("balloon-col-1"), "Second balloon column rendered");
+    assert!(svg.contains("balloon-col-2"), "Third balloon column rendered");
 }

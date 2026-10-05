@@ -129,6 +129,8 @@ pub struct Panel {
     pub dialogues: Vec<DialogueLine>,
     #[serde(default)]
     pub effects: Vec<VisualEffect>,
+    #[serde(default)]
+    pub characters: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

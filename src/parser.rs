@@ -10,6 +10,8 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
     let mut explicit_panels = false;
     let mut strip_layout = StripLayout::Horizontal;
     let mut strip_backdrop: Option<String> = None;
+    let mut current_characters: Vec<String> = Vec::new();
+    let mut global_characters: Vec<String> = Vec::new();
 
     for raw_line in script.lines() {
         let line = raw_line.trim();
@@ -31,14 +33,38 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
             continue;
         }
 
+        // Characters / Cast directive: [characters: Tiki, Jordan, Armando] or [cast: ...]
+        let line_lower = line.to_lowercase();
+        if (line_lower.starts_with("[characters:") || line_lower.starts_with("[cast:")) && line.ends_with(']') {
+            let colon_idx = line.find(':').unwrap();
+            let inner = line[colon_idx + 1..line.len() - 1].trim();
+            let parsed_chars: Vec<String> = inner
+                .split(',')
+                .map(|s| s.trim().to_string())
+                .filter(|s| !s.is_empty())
+                .collect();
+            if explicit_panels || !panels.is_empty() {
+                current_characters = parsed_chars;
+            } else {
+                global_characters = parsed_chars;
+            }
+            continue;
+        }
+
         // Panel boundaries: '---' or '[panel...]'
         if line == "---" || line.starts_with("[panel") {
             explicit_panels = true;
-            if !current_dialogues.is_empty() || !current_effects.is_empty() {
+            if !current_dialogues.is_empty() || !current_effects.is_empty() || !current_characters.is_empty() {
+                let chars = if !current_characters.is_empty() {
+                    std::mem::take(&mut current_characters)
+                } else {
+                    global_characters.clone()
+                };
                 panels.push(Panel {
                     id: panels.len() + 1,
                     dialogues: std::mem::take(&mut current_dialogues),
                     effects: std::mem::take(&mut current_effects),
+                    characters: chars,
                 });
             }
             continue;
@@ -105,29 +131,39 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
         }
     }
 
-    if !current_dialogues.is_empty() || !current_effects.is_empty() {
+    if !current_dialogues.is_empty() || !current_effects.is_empty() || !current_characters.is_empty() {
+        let chars = if !current_characters.is_empty() {
+            std::mem::take(&mut current_characters)
+        } else {
+            global_characters.clone()
+        };
         panels.push(Panel {
             id: panels.len() + 1,
             dialogues: current_dialogues,
             effects: current_effects,
+            characters: chars,
         });
     }
 
-    // If no explicit panel boundaries were specified, auto-group into panels of up to 2 dialogues
+    // If no explicit panel boundaries were specified, auto-group into panels
     let final_panels = if !explicit_panels && panels.len() == 1 {
         let first = panels.remove(0);
         let all_dialogues = first.dialogues;
         let mut effects = first.effects;
+        let p_chars = first.characters;
         let mut grouped = Vec::new();
         let mut chunk = Vec::new();
 
+        let max_per_panel = if p_chars.len() >= 3 { 3 } else { 2 };
+
         for d in all_dialogues {
             chunk.push(d);
-            if chunk.len() >= 2 {
+            if chunk.len() >= max_per_panel {
                 grouped.push(Panel {
                     id: grouped.len() + 1,
                     dialogues: std::mem::take(&mut chunk),
                     effects: std::mem::take(&mut effects),
+                    characters: p_chars.clone(),
                 });
             }
         }
@@ -136,6 +172,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                 id: grouped.len() + 1,
                 dialogues: chunk,
                 effects,
+                characters: p_chars,
             });
         }
         grouped

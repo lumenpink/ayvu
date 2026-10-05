@@ -40,6 +40,17 @@ pub fn escape_xml(s: &str) -> String {
         .replace('\'', "&apos;")
 }
 
+/// Calculate balloon dimensions and wrapped text for a given max_width
+pub fn measure_balloon(text: &str, max_width: f64) -> (f64, f64, Vec<String>) {
+    let line_height = 16.0;
+    let approx_chars = ((max_width - 20.0) / 7.5).max(7.0) as usize;
+    let lines = wrap_text(text, approx_chars);
+    let max_line_len = lines.iter().map(|l| l.chars().count()).max().unwrap_or(1);
+    let bubble_width = ((max_line_len as f64 * 7.5) + 24.0).clamp(48.0, max_width);
+    let bubble_height = (lines.len() as f64 * line_height) + 16.0;
+    (bubble_width, bubble_height, lines)
+}
+
 /// Render a single speech/thought/shout balloon in SVG vector format
 pub fn render_balloon_svg(
     text: &str,
@@ -50,12 +61,7 @@ pub fn render_balloon_svg(
 ) -> String {
     let font_size = 12.0;
     let line_height = 16.0;
-    let approx_chars = ((max_width - 24.0) / 7.2).max(12.0) as usize;
-    let lines = wrap_text(text, approx_chars);
-
-    let max_line_len = lines.iter().map(|l| l.chars().count()).max().unwrap_or(1);
-    let bubble_width = ((max_line_len as f64 * 7.8) + 24.0).clamp(60.0, max_width);
-    let bubble_height = (lines.len() as f64 * line_height) + 16.0;
+    let (bubble_width, bubble_height, lines) = measure_balloon(text, max_width);
 
     let bx = origin.x;
     let by = origin.y;

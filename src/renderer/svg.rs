@@ -1,6 +1,6 @@
-use crate::balloon::{escape_xml, render_balloon_svg, Point};
+use crate::balloon::{escape_xml, measure_balloon, render_balloon_svg, Point};
 use crate::character::CharacterRegistry;
-use crate::model::{ComicStrip, Emotion, Panel, StickerType, StripLayout, VisualEffect};
+use crate::model::{ComicStrip, DialogueLine, Emotion, Panel, StickerType, StripLayout, VisualEffect};
 
 pub const PANEL_WIDTH: f64 = 280.0;
 pub const PANEL_HEIGHT: f64 = 280.0;
@@ -103,6 +103,7 @@ struct CharacterSlot {
     scaled_w: f64,
     mouth: Point,
     pose_svg: String,
+    flipped: bool,
 }
 
 fn render_single_panel(
@@ -186,7 +187,11 @@ fn render_single_panel(
     ));
 
     // 2. Identify characters present in this panel
-    let mut speakers: Vec<String> = Vec::new();
+    let mut speakers: Vec<String> = if !panel.characters.is_empty() {
+        panel.characters.clone()
+    } else {
+        Vec::new()
+    };
     for d in &panel.dialogues {
         if !speakers.contains(&d.speaker) {
             speakers.push(d.speaker.clone());
@@ -223,8 +228,9 @@ fn render_single_panel(
     let actual_total_w: f64 = resolved_packs.iter().map(|(_, _, d)| d.0 * final_scale).sum();
     let margin = (PANEL_WIDTH - actual_total_w) / (resolved_packs.len() + 1).max(1) as f64;
     let mut cur_x = px + margin;
+    let n_speakers = resolved_packs.len();
 
-    for (speaker, pack, dims) in resolved_packs {
+    for (idx, (speaker, pack, dims)) in resolved_packs.into_iter().enumerate() {
         let scale = final_scale;
         let scaled_w = dims.0 * scale;
         let scaled_h = dims.1 * scale;
@@ -233,9 +239,38 @@ fn render_single_panel(
         let char_x = cur_x;
         let char_y = floor_y - scaled_h;
 
-        // Pointer target points toward the mouth X position, but terminates above the head apex!
+        // Facing direction:
+        // In Comic Chat (m_flip), all Jim Woodring original base bitmaps face RIGHT.
+        // In a two-character conversation, the character on the right faces LEFT (flipped)
+        // so that they face each other directly.
+        // In three-or-more character scenes, characters on the right half face LEFT,
+        // characters on the left half face RIGHT, and center characters face their interlocutor.
+        let flipped = if n_speakers <= 1 {
+            false
+        } else if n_speakers == 2 {
+            idx == 1 // Right speaker faces Left speaker
+        } else if idx < n_speakers / 2 {
+            false // Left side faces right
+        } else if idx > n_speakers / 2 {
+            true // Right side faces left
+        } else {
+            // Center character in 3+ cast: face the first speaker or stage-left
+            let first_speaker = panel.dialogues.first().map(|d| d.speaker.as_str()).unwrap_or("");
+            if let Some(first_idx) = speakers.iter().position(|s| s == first_speaker) {
+                first_idx < idx
+            } else {
+                true
+            }
+        };
+
+        // Pointer target points toward the mouth X position (adjusted for flip), terminating above the head apex!
+        let mouth_x = if flipped {
+            char_x + ((1.0 - anchor.x) * scaled_w)
+        } else {
+            char_x + (anchor.x * scaled_w)
+        };
         let mouth = Point {
-            x: char_x + (anchor.x * scaled_w),
+            x: mouth_x,
             y: char_y - 2.0,
         };
 
@@ -258,6 +293,7 @@ fn render_single_panel(
             scaled_w,
             mouth,
             pose_svg,
+            flipped,
         });
 
         cur_x += scaled_w + margin;
@@ -274,15 +310,28 @@ fn render_single_panel(
             ));
         }
 
-        out.push_str(&format!(
-            r##"<g class="character-pose" id="char-{}" data-speaker="{}" aria-label="{}" transform="translate({:.1}, {:.1}) scale({:.4})">"##,
-            escape_xml(&slot.char_id),
-            escape_xml(&slot.speaker),
-            escape_xml(&slot.speaker),
-            slot.char_x,
-            slot.char_y,
-            slot.scale
-        ));
+        if slot.flipped {
+            out.push_str(&format!(
+                r##"<g class="character-pose flipped" id="char-{}" data-speaker="{}" aria-label="{}" transform="translate({:.1}, {:.1}) scale(-{:.4}, {:.4})">"##,
+                escape_xml(&slot.char_id),
+                escape_xml(&slot.speaker),
+                escape_xml(&slot.speaker),
+                slot.char_x + slot.scaled_w,
+                slot.char_y,
+                slot.scale,
+                slot.scale
+            ));
+        } else {
+            out.push_str(&format!(
+                r##"<g class="character-pose" id="char-{}" data-speaker="{}" aria-label="{}" transform="translate({:.1}, {:.1}) scale({:.4})">"##,
+                escape_xml(&slot.char_id),
+                escape_xml(&slot.speaker),
+                escape_xml(&slot.speaker),
+                slot.char_x,
+                slot.char_y,
+                slot.scale
+            ));
+        }
         out.push_str(&slot.pose_svg);
         out.push_str("</g>");
     }
@@ -337,7 +386,7 @@ fn render_single_panel(
         );
         out.push_str(&balloon_svg);
         out.push_str("</g>");
-    } else if num_dialogues >= 2 {
+    } else if num_dialogues == 2 {
         // Multi-speaker layout: Comic Chat Rule (No crossing tails)
         let d0 = &panel.dialogues[0];
         let d1 = &panel.dialogues[1];
@@ -358,15 +407,8 @@ fn render_single_panel(
 
         let max_balloon_w = 126.0;
 
-        // Wrap to fit side-by-side in 280px panel
-        let approx_chars = 14;
-        let lines1 = crate::balloon::wrap_text(&d1.text, approx_chars);
-        let max_len1 = lines1.iter().map(|l| l.chars().count()).max().unwrap_or(1);
-        let bw1 = ((max_len1 as f64 * 7.5) + 24.0).clamp(55.0, max_balloon_w);
-
-        let lines0 = crate::balloon::wrap_text(&d0.text, approx_chars);
-        let max_len0 = lines0.iter().map(|l| l.chars().count()).max().unwrap_or(1);
-        let bw0 = ((max_len0 as f64 * 7.5) + 24.0).clamp(55.0, max_balloon_w);
+        let (bw1, _, _) = measure_balloon(&d1.text, max_balloon_w);
+        let (bw0, _, _) = measure_balloon(&d0.text, max_balloon_w);
 
         let (origin0, origin1) = if is_d0_left {
             // First speaker on left (top-left), second on right (top-right)
@@ -415,6 +457,139 @@ fn render_single_panel(
             max_balloon_w,
         ));
         out.push_str("</g>");
+    } else if num_dialogues == 3 {
+        // 3-dialogue layout: 3 side-by-side columns sorted by speaker mouth X (anti-crossing)
+        let max_balloon_w = 82.0;
+
+        struct BalloonItem<'a> {
+            orig_idx: usize,
+            dialogue: &'a DialogueLine,
+            mouth: Point,
+            bubble_w: f64,
+        }
+
+        let mut items: Vec<BalloonItem> = panel
+            .dialogues
+            .iter()
+            .enumerate()
+            .map(|(i, d)| {
+                let slot = slots.iter().find(|s| s.speaker == d.speaker);
+                let mouth = slot.map(|s| s.mouth).unwrap_or(Point {
+                    x: px + 40.0 + (i as f64 * 100.0),
+                    y: py + 170.0,
+                });
+                let (bw, _, _) = measure_balloon(&d.text, max_balloon_w);
+                BalloonItem {
+                    orig_idx: i,
+                    dialogue: d,
+                    mouth,
+                    bubble_w: bw,
+                }
+            })
+            .collect();
+
+        // Sort items by mouth X so balloon columns match character positions left-to-right (no crossed tails)
+        items.sort_by(|a, b| {
+            a.mouth
+                .x
+                .partial_cmp(&b.mouth.x)
+                .unwrap_or(std::cmp::Ordering::Equal)
+        });
+
+        for (col_idx, item) in items.iter().enumerate() {
+            let origin_x = if col_idx == 0 {
+                px + 8.0
+            } else if col_idx == 1 {
+                px + 99.0 + ((max_balloon_w - item.bubble_w) / 2.0).max(0.0)
+            } else {
+                px + PANEL_WIDTH - item.bubble_w - 8.0
+            };
+
+            // Stagger Y slightly based on original dialogue order to indicate temporal precedence
+            let origin_y = py + 8.0 + (item.orig_idx as f64 * 6.0);
+            let origin = Point {
+                x: origin_x,
+                y: origin_y,
+            };
+
+            out.push_str(&format!(
+                r##"<g class="balloon-container anti-crossing balloon-col-{}">"##,
+                col_idx
+            ));
+            out.push_str(&render_balloon_svg(
+                &item.dialogue.text,
+                item.dialogue.balloon_type,
+                origin,
+                item.mouth,
+                max_balloon_w,
+            ));
+            out.push_str("</g>");
+        }
+    } else if num_dialogues >= 4 {
+        // 4+ dialogues: 2x2 grid layout (take first 4)
+        let max_balloon_w = 126.0;
+
+        struct BalloonItem<'a> {
+            orig_idx: usize,
+            dialogue: &'a DialogueLine,
+            mouth: Point,
+            bubble_w: f64,
+        }
+
+        let items: Vec<BalloonItem> = panel
+            .dialogues
+            .iter()
+            .take(4)
+            .enumerate()
+            .map(|(i, d)| {
+                let slot = slots.iter().find(|s| s.speaker == d.speaker);
+                let mouth = slot.map(|s| s.mouth).unwrap_or(Point {
+                    x: px + 50.0 + ((i % 2) as f64 * 180.0),
+                    y: py + 170.0,
+                });
+                let (bw, _, _) = measure_balloon(&d.text, max_balloon_w);
+                BalloonItem {
+                    orig_idx: i,
+                    dialogue: d,
+                    mouth,
+                    bubble_w: bw,
+                }
+            })
+            .collect();
+
+        for (i, item) in items.iter().enumerate() {
+            let is_left = item.mouth.x <= px + (PANEL_WIDTH / 2.0);
+            let is_top = i < 2;
+
+            let origin_x = if is_left {
+                px + 10.0
+            } else {
+                px + PANEL_WIDTH - item.bubble_w - 10.0
+            };
+            let origin_y = if is_top {
+                py + 8.0 + ((item.orig_idx % 2) as f64 * 6.0)
+            } else {
+                py + 68.0 + ((item.orig_idx % 2) as f64 * 6.0)
+            };
+
+            let origin = Point {
+                x: origin_x,
+                y: origin_y,
+            };
+
+            out.push_str(&format!(
+                r##"<g class="balloon-container anti-crossing balloon-grid-{}">"##,
+                i
+            ));
+            out.push_str(&render_balloon_svg(
+                &item.dialogue.text,
+                item.dialogue.balloon_type,
+                origin,
+                item.mouth,
+                max_balloon_w,
+            ));
+            out.push_str("</g>");
+        }
     }
 
     out.push_str("</g>");
