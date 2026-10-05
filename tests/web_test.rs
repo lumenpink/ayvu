@@ -20,6 +20,9 @@ fn test_wrangler_config_and_site_files() {
     assert!(html_content.contains("id=\"editor\""));
     assert!(html_content.contains("id=\"preview\""));
     assert!(html_content.contains("POW!"));
+    assert!(html_content.contains("footer-canonical"));
+    assert!(html_content.contains("https://travesti.2lp.in/pt/"));
+    assert!(html_content.contains("https://lumen.pink"));
 
     let headers = Path::new("site/_headers");
     assert!(headers.is_file(), "site/_headers should exist");
