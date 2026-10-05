@@ -12,7 +12,12 @@ pub fn get_backdrop_b64(name: &str) -> Option<&'static str> {
     }
 }
 
-pub const ALL_CHARACTERS: &[&str] = &["anna", "armando", "bolo", "buck", "connor", "cro", "dan", "denise", "glenda", "hugh", "jordan", "kevin", "kirby", "kwensa", "lance", "lynnea", "margaret", "maynard", "mike", "pedagog", "rainbow", "rebecca", "sage", "scotty", "susan", "tiki", "tongtyed", "tux", "veronica", "waf", "xeno"];
+pub const ALL_CHARACTERS: &[&str] = &[
+    "anna", "armando", "bolo", "buck", "connor", "cro", "dan", "denise", "glenda", "hugh",
+    "jordan", "kevin", "kirby", "kwensa", "lance", "lynnea", "margaret", "maynard", "mike",
+    "pedagog", "rainbow", "rebecca", "sage", "scotty", "susan", "tiki", "tongtyed", "tux",
+    "veronica", "waf", "xeno",
+];
 
 fn load_anna() -> CharacterPack {
     let mut poses = HashMap::new();

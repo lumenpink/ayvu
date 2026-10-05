@@ -1,6 +1,8 @@
 use crate::balloon::{escape_xml, measure_balloon, render_balloon_svg, Point};
 use crate::character::CharacterRegistry;
-use crate::model::{ComicStrip, DialogueLine, Emotion, Panel, StickerType, StripLayout, VisualEffect};
+use crate::model::{
+    ComicStrip, DialogueLine, Emotion, Panel, StickerType, StripLayout, VisualEffect,
+};
 
 pub const PANEL_WIDTH: f64 = 280.0;
 pub const PANEL_HEIGHT: f64 = 280.0;
@@ -18,22 +20,81 @@ pub fn render_comic_strip_to_svg_with_registry(
     registry: &CharacterRegistry,
 ) -> String {
     let mut registry_clone = registry.clone();
-    let panel_count = strip.panels.len().max(1);
     let title_height = if strip.title.is_some() { 48.0 } else { 0.0 };
 
-    let (cols, rows) = match strip.layout {
-        StripLayout::Horizontal => (panel_count, 1),
-        StripLayout::Grid => {
-            let c = if panel_count >= 2 { 2 } else { 1 };
-            let r = panel_count.div_ceil(c);
-            (c, r)
+    // Compute (px, py, pw) for each panel according to strip layout
+    let (panel_layouts, total_width, total_height) = match strip.layout {
+        StripLayout::Horizontal => {
+            let mut layouts = Vec::with_capacity(strip.panels.len());
+            let mut cur_x = PANEL_MARGIN;
+            for panel in &strip.panels {
+                let pw = panel.resolve_width();
+                let py = PANEL_MARGIN + title_height;
+                layouts.push((cur_x, py, pw));
+                cur_x += pw + PANEL_MARGIN;
+            }
+            let w = if strip.panels.is_empty() {
+                PANEL_WIDTH + (PANEL_MARGIN * 2.0)
+            } else {
+                cur_x
+            };
+            let h = PANEL_HEIGHT + (PANEL_MARGIN * 2.0) + title_height;
+            (layouts, w, h)
         }
-        StripLayout::Vertical => (1, panel_count),
+        StripLayout::Vertical => {
+            let max_w = strip
+                .panels
+                .iter()
+                .map(|p| p.resolve_width())
+                .fold(PANEL_WIDTH, f64::max);
+            let w = max_w + (PANEL_MARGIN * 2.0);
+            let mut layouts = Vec::with_capacity(strip.panels.len());
+            let mut cur_y = PANEL_MARGIN + title_height;
+            for panel in &strip.panels {
+                let pw = panel.resolve_width();
+                let px = PANEL_MARGIN + (max_w - pw) / 2.0;
+                layouts.push((px, cur_y, pw));
+                cur_y += PANEL_HEIGHT + PANEL_MARGIN;
+            }
+            let h = if strip.panels.is_empty() {
+                PANEL_HEIGHT + (PANEL_MARGIN * 2.0) + title_height
+            } else {
+                cur_y
+            };
+            (layouts, w, h)
+        }
+        StripLayout::Grid => {
+            let rows: Vec<&[Panel]> = strip.panels.chunks(2).collect();
+            let mut max_row_w: f64 = PANEL_WIDTH * 2.0 + PANEL_MARGIN * 3.0;
+            for row in &rows {
+                let row_w: f64 = row.iter().map(|p| p.resolve_width()).sum::<f64>()
+                    + (row.len() as f64 + 1.0) * PANEL_MARGIN;
+                if row_w > max_row_w {
+                    max_row_w = row_w;
+                }
+            }
+            let total_w = max_row_w;
+            let mut layouts = Vec::with_capacity(strip.panels.len());
+            let mut cur_y = PANEL_MARGIN + title_height;
+            for row in &rows {
+                let row_panels_w: f64 = row.iter().map(|p| p.resolve_width()).sum();
+                let extra_space = total_w - row_panels_w - (row.len() as f64 + 1.0) * PANEL_MARGIN;
+                let mut cur_x = PANEL_MARGIN + (extra_space / 2.0).max(0.0);
+                for panel in *row {
+                    let pw = panel.resolve_width();
+                    layouts.push((cur_x, cur_y, pw));
+                    cur_x += pw + PANEL_MARGIN;
+                }
+                cur_y += PANEL_HEIGHT + PANEL_MARGIN;
+            }
+            let h = if strip.panels.is_empty() {
+                PANEL_HEIGHT + (PANEL_MARGIN * 2.0) + title_height
+            } else {
+                cur_y
+            };
+            (layouts, total_w, h)
+        }
     };
-
-    let total_width = (PANEL_WIDTH * cols as f64) + (PANEL_MARGIN * (cols as f64 + 1.0));
-    let total_height =
-        (PANEL_HEIGHT * rows as f64) + (PANEL_MARGIN * (rows as f64 + 1.0)) + title_height;
 
     let mut out = String::new();
 
@@ -69,15 +130,7 @@ pub fn render_comic_strip_to_svg_with_registry(
     }
 
     // Render Panels
-    for (idx, panel) in strip.panels.iter().enumerate() {
-        let (col, row) = match strip.layout {
-            StripLayout::Horizontal => (idx, 0),
-            StripLayout::Grid => (idx % cols, idx / cols),
-            StripLayout::Vertical => (0, idx),
-        };
-
-        let px = PANEL_MARGIN + (col as f64 * (PANEL_WIDTH + PANEL_MARGIN));
-        let py = PANEL_MARGIN + title_height + (row as f64 * (PANEL_HEIGHT + PANEL_MARGIN));
+    for (idx, (panel, &(px, py, pw))) in strip.panels.iter().zip(&panel_layouts).enumerate() {
         let effective_backdrop = panel.backdrop.as_deref().or(strip.backdrop.as_deref());
 
         render_single_panel(
@@ -85,6 +138,7 @@ pub fn render_comic_strip_to_svg_with_registry(
             panel,
             px,
             py,
+            pw,
             idx + 1,
             effective_backdrop,
             &mut registry_clone,
@@ -112,6 +166,7 @@ fn render_single_panel(
     panel: &Panel,
     px: f64,
     py: f64,
+    pw: f64,
     panel_num: usize,
     backdrop: Option<&str>,
     registry: &mut CharacterRegistry,
@@ -119,17 +174,19 @@ fn render_single_panel(
     // 1. Panel background and floor staging
     out.push_str(&format!(r##"<g id="panel-{panel_num}">"##));
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{PANEL_WIDTH:.1}" height="{PANEL_HEIGHT:.1}" class="panel-bg" />"##
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{pw:.1}" height="{PANEL_HEIGHT:.1}" class="panel-bg" />"##
     ));
 
     // Optional vector backdrop (UFSC academic / vector pastoral / room) or authentic Jim Woodring bitmap
     let has_backdrop = if let Some(bg_name) = backdrop {
-        if let Some(vector_svg) = crate::backdrop::get_vector_backdrop_svg(bg_name, px, py, PANEL_WIDTH, PANEL_HEIGHT) {
+        if let Some(vector_svg) =
+            crate::backdrop::get_vector_backdrop_svg(bg_name, px, py, pw, PANEL_HEIGHT)
+        {
             out.push_str(&vector_svg);
             true
         } else if let Some(b64) = crate::assets::get_backdrop_b64(bg_name) {
             out.push_str(&format!(
-                r##"<image href="data:image/png;base64,{b64}" x="{px:.1}" y="{py:.1}" width="{PANEL_WIDTH:.1}" height="{PANEL_HEIGHT:.1}" preserveAspectRatio="xMidYMid slice" opacity="0.95" />"##
+                r##"<image href="data:image/png;base64,{b64}" x="{px:.1}" y="{py:.1}" width="{pw:.1}" height="{PANEL_HEIGHT:.1}" preserveAspectRatio="xMidYMid slice" opacity="0.95" />"##
             ));
             true
         } else {
@@ -148,11 +205,11 @@ fn render_single_panel(
     if !has_backdrop {
         // Floor area wash & floor line
         out.push_str(&format!(
-            r##"<rect x="{px:.1}" y="{floor_y:.1}" width="{PANEL_WIDTH:.1}" height="24.0" class="panel-floor-wash" />"##
+            r##"<rect x="{px:.1}" y="{floor_y:.1}" width="{pw:.1}" height="24.0" class="panel-floor-wash" />"##
         ));
         out.push_str(&format!(
             r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" class="panel-floor" stroke-dasharray="12,3" />"##,
-            px + PANEL_WIDTH
+            px + pw
         ));
     }
 
@@ -167,26 +224,26 @@ fn render_single_panel(
 </g>"##,
         px - tick,
         py,
-        px + PANEL_WIDTH + tick,
+        px + pw + tick,
         py,
         px - tick,
         py + PANEL_HEIGHT,
-        px + PANEL_WIDTH + tick,
+        px + pw + tick,
         py + PANEL_HEIGHT,
         px,
         py - tick,
         px,
         py + PANEL_HEIGHT + tick,
-        px + PANEL_WIDTH,
+        px + pw,
         py - tick,
-        px + PANEL_WIDTH,
+        px + pw,
         py + PANEL_HEIGHT + tick
     ));
 
     // Panel number in top-right corner
     out.push_str(&format!(
         r##"<text x="{:.1}" y="{:.1}" font-size="10" font-weight="bold" fill="#aaaaaa" font-family="sans-serif">{panel_num}</text>"##,
-        px + PANEL_WIDTH - 14.0,
+        px + pw - 14.0,
         py + 14.0
     ));
 
@@ -224,16 +281,22 @@ fn render_single_panel(
     let base_scale = target_height / max_char_h;
 
     // Check if sum of widths exceeds panel width
-    let total_avatar_w: f64 = resolved_packs.iter().map(|(_, _, d)| d.0 * base_scale).sum();
-    let max_allowed_w = PANEL_WIDTH - 24.0;
+    let total_avatar_w: f64 = resolved_packs
+        .iter()
+        .map(|(_, _, d)| d.0 * base_scale)
+        .sum();
+    let max_allowed_w = pw - 24.0;
     let final_scale = if total_avatar_w > max_allowed_w && total_avatar_w > 0.0 {
         base_scale * (max_allowed_w / total_avatar_w)
     } else {
         base_scale
     };
 
-    let actual_total_w: f64 = resolved_packs.iter().map(|(_, _, d)| d.0 * final_scale).sum();
-    let margin = (PANEL_WIDTH - actual_total_w) / (resolved_packs.len() + 1).max(1) as f64;
+    let actual_total_w: f64 = resolved_packs
+        .iter()
+        .map(|(_, _, d)| d.0 * final_scale)
+        .sum();
+    let margin = (pw - actual_total_w) / (resolved_packs.len() + 1).max(1) as f64;
     let mut cur_x = px + margin;
     let n_speakers = resolved_packs.len();
 
@@ -262,7 +325,11 @@ fn render_single_panel(
             true // Right side faces left
         } else {
             // Center character in 3+ cast: face the first speaker or stage-left
-            let first_speaker = panel.dialogues.first().map(|d| d.speaker.as_str()).unwrap_or("");
+            let first_speaker = panel
+                .dialogues
+                .first()
+                .map(|d| d.speaker.as_str())
+                .unwrap_or("");
             if let Some(first_idx) = speakers.iter().position(|s| s == first_speaker) {
                 first_idx < idx
             } else {
@@ -344,11 +411,11 @@ fn render_single_panel(
     }
 
     // 5. Render Visual Effects (Onomatopoeia & Stickers)
-    let mut sticker_offset_x = px + PANEL_WIDTH - 36.0;
+    let mut sticker_offset_x = px + pw - 36.0;
     for effect in &panel.effects {
         match effect {
             VisualEffect::Onomatopoeia(text) => {
-                render_onomatopoeia_starburst(out, text, px + PANEL_WIDTH / 2.0, py + 75.0);
+                render_onomatopoeia_starburst(out, text, px + pw / 2.0, py + 75.0);
             }
             VisualEffect::Sticker(sticker) => {
                 render_sticker(out, *sticker, sticker_offset_x, py + 38.0);
@@ -361,7 +428,9 @@ fn render_single_panel(
     let num_dialogues = panel.dialogues.len();
     if num_dialogues == 1 {
         let d = &panel.dialogues[0];
-        let slot = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d.speaker));
+        let slot = slots
+            .iter()
+            .find(|s| s.speaker.eq_ignore_ascii_case(&d.speaker));
         let mouth_target = if let Some(s) = slot {
             s.mouth
         } else {
@@ -371,7 +440,7 @@ fn render_single_panel(
             }
         };
 
-        let origin = if mouth_target.x < (px + PANEL_WIDTH / 2.0) {
+        let origin = if mouth_target.x < (px + pw / 2.0) {
             Point {
                 x: px + 12.0,
                 y: py + 14.0,
@@ -384,13 +453,8 @@ fn render_single_panel(
         };
 
         out.push_str(r##"<g class="balloon-container anti-crossing balloon-left">"##);
-        let balloon_svg = render_balloon_svg(
-            &d.text,
-            d.balloon_type,
-            origin,
-            mouth_target,
-            PANEL_WIDTH - 40.0,
-        );
+        let balloon_svg =
+            render_balloon_svg(&d.text, d.balloon_type, origin, mouth_target, pw - 40.0);
         out.push_str(&balloon_svg);
         out.push_str("</g>");
     } else if num_dialogues == 2 {
@@ -398,21 +462,25 @@ fn render_single_panel(
         let d0 = &panel.dialogues[0];
         let d1 = &panel.dialogues[1];
 
-        let slot0 = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d0.speaker));
-        let slot1 = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d1.speaker));
+        let slot0 = slots
+            .iter()
+            .find(|s| s.speaker.eq_ignore_ascii_case(&d0.speaker));
+        let slot1 = slots
+            .iter()
+            .find(|s| s.speaker.eq_ignore_ascii_case(&d1.speaker));
 
         let mouth0 = slot0.map(|s| s.mouth).unwrap_or(Point {
             x: px + 50.0,
             y: py + 170.0,
         });
         let mouth1 = slot1.map(|s| s.mouth).unwrap_or(Point {
-            x: px + 220.0,
+            x: px + pw - 60.0,
             y: py + 170.0,
         });
 
         let is_d0_left = mouth0.x <= mouth1.x;
 
-        let max_balloon_w = 126.0;
+        let max_balloon_w = ((pw - 28.0) / 2.0).clamp(90.0, 190.0);
 
         let (bw1, _, _) = measure_balloon(&d1.text, max_balloon_w);
         let (bw0, _, _) = measure_balloon(&d0.text, max_balloon_w);
@@ -425,7 +493,7 @@ fn render_single_panel(
                     y: py + 10.0,
                 },
                 Point {
-                    x: px + PANEL_WIDTH - bw1 - 10.0,
+                    x: px + pw - bw1 - 10.0,
                     y: py + 12.0,
                 },
             )
@@ -433,7 +501,7 @@ fn render_single_panel(
             // First speaker on right (top-right), second on left (top-left)
             (
                 Point {
-                    x: px + PANEL_WIDTH - bw0 - 10.0,
+                    x: px + pw - bw0 - 10.0,
                     y: py + 10.0,
                 },
                 Point {
@@ -466,7 +534,7 @@ fn render_single_panel(
         out.push_str("</g>");
     } else if num_dialogues == 3 {
         // 3-dialogue layout: 3 side-by-side columns sorted by speaker mouth X (anti-crossing)
-        let max_balloon_w = 82.0;
+        let max_balloon_w = ((pw - 24.0) / 3.0).clamp(80.0, 160.0);
 
         struct BalloonItem<'a> {
             orig_idx: usize,
@@ -480,9 +548,11 @@ fn render_single_panel(
             .iter()
             .enumerate()
             .map(|(i, d)| {
-                let slot = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d.speaker));
+                let slot = slots
+                    .iter()
+                    .find(|s| s.speaker.eq_ignore_ascii_case(&d.speaker));
                 let mouth = slot.map(|s| s.mouth).unwrap_or(Point {
-                    x: px + 40.0 + (i as f64 * 100.0),
+                    x: px + 40.0 + (i as f64 * (pw - 80.0) / 2.0),
                     y: py + 170.0,
                 });
                 let (bw, _, _) = measure_balloon(&d.text, max_balloon_w);
@@ -503,14 +573,17 @@ fn render_single_panel(
                 .unwrap_or(std::cmp::Ordering::Equal)
         });
 
+        let x0 = px + 8.0;
+        let x2 = px + pw - items[2].bubble_w - 8.0;
+        let ideal_x1 = px + (pw / 2.0) - (items[1].bubble_w / 2.0);
+        let x1 = ideal_x1.clamp(
+            x0 + items[0].bubble_w + 6.0,
+            (x2 - items[1].bubble_w - 6.0).max(x0 + items[0].bubble_w + 6.0),
+        );
+        let origins_x = [x0, x1, x2];
+
         for (col_idx, item) in items.iter().enumerate() {
-            let origin_x = if col_idx == 0 {
-                px + 8.0
-            } else if col_idx == 1 {
-                px + 99.0 + ((max_balloon_w - item.bubble_w) / 2.0).max(0.0)
-            } else {
-                px + PANEL_WIDTH - item.bubble_w - 8.0
-            };
+            let origin_x = origins_x[col_idx];
 
             // Stagger Y slightly based on original dialogue order to indicate temporal precedence
             let origin_y = py + 8.0 + (item.orig_idx as f64 * 6.0);
@@ -534,7 +607,7 @@ fn render_single_panel(
         }
     } else if num_dialogues >= 4 {
         // 4+ dialogues: 2x2 grid layout (take first 4)
-        let max_balloon_w = 126.0;
+        let max_balloon_w = ((pw - 36.0) / 2.0).clamp(90.0, 190.0);
 
         struct BalloonItem<'a> {
             orig_idx: usize,
@@ -549,9 +622,11 @@ fn render_single_panel(
             .take(4)
             .enumerate()
             .map(|(i, d)| {
-                let slot = slots.iter().find(|s| s.speaker.eq_ignore_ascii_case(&d.speaker));
+                let slot = slots
+                    .iter()
+                    .find(|s| s.speaker.eq_ignore_ascii_case(&d.speaker));
                 let mouth = slot.map(|s| s.mouth).unwrap_or(Point {
-                    x: px + 50.0 + ((i % 2) as f64 * 180.0),
+                    x: px + 50.0 + ((i % 2) as f64 * (pw - 100.0)),
                     y: py + 170.0,
                 });
                 let (bw, _, _) = measure_balloon(&d.text, max_balloon_w);
@@ -565,13 +640,13 @@ fn render_single_panel(
             .collect();
 
         for (i, item) in items.iter().enumerate() {
-            let is_left = item.mouth.x <= px + (PANEL_WIDTH / 2.0);
+            let is_left = item.mouth.x <= px + (pw / 2.0);
             let is_top = i < 2;
 
             let origin_x = if is_left {
                 px + 10.0
             } else {
-                px + PANEL_WIDTH - item.bubble_w - 10.0
+                px + pw - item.bubble_w - 10.0
             };
             let origin_y = if is_top {
                 py + 8.0 + ((item.orig_idx % 2) as f64 * 6.0)

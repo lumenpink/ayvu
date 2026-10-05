@@ -490,10 +490,12 @@
           <option value="" disabled selected>⚡ Escolha um preset...</option>
           <option value="classic">1. Trio Comic Chat (Tiki, Jordan & Armando)</option>
           <option value="ufsc">🎓 2. Vida Acadêmica na UFSC (Sala, Café CCS & Lab)</option>
-          <option value="sfx">3. Briga Comic com SFX ([POW!], [CRASH!])</option>
-          <option value="stickers">4. Emoções & Stickers ([heart], [sweat])</option>
-          <option value="grid">5. Layout Quadrado (Grid 2x2)</option>
-          <option value="vertical">6. Layout Webtoon (Vertical Mobile)</option>
+          <option value="ufsc_tour">🏥 3. Tour UFSC (HU Fachada, RU Bandejão & Hall CCS)</option>
+          <option value="sfx">4. Briga Comic com SFX ([POW!], [CRASH!])</option>
+          <option value="stickers">5. Emoções & Stickers ([heart], [sweat])</option>
+          <option value="grid">6. Layout Quadrado (Grid 2x2)</option>
+          <option value="vertical">7. Layout Webtoon (Vertical Mobile)</option>
+          <option value="dynamic">📏 8. Painéis Dinâmicos (Estreito / Padrão / Amplo)</option>
         </select>
         <input type="text" id="title-input" placeholder="Título da Tirinha (opcional)..." value="Ayvu Comic Chat">
       </div>
@@ -508,15 +510,31 @@
         </div>
       </div>
 
+      <!-- Quick Chips: Panel Widths -->
+      <div class="toolbar-row">
+        <span class="row-label">📏 Largura do Painel (Comic Chat)</span>
+        <div class="chips-group">
+          <button type="button" class="chip" data-insert="[narrow]">🤏 [narrow] (210px)</button>
+          <button type="button" class="chip" data-insert="[standard]">📐 [standard] (280px)</button>
+          <button type="button" class="chip" data-insert="[wide]">↔️ [wide] (360px)</button>
+          <button type="button" class="chip" data-insert="[panoramic]">🌅 [panoramic] (450px)</button>
+        </div>
+      </div>
+
       <!-- Quick Chips: Backdrops -->
       <div class="toolbar-row">
-        <span class="row-label">🖼️ Cenários (Vetoriais Nanquim & Clássicos)</span>
+        <span class="row-label">🖼️ Cenários (Vetoriais Nanquim UFSC & Clássicos)</span>
         <div class="chips-group" id="backdrop-chips">
-          <button type="button" class="chip" data-insert="[backdrop: sala_de_aula]">🏫 Sala de Aula (UFSC)</button>
-          <button type="button" class="chip" data-insert="[backdrop: cafe_ccs]">☕ Café do CCS (UFSC)</button>
-          <button type="button" class="chip" data-insert="[backdrop: laboratorio]">🔬 Laboratório (UFSC)</button>
-          <button type="button" class="chip active" data-insert="[backdrop: pastoral]">🌿 Pastoral (Jardim)</button>
-          <button type="button" class="chip" data-insert="[backdrop: room]">🛋️ Sala (Janela)</button>
+          <button type="button" class="chip" data-insert="[backdrop: hu_fachada]">🏥 Hospital HU</button>
+          <button type="button" class="chip" data-insert="[backdrop: ru]">🍽️ RU Bandejão</button>
+          <button type="button" class="chip" data-insert="[backdrop: hall_ccs]">🏛️ Hall do CCS</button>
+          <button type="button" class="chip" data-insert="[backdrop: hu_enfermaria]">🩺 Enfermaria HU</button>
+          <button type="button" class="chip" data-insert="[backdrop: bu_ufsc]">📚 Biblioteca BU</button>
+          <button type="button" class="chip" data-insert="[backdrop: sala_de_aula]">🏫 Sala de Aula</button>
+          <button type="button" class="chip" data-insert="[backdrop: cafe_ccs]">☕ Café do CCS</button>
+          <button type="button" class="chip" data-insert="[backdrop: laboratorio]">🔬 Laboratório</button>
+          <button type="button" class="chip active" data-insert="[backdrop: pastoral]">🌿 Pastoral</button>
+          <button type="button" class="chip" data-insert="[backdrop: room]">🛋️ Sala</button>
         </div>
       </div>
 
@@ -668,6 +686,16 @@ Tiki (happy): UAU, ARTE DO JIM WOODRING E BALÕES CLÁSSICOS! [idea]</textarea>
               <td><code>[layout: grid]</code>, <code>[layout: vertical]</code></td>
               <td>Formata em grade 2x2 para redes ou vertical para mobile.</td>
             </tr>
+            <tr>
+              <td>Largura do Quadro</td>
+              <td><code>[narrow]</code>, <code>[standard]</code>, <code>[wide]</code>, <code>[panoramic]</code></td>
+              <td>Ajusta a largura do painel (210px, 280px, 360px, 450px ou <code>[width: 320]</code>).</td>
+            </tr>
+            <tr>
+              <td>Cenário por Quadro</td>
+              <td><code>[backdrop: hu_fachada]</code>, <code>[backdrop: ru]</code>, <code>[backdrop: hall_ccs]</code>, <code>[backdrop: sala_de_aula]</code>, <code>[backdrop: bu_ufsc]</code></td>
+              <td>Alterna cenários vetoriais da UFSC (HU, RU Bandejão, Hall CCS, Salas, BU) ou clássicos por painel.</td>
+            </tr>
           </tbody>
         </table>
 
@@ -763,6 +791,21 @@ Tiki (happy): Me vê mais um expresso bem quente!
 Dan: O experimento no laboratório deu certo!
 Armando (happy): Artigo aprovado e comemoração garantida! [heart]`,
 
+      ufsc_tour: `[backdrop: hu_fachada]
+Dan: Chegamos no Hospital Universitário da UFSC!
+Armando: A marquise de concreto aparente e o pórtico ficaram perfeitos!
+---
+[backdrop: ru]
+[characters: Armando, Dan, Tiki]
+Tiki (happy): Hora do almoço no RU da Trindade!
+Armando: Já peguei meu bandejão de inox com arroz e feijão!
+Dan: Não esquece de devolver a bandeja depois!
+---
+[backdrop: hall_ccs]
+Dan: Vamos passar no Hall do CCS?
+Armando: Olha o mural de avisos cheio de bolsas de IC e pesquisas!
+Tiki (happy): E a escadaria monumental no fundo! [heart]`,
+
       sfx: `[layout: strip]
 Dan (angry): Cuidado com o vilão atrás de você!
 [POW!]
@@ -793,7 +836,23 @@ Dan (happy): Formato webtoon para leitura em celular!
 ---
 Jordan (thinking): Você vai rolando para baixo suavemente.
 ---
-Tongtyed (laughing): E a tirinha flui perfeitamente na vertical! [idea]`
+Tongtyed (laughing): E a tirinha flui perfeitamente na vertical! [idea]`,
+
+      dynamic: `[narrow]
+[backdrop: sala_de_aula]
+Tiki (happy): Olá! [heart]
+---
+[standard]
+[backdrop: cafe_ccs]
+Armando: Dois personagens conversando no café.
+Dan: Em um quadro padrão de 280px!
+---
+[wide]
+[backdrop: laboratorio]
+[characters: Armando, Dan, Tiki]
+Armando: E quando chegam 3 personagens no lab...
+Dan: O quadro se expande automaticamente!
+Tiki (happy): Ninguém fica espremido! [idea]`
     };
 
     const editor = document.getElementById('editor');

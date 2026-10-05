@@ -286,5 +286,3 @@ pub fn clean_or_extract_svg(raw_svg: &str) -> String {
 fn load_embedded_presets() -> Vec<CharacterPack> {
     crate::assets::load_official_packs()
 }
-
-

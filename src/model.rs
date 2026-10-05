@@ -123,6 +123,50 @@ pub struct DialogueLine {
     pub text: String,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PanelWidth {
+    Narrow,
+    Standard,
+    Wide,
+    Panoramic,
+    Custom(u32),
+}
+
+impl PanelWidth {
+    pub fn to_pixels(&self) -> f64 {
+        match self {
+            PanelWidth::Narrow => 210.0,
+            PanelWidth::Standard => 280.0,
+            PanelWidth::Wide => 360.0,
+            PanelWidth::Panoramic => 450.0,
+            PanelWidth::Custom(px) => *px as f64,
+        }
+    }
+
+    pub fn from_str_loose(s: &str) -> Option<Self> {
+        let clean = s.trim().to_lowercase();
+        match clean.as_str() {
+            "narrow" | "estreito" | "small" | "pequeno" | "curto" => Some(PanelWidth::Narrow),
+            "standard" | "padrao" | "padrão" | "normal" | "medium" | "medio" | "médio" => {
+                Some(PanelWidth::Standard)
+            }
+            "wide" | "largo" | "grande" | "large" => Some(PanelWidth::Wide),
+            "panoramic" | "panoramico" | "panorâmico" | "extra-wide" | "extrawide" => {
+                Some(PanelWidth::Panoramic)
+            }
+            _ => {
+                let num_str = clean.trim_end_matches("px").trim();
+                if let Ok(val) = num_str.parse::<u32>() {
+                    Some(PanelWidth::Custom(val.clamp(140, 800)))
+                } else {
+                    None
+                }
+            }
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Panel {
     pub id: usize,
@@ -133,6 +177,52 @@ pub struct Panel {
     pub characters: Vec<String>,
     #[serde(default)]
     pub backdrop: Option<String>,
+    #[serde(default)]
+    pub width: Option<PanelWidth>,
+}
+
+impl Panel {
+    pub fn resolve_width(&self) -> f64 {
+        if let Some(w) = self.width {
+            return w.to_pixels();
+        }
+
+        let mut distinct_speakers = self.characters.clone();
+        for d in &self.dialogues {
+            if !distinct_speakers
+                .iter()
+                .any(|c| c.eq_ignore_ascii_case(&d.speaker))
+            {
+                distinct_speakers.push(d.speaker.clone());
+            }
+        }
+        let char_count = distinct_speakers.len();
+        let total_chars: usize = self.dialogues.iter().map(|d| d.text.len()).sum();
+
+        if char_count >= 4 {
+            PanelWidth::Panoramic.to_pixels()
+        } else if char_count == 3 {
+            PanelWidth::Wide.to_pixels()
+        } else if char_count == 2 {
+            if total_chars > 90 {
+                330.0
+            } else {
+                PanelWidth::Standard.to_pixels()
+            }
+        } else if char_count == 1 {
+            if total_chars > 25 {
+                PanelWidth::Standard.to_pixels()
+            } else {
+                PanelWidth::Narrow.to_pixels()
+            }
+        } else {
+            if self.backdrop.is_some() || !self.effects.is_empty() {
+                PanelWidth::Standard.to_pixels()
+            } else {
+                PanelWidth::Narrow.to_pixels()
+            }
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -144,4 +234,3 @@ pub struct ComicStrip {
     pub backdrop: Option<String>,
     pub panels: Vec<Panel>,
 }
-

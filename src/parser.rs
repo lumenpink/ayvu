@@ -1,5 +1,6 @@
 use crate::model::{
-    BalloonType, ComicStrip, DialogueLine, Emotion, Panel, StickerType, StripLayout, VisualEffect,
+    BalloonType, ComicStrip, DialogueLine, Emotion, Panel, PanelWidth, StickerType, StripLayout,
+    VisualEffect,
 };
 
 /// Parse plain text dialogue script into a structured ComicStrip
@@ -13,6 +14,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
     let mut current_backdrop: Option<String> = None;
     let mut current_characters: Vec<String> = Vec::new();
     let mut global_characters: Vec<String> = Vec::new();
+    let mut current_width: Option<PanelWidth> = None;
 
     for raw_line in script.lines() {
         let line = raw_line.trim();
@@ -41,7 +43,9 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
 
         // Characters / Cast directive: [characters: Tiki, Jordan, Armando] or [cast: ...]
         let line_lower = line.to_lowercase();
-        if (line_lower.starts_with("[characters:") || line_lower.starts_with("[cast:")) && line.ends_with(']') {
+        if (line_lower.starts_with("[characters:") || line_lower.starts_with("[cast:"))
+            && line.ends_with(']')
+        {
             let colon_idx = line.find(':').unwrap();
             let inner = line[colon_idx + 1..line.len() - 1].trim();
             let parsed_chars: Vec<String> = inner
@@ -60,27 +64,66 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
         // Panel boundaries: '---' or '[panel...]'
         if line == "---" || line.starts_with("[panel") {
             explicit_panels = true;
-            if !current_dialogues.is_empty() || !current_effects.is_empty() || !current_characters.is_empty() || current_backdrop.is_some() {
+            let explicit_w = if line.starts_with("[panel") && line.ends_with(']') {
+                let inner = line[6..line.len() - 1].trim();
+                let opt = if let Some((_, o)) = inner.split_once(':') {
+                    o.trim()
+                } else if let Some((_, o)) = inner.split_once(' ') {
+                    o.trim()
+                } else {
+                    inner
+                };
+                PanelWidth::from_str_loose(opt)
+            } else {
+                None
+            };
+
+            if !current_dialogues.is_empty()
+                || !current_effects.is_empty()
+                || !current_characters.is_empty()
+                || current_backdrop.is_some()
+            {
                 let chars = if !current_characters.is_empty() {
                     std::mem::take(&mut current_characters)
                 } else {
                     global_characters.clone()
                 };
                 let bg = current_backdrop.take().or_else(|| strip_backdrop.clone());
+                let w = current_width.take();
                 panels.push(Panel {
                     id: panels.len() + 1,
                     dialogues: std::mem::take(&mut current_dialogues),
                     effects: std::mem::take(&mut current_effects),
                     characters: chars,
                     backdrop: bg,
+                    width: w,
                 });
             }
+            current_width = explicit_w;
             continue;
         }
 
-        // Standalone onomatopoeia line: e.g. [POW!], [CRASH!], [BOOM!]
+        // Directives inside panel: [wide], [narrow], [standard], [panoramic], [width: ...]
         if line.starts_with('[') && line.ends_with(']') {
             let inner = &line[1..line.len() - 1].trim();
+            if let Some(pw) = PanelWidth::from_str_loose(inner) {
+                current_width = Some(pw);
+                continue;
+            }
+            if let Some((prefix, val)) = inner.split_once(':') {
+                let p = prefix.trim().to_lowercase();
+                if p == "width"
+                    || p == "largura"
+                    || p == "size"
+                    || p == "tamanho"
+                    || p == "panel_width"
+                {
+                    if let Some(pw) = PanelWidth::from_str_loose(val) {
+                        current_width = Some(pw);
+                        continue;
+                    }
+                }
+            }
             if inner.ends_with('!') {
                 current_effects.push(VisualEffect::Onomatopoeia(inner.to_string()));
                 continue;
@@ -139,19 +182,25 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
         }
     }
 
-    if !current_dialogues.is_empty() || !current_effects.is_empty() || !current_characters.is_empty() || current_backdrop.is_some() {
+    if !current_dialogues.is_empty()
+        || !current_effects.is_empty()
+        || !current_characters.is_empty()
+        || current_backdrop.is_some()
+    {
         let chars = if !current_characters.is_empty() {
             std::mem::take(&mut current_characters)
         } else {
             global_characters.clone()
         };
         let bg = current_backdrop.take().or_else(|| strip_backdrop.clone());
+        let w = current_width.take();
         panels.push(Panel {
             id: panels.len() + 1,
             dialogues: current_dialogues,
             effects: current_effects,
             characters: chars,
             backdrop: bg,
+            width: w,
         });
     }
 
@@ -176,6 +225,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                     effects: std::mem::take(&mut effects),
                     characters: p_chars.clone(),
                     backdrop: p_bg.clone(),
+                    width: None,
                 });
             }
         }
@@ -186,6 +236,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                 effects,
                 characters: p_chars,
                 backdrop: p_bg,
+                width: None,
             });
         }
         grouped
