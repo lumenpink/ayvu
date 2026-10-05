@@ -135,15 +135,15 @@ fn render_single_panel(
     };
 
     let floor_y = if has_backdrop {
-        py + PANEL_HEIGHT - 12.0
+        py + PANEL_HEIGHT - 16.0
     } else {
-        py + PANEL_HEIGHT - 38.0
+        py + PANEL_HEIGHT - 24.0
     };
 
     if !has_backdrop {
         // Floor area wash & floor line
         out.push_str(&format!(
-            r##"<rect x="{px:.1}" y="{floor_y:.1}" width="{PANEL_WIDTH:.1}" height="38.0" class="panel-floor-wash" />"##
+            r##"<rect x="{px:.1}" y="{floor_y:.1}" width="{PANEL_WIDTH:.1}" height="24.0" class="panel-floor-wash" />"##
         ));
         out.push_str(&format!(
             r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" class="panel-floor" stroke-dasharray="12,3" />"##,
@@ -195,31 +195,48 @@ fn render_single_panel(
 
     // 3. Resolve characters and positioning according to Comic Chat LayoutAvatars
     let mut slots: Vec<CharacterSlot> = Vec::new();
-    let target_height = 150.0; // maxBodyHeight in Comic Chat (unitHeight / 1.9)
+    let target_height = 125.0; // maxBodyHeight in Comic Chat (unitHeight / 1.9 = 240 / 1.9 ~ 126)
 
-    let mut resolved = Vec::new();
+    let mut resolved_packs = Vec::new();
+    let mut max_char_h: f64 = 400.0;
     for speaker in &speakers {
         let pack = registry.resolve_speaker(speaker);
         let dims = pack.dimensions();
-        let scale = target_height / dims.1;
-        let scaled_w = dims.0 * scale;
-        let scaled_h = dims.1 * scale;
-        resolved.push((speaker.clone(), pack, scale, scaled_w, scaled_h));
+        if dims.1 > max_char_h {
+            max_char_h = dims.1;
+        }
+        resolved_packs.push((speaker.clone(), pack, dims));
     }
 
-    let total_avatar_w: f64 = resolved.iter().map(|r| r.3).sum();
-    let margin = (PANEL_WIDTH - total_avatar_w) / (resolved.len() + 1).max(1) as f64;
+    // Comic Chat uniform scale ratio: newHeight = maxBodyHeight * (normHeight / maxNorm)
+    let base_scale = target_height / max_char_h;
+
+    // Check if sum of widths exceeds panel width
+    let total_avatar_w: f64 = resolved_packs.iter().map(|(_, _, d)| d.0 * base_scale).sum();
+    let max_allowed_w = PANEL_WIDTH - 24.0;
+    let final_scale = if total_avatar_w > max_allowed_w && total_avatar_w > 0.0 {
+        base_scale * (max_allowed_w / total_avatar_w)
+    } else {
+        base_scale
+    };
+
+    let actual_total_w: f64 = resolved_packs.iter().map(|(_, _, d)| d.0 * final_scale).sum();
+    let margin = (PANEL_WIDTH - actual_total_w) / (resolved_packs.len() + 1).max(1) as f64;
     let mut cur_x = px + margin;
 
-    for (speaker, pack, scale, scaled_w, scaled_h) in resolved {
+    for (speaker, pack, dims) in resolved_packs {
+        let scale = final_scale;
+        let scaled_w = dims.0 * scale;
+        let scaled_h = dims.1 * scale;
         let char_id = pack.id.clone();
         let anchor = pack.balloon_anchor;
         let char_x = cur_x;
         let char_y = floor_y - scaled_h;
 
+        // Pointer target points toward the mouth X position, but terminates above the head apex!
         let mouth = Point {
             x: char_x + (anchor.x * scaled_w),
-            y: char_y + (anchor.y * scaled_h),
+            y: char_y - 2.0,
         };
 
         let emotion = panel
@@ -339,40 +356,40 @@ fn render_single_panel(
 
         let is_d0_left = mouth0.x <= mouth1.x;
 
-        let max_balloon_w = 210.0;
+        let max_balloon_w = 126.0;
 
-        // Compute approximate widths to snuggly align balloons
-        let approx_chars1 = f64::max((max_balloon_w - 24.0) / 7.2, 12.0) as usize;
-        let lines1 = crate::balloon::wrap_text(&d1.text, approx_chars1);
+        // Wrap to fit side-by-side in 280px panel
+        let approx_chars = 14;
+        let lines1 = crate::balloon::wrap_text(&d1.text, approx_chars);
         let max_len1 = lines1.iter().map(|l| l.chars().count()).max().unwrap_or(1);
-        let bw1 = ((max_len1 as f64 * 7.5) + 24.0).clamp(60.0, max_balloon_w);
+        let bw1 = ((max_len1 as f64 * 7.5) + 24.0).clamp(55.0, max_balloon_w);
 
-        let lines0 = crate::balloon::wrap_text(&d0.text, approx_chars1);
+        let lines0 = crate::balloon::wrap_text(&d0.text, approx_chars);
         let max_len0 = lines0.iter().map(|l| l.chars().count()).max().unwrap_or(1);
-        let bw0 = ((max_len0 as f64 * 7.5) + 24.0).clamp(60.0, max_balloon_w);
+        let bw0 = ((max_len0 as f64 * 7.5) + 24.0).clamp(55.0, max_balloon_w);
 
         let (origin0, origin1) = if is_d0_left {
-            // First speaker on left (top-left), second on right (staggered right)
+            // First speaker on left (top-left), second on right (top-right)
             (
                 Point {
                     x: px + 10.0,
-                    y: py + 12.0,
+                    y: py + 10.0,
                 },
                 Point {
                     x: px + PANEL_WIDTH - bw1 - 10.0,
-                    y: py + 68.0,
+                    y: py + 12.0,
                 },
             )
         } else {
-            // First speaker on right (top-right), second on left (staggered left)
+            // First speaker on right (top-right), second on left (top-left)
             (
                 Point {
                     x: px + PANEL_WIDTH - bw0 - 10.0,
-                    y: py + 12.0,
+                    y: py + 10.0,
                 },
                 Point {
                     x: px + 10.0,
-                    y: py + 68.0,
+                    y: py + 12.0,
                 },
             )
         };

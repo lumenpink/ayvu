@@ -31,12 +31,13 @@ fn test_character_manifest_deserialization() {
 #[test]
 fn test_default_registry_contains_presets() {
     let registry = CharacterRegistry::default();
-    assert!(registry.contains_id("tuffy"));
+    assert!(registry.contains_id("armando"));
+    assert!(registry.contains_id("dan"));
     assert!(registry.contains_id("jordan"));
-    assert!(registry.contains_id("peep"));
+    assert!(registry.contains_id("tiki"));
 
     let list = registry.list_metadata();
-    assert!(list.len() >= 3);
+    assert!(list.len() >= 31);
 }
 
 #[test]
@@ -44,8 +45,8 @@ fn test_registry_speaker_resolution() {
     let mut registry = CharacterRegistry::default();
 
     // Explicit character match
-    let tuffy_pack = registry.resolve_speaker("Tuffy");
-    assert_eq!(tuffy_pack.id, "tuffy");
+    let armando_pack = registry.resolve_speaker("Armando");
+    assert_eq!(armando_pack.id, "armando");
 
     // Dynamic fallback for unknown speaker 1
     let speaker1_pack = registry.resolve_speaker("Alice");
@@ -63,19 +64,19 @@ fn test_registry_speaker_resolution() {
 #[test]
 fn test_pose_retrieval_and_fallback() {
     let registry = CharacterRegistry::default();
-    let tuffy = registry.get("tuffy").expect("tuffy pack exists");
+    let armando = registry.get("armando").expect("armando pack exists");
 
-    let happy_pose = tuffy.get_pose_svg(&Emotion::Happy);
+    let happy_pose = armando.get_pose_svg(&Emotion::Happy);
     assert!(!happy_pose.is_empty());
 
-    let neutral_pose = tuffy.get_pose_svg(&Emotion::Neutral);
+    let neutral_pose = armando.get_pose_svg(&Emotion::Neutral);
     assert!(!neutral_pose.is_empty());
 }
 
 #[test]
 fn test_renderer_with_character_registry() {
     let script = r#"
-Tuffy (happy): Hello world!
+Armando (happy): Hello world!
 Bob (angry): Grrr!
 "#;
     let strip = parse_dialogue_script(script, Some("Character Test Strip"))
@@ -85,7 +86,7 @@ Bob (angry): Grrr!
     let svg = render_comic_strip_to_svg_with_registry(&strip, &registry);
 
     assert!(svg.contains("character-pose"));
-    assert!(svg.contains("char-tuffy"));
+    assert!(svg.contains("char-armando"));
     assert!(svg.contains("strip-title"));
 }
 
@@ -107,9 +108,10 @@ fn test_http_get_characters_endpoint() {
     assert_eq!(resp.header("access-control-allow-origin"), Some("*"));
 
     let body = resp.into_string().expect("response body as string");
-    assert!(body.contains("tuffy"));
+    assert!(body.contains("armando"));
+    assert!(body.contains("dan"));
     assert!(body.contains("jordan"));
-    assert!(body.contains("peep"));
+    assert!(body.contains("tiki"));
 
     handle.stop();
 }

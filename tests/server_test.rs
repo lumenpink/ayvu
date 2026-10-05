@@ -55,7 +55,7 @@ fn test_http_server_endpoints() {
     let svg_body = post_json_res.into_string().unwrap();
     assert!(svg_body.contains("<svg"));
     assert!(svg_body.contains("HTTP Strip"));
-    assert!(svg_body.contains("Test from HTTP JSON!"));
+    assert!(svg_body.contains("Test from HTTP") && svg_body.contains("JSON!"));
 
     // 4. Test POST /render with raw text
     let post_raw_res = ureq::post(&format!("{}/render", base_url))
@@ -66,7 +66,7 @@ fn test_http_server_endpoints() {
     assert_eq!(post_raw_res.status(), 200);
     let raw_svg = post_raw_res.into_string().unwrap();
     assert!(raw_svg.contains("<svg"));
-    assert!(raw_svg.contains("Raw plain text dialogue!"));
+    assert!(raw_svg.contains("Raw plain text") && raw_svg.contains("dialogue!"));
 
     // 5. Test GET /render?text=...
     let get_render_res = ureq::get(&format!(

@@ -66,9 +66,18 @@ pub fn render_balloon_svg(
 
     match balloon_type {
         BalloonType::Speech => {
-            // Speech bubble with rounded rectangle & vector pointer tail
-            let tail_x1 = bx + (bw * 0.35);
-            let tail_x2 = bx + (bw * 0.55);
+            // Dynamically place tail base on the balloon bottom edge closest to target
+            let (tail_x1, tail_x2) = if target.x < bx + (bw * 0.35) {
+                // Speaker is to the left of balloon center
+                (bx + 16.0, (bx + 36.0).min(bx + bw - 12.0))
+            } else if target.x > bx + (bw * 0.65) {
+                // Speaker is to the right of balloon center
+                ((bx + bw - 36.0).max(bx + 12.0), bx + bw - 16.0)
+            } else {
+                // Speaker is centered under balloon
+                let mid = bx + (bw * 0.5);
+                (mid - 10.0, mid + 10.0)
+            };
             let tail_y = by + bh;
 
             out.push_str(&format!(

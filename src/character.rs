@@ -85,11 +85,38 @@ impl CharacterPack {
 
     pub fn dimensions(&self) -> (f64, f64) {
         match self.id.to_lowercase().as_str() {
+            "anna" => (201.0, 454.0),
             "armando" => (150.0, 390.0),
-            "dan" => (200.0, 390.0),
-            "tiki" => (180.0, 440.0),
-            "tongtyed" => (210.0, 450.0),
-            _ => (100.0, 120.0),
+            "bolo" => (211.0, 469.0),
+            "buck" => (124.0, 332.0),
+            "connor" => (166.0, 421.0),
+            "cro" => (213.0, 421.0),
+            "dan" => (197.0, 388.0),
+            "denise" => (172.0, 454.0),
+            "glenda" => (224.0, 387.0),
+            "hugh" => (230.0, 444.0),
+            "jordan" => (223.0, 420.0),
+            "kevin" => (195.0, 435.0),
+            "kirby" => (117.0, 320.0),
+            "kwensa" => (194.0, 442.0),
+            "lance" => (157.0, 438.0),
+            "lynnea" => (191.0, 481.0),
+            "margaret" => (202.0, 454.0),
+            "maynard" => (217.0, 407.0),
+            "mike" => (209.0, 440.0),
+            "pedagog" => (173.0, 397.0),
+            "rainbow" => (240.0, 346.0),
+            "rebecca" => (192.0, 462.0),
+            "sage" => (244.0, 495.0),
+            "scotty" => (177.0, 417.0),
+            "susan" => (213.0, 462.0),
+            "tiki" => (174.0, 424.0),
+            "tongtyed" => (209.0, 448.0),
+            "tux" => (167.0, 393.0),
+            "veronica" => (124.0, 313.0),
+            "waf" => (208.0, 367.0),
+            "xeno" => (152.0, 445.0),
+            _ => (180.0, 420.0),
         }
     }
 }
@@ -257,161 +284,7 @@ pub fn clean_or_extract_svg(raw_svg: &str) -> String {
 }
 
 fn load_embedded_presets() -> Vec<CharacterPack> {
-    let mut presets = crate::assets::load_woodring_characters();
-    presets.push(load_preset_jordan());
-    presets.push(load_preset_tuffy());
-    presets.push(load_preset_peep());
-    presets
+    crate::assets::load_official_packs()
 }
 
 
-fn load_preset_tuffy() -> CharacterPack {
-    let mut poses = HashMap::new();
-    poses.insert(
-        "neutral".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tuffy/neutral.svg")),
-    );
-    poses.insert(
-        "happy".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tuffy/happy.svg")),
-    );
-    poses.insert(
-        "sad".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tuffy/sad.svg")),
-    );
-    poses.insert(
-        "angry".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tuffy/angry.svg")),
-    );
-    poses.insert(
-        "surprised".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tuffy/surprised.svg")),
-    );
-    poses.insert(
-        "shouting".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tuffy/shouting.svg")),
-    );
-    poses.insert(
-        "thinking".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tuffy/thinking.svg")),
-    );
-    poses.insert(
-        "laughing".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tuffy/laughing.svg")),
-    );
-    poses.insert(
-        "whispering".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/tuffy/whispering.svg")),
-    );
-
-    CharacterPack {
-        id: "tuffy".into(),
-        name: "Tuffy".into(),
-        author: "Ayvu Project (inspired by Jim Woodring / MS Comic Chat)".into(),
-        license: "GPL-3.0-or-later".into(),
-        description: "Expressive vintage cartoon dog with floppy ears and snout".into(),
-        balloon_anchor: Anchor { x: 0.5, y: 0.35 },
-        poses,
-    }
-}
-
-fn load_preset_jordan() -> CharacterPack {
-    let mut poses = HashMap::new();
-    poses.insert(
-        "neutral".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/jordan/neutral.svg")),
-    );
-    poses.insert(
-        "happy".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/jordan/happy.svg")),
-    );
-    poses.insert(
-        "sad".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/jordan/sad.svg")),
-    );
-    poses.insert(
-        "angry".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/jordan/angry.svg")),
-    );
-    poses.insert(
-        "surprised".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/jordan/surprised.svg")),
-    );
-    poses.insert(
-        "shouting".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/jordan/shouting.svg")),
-    );
-    poses.insert(
-        "thinking".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/jordan/thinking.svg")),
-    );
-    poses.insert(
-        "laughing".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/jordan/laughing.svg")),
-    );
-    poses.insert(
-        "whispering".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/jordan/whispering.svg")),
-    );
-
-    CharacterPack {
-        id: "jordan".into(),
-        name: "Jordan".into(),
-        author: "Jim Woodring / Microsoft Comic Chat / Ayvu".into(),
-        license: "MIT".into(),
-        description:
-            "Intellectual comic character with round spectacles, shaggy hair and green coat".into(),
-        balloon_anchor: Anchor { x: 0.5, y: 0.45 },
-        poses,
-    }
-}
-
-fn load_preset_peep() -> CharacterPack {
-    let mut poses = HashMap::new();
-    poses.insert(
-        "neutral".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/peep/neutral.svg")),
-    );
-    poses.insert(
-        "happy".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/peep/happy.svg")),
-    );
-    poses.insert(
-        "sad".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/peep/sad.svg")),
-    );
-    poses.insert(
-        "angry".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/peep/angry.svg")),
-    );
-    poses.insert(
-        "surprised".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/peep/surprised.svg")),
-    );
-    poses.insert(
-        "shouting".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/peep/shouting.svg")),
-    );
-    poses.insert(
-        "thinking".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/peep/thinking.svg")),
-    );
-    poses.insert(
-        "laughing".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/peep/laughing.svg")),
-    );
-    poses.insert(
-        "whispering".into(),
-        clean_or_extract_svg(include_str!("../assets/characters/peep/whispering.svg")),
-    );
-
-    CharacterPack {
-        id: "peep".into(),
-        name: "Peep".into(),
-        author: "Ayvu Project".into(),
-        license: "GPL-3.0-or-later".into(),
-        description: "Cheerful curious avian cartoon character".into(),
-        balloon_anchor: Anchor { x: 0.5, y: 0.35 },
-        poses,
-    }
-}

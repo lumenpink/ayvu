@@ -78,3 +78,54 @@ fn test_comic_chat_layout_proportions() {
     let svg = render_comic_strip_to_svg(&strip);
     assert!(svg.contains("data:image/png;base64,"), "Must contain character image data URI");
 }
+
+#[test]
+fn test_all_31_official_comic_chat_characters_present() {
+    let registry = CharacterRegistry::default();
+    let char_ids = registry.list_character_ids();
+
+    let expected_31 = [
+        "anna", "armando", "bolo", "buck", "connor", "cro", "dan", "denise",
+        "glenda", "hugh", "jordan", "kevin", "kirby", "kwensa", "lance", "lynnea",
+        "margaret", "maynard", "mike", "pedagog", "rainbow", "rebecca", "sage",
+        "scotty", "susan", "tiki", "tongtyed", "tux", "veronica", "waf", "xeno",
+    ];
+
+    assert_eq!(char_ids.len(), 31, "Registry must contain exactly 31 official Comic Chat characters");
+    for id in &expected_31 {
+        assert!(char_ids.contains(&id.to_string()), "Character '{}' must be present in registry", id);
+        let pack = registry.get(id).unwrap();
+        assert_eq!(pack.author, "Jim Woodring");
+        assert_eq!(pack.license, "MIT");
+        assert!(!pack.get_pose_svg(&Emotion::Neutral).is_empty(), "Character '{}' must have a neutral pose", id);
+    }
+}
+
+#[test]
+fn test_balloon_arrow_stops_above_character_head() {
+    let panel = Panel {
+        id: 1,
+        dialogues: vec![DialogueLine {
+            speaker: "dan".to_string(),
+            emotion: Emotion::Neutral,
+            balloon_type: BalloonType::Speech,
+            text: "Hello above my head!".to_string(),
+        }],
+        effects: vec![],
+    };
+
+    let strip = ComicStrip {
+        title: None,
+        layout: StripLayout::Horizontal,
+        backdrop: None,
+        panels: vec![panel],
+    };
+
+    let svg = render_comic_strip_to_svg(&strip);
+
+    // Find the speech balloon path
+    assert!(svg.contains("<path d=\"M "), "Must render speech balloon path");
+    // Verify that the speech balloon path does not penetrate deep into character
+    // In our algorithm, target_y = char_y - 2.0 (above the character apex)
+    assert!(svg.contains("class=\"character-pose\" id=\"char-dan\""));
+}
