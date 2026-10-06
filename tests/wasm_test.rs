@@ -31,4 +31,15 @@ fn test_wasm_artifacts_and_html_integration() {
         html.contains("render_comic") || html.contains("./pkg/ayvu.js"),
         "site/index.html should integrate WASM module"
     );
+
+    let char_html = fs::read_to_string("site/character.html").expect("site/character.html readable");
+    assert!(
+        char_html.contains("./pkg/ayvu.js"),
+        "site/character.html should integrate WASM module"
+    );
+
+    let d_ts = fs::read_to_string("site/pkg/ayvu.d.ts").expect("site/pkg/ayvu.d.ts readable");
+    assert!(d_ts.contains("get_character_detail_json"));
+    assert!(d_ts.contains("get_character_pose_svg"));
+    assert!(d_ts.contains("get_backdrop_svg"));
 }

@@ -42,7 +42,24 @@ pub struct CharacterMetadata {
     pub author: String,
     pub license: String,
     pub description: String,
+    pub width: f64,
+    pub height: f64,
+    pub balloon_anchor: Anchor,
     pub emotions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CharacterDetail {
+    pub id: String,
+    pub name: String,
+    pub author: String,
+    pub license: String,
+    pub description: String,
+    pub width: f64,
+    pub height: f64,
+    pub balloon_anchor: Anchor,
+    pub emotions: Vec<String>,
+    pub poses: HashMap<String, String>,
 }
 
 #[derive(Debug, Clone)]
@@ -180,17 +197,43 @@ impl CharacterRegistry {
             if let Some(pack) = self.packs.get(id) {
                 let mut emotions: Vec<String> = pack.poses.keys().cloned().collect();
                 emotions.sort();
+                let (width, height) = pack.dimensions();
                 list.push(CharacterMetadata {
                     id: pack.id.clone(),
                     name: pack.name.clone(),
                     author: pack.author.clone(),
                     license: pack.license.clone(),
                     description: pack.description.clone(),
+                    width,
+                    height,
+                    balloon_anchor: pack.balloon_anchor,
                     emotions,
                 });
             }
         }
         list
+    }
+
+    pub fn get_detail(&self, id: &str) -> Option<CharacterDetail> {
+        if let Some(pack) = self.get(id) {
+            let (width, height) = pack.dimensions();
+            let mut emotions: Vec<String> = pack.poses.keys().cloned().collect();
+            emotions.sort();
+            Some(CharacterDetail {
+                id: pack.id.clone(),
+                name: pack.name.clone(),
+                author: pack.author.clone(),
+                license: pack.license.clone(),
+                description: pack.description.clone(),
+                width,
+                height,
+                balloon_anchor: pack.balloon_anchor,
+                emotions,
+                poses: pack.poses.clone(),
+            })
+        } else {
+            None
+        }
     }
 
     pub fn resolve_speaker(&mut self, speaker: &str) -> CharacterPack {

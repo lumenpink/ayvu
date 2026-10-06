@@ -147,6 +147,15 @@ fn handle_request(mut request: tiny_http::Request) {
                 .with_header(cors_header);
             let _ = request.respond(res);
         }
+        (&Method::Get, "/character.html") | (&Method::Get, "/characters.html") => {
+            let html = include_str!("../site/character.html");
+            let header =
+                Header::from_bytes(&b"Content-Type"[..], &b"text/html; charset=utf-8"[..]).unwrap();
+            let res = Response::from_string(html)
+                .with_header(header)
+                .with_header(cors_header);
+            let _ = request.respond(res);
+        }
         (&Method::Get, p) if p.starts_with("/pkg/") => {
             let candidate1 = format!("./site{}", p);
             let candidate2 = format!(".{}", p);
@@ -226,6 +235,33 @@ fn handle_request(mut request: tiny_http::Request) {
                 .with_header(header)
                 .with_header(cors_header);
             let _ = request.respond(res);
+        }
+        (&Method::Get, "/character") | (&Method::Get, "/character.json") => {
+            let registry = CharacterRegistry::default();
+            let id = query
+                .and_then(|q| {
+                    q.split('&')
+                        .find_map(|pair| pair.strip_prefix("id="))
+                })
+                .unwrap_or("arti");
+
+            if let Some(detail) = registry.get_detail(id) {
+                let json = serde_json::to_string(&detail).unwrap();
+                let header = Header::from_bytes(
+                    &b"Content-Type"[..],
+                    &b"application/json; charset=utf-8"[..],
+                )
+                .unwrap();
+                let res = Response::from_string(json)
+                    .with_header(header)
+                    .with_header(cors_header);
+                let _ = request.respond(res);
+            } else {
+                let res = Response::from_string("{\"error\":\"character not found\"}")
+                    .with_status_code(StatusCode(404))
+                    .with_header(cors_header);
+                let _ = request.respond(res);
+            }
         }
         (&Method::Post, "/render") | (&Method::Post, "/comic") => {
             let mut body = String::new();

@@ -1,6 +1,31 @@
 /* @ts-self-types="./ayvu.d.ts" */
 
 /**
+ * @param {string} name
+ * @param {number} width
+ * @param {number} height
+ * @returns {string | undefined}
+ */
+export function get_backdrop_svg(name, width, height) {
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        const ptr0 = passStringToWasm0(name, wasm.__wbindgen_export, wasm.__wbindgen_export2);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.get_backdrop_svg(retptr, ptr0, len0, width, height);
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+        let v2;
+        if (r0 !== 0) {
+            v2 = getStringFromWasm0(r0, r1);
+            wasm.__wbindgen_export3(r0, r1 * 1, 1);
+        }
+        return v2;
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+    }
+}
+
+/**
  * @param {string} id
  * @returns {string | undefined}
  */
@@ -20,6 +45,75 @@ export function get_character_avatar_svg(id) {
         return v2;
     } finally {
         wasm.__wbindgen_add_to_stack_pointer(16);
+    }
+}
+
+/**
+ * @param {string} id
+ * @returns {string | undefined}
+ */
+export function get_character_detail_json(id) {
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_export, wasm.__wbindgen_export2);
+        const len0 = WASM_VECTOR_LEN;
+        wasm.get_character_detail_json(retptr, ptr0, len0);
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+        let v2;
+        if (r0 !== 0) {
+            v2 = getStringFromWasm0(r0, r1);
+            wasm.__wbindgen_export3(r0, r1 * 1, 1);
+        }
+        return v2;
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+    }
+}
+
+/**
+ * @param {string} id
+ * @param {string} emotion
+ * @returns {string | undefined}
+ */
+export function get_character_pose_svg(id, emotion) {
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        const ptr0 = passStringToWasm0(id, wasm.__wbindgen_export, wasm.__wbindgen_export2);
+        const len0 = WASM_VECTOR_LEN;
+        const ptr1 = passStringToWasm0(emotion, wasm.__wbindgen_export, wasm.__wbindgen_export2);
+        const len1 = WASM_VECTOR_LEN;
+        wasm.get_character_pose_svg(retptr, ptr0, len0, ptr1, len1);
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+        let v3;
+        if (r0 !== 0) {
+            v3 = getStringFromWasm0(r0, r1);
+            wasm.__wbindgen_export3(r0, r1 * 1, 1);
+        }
+        return v3;
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+    }
+}
+
+/**
+ * @returns {string}
+ */
+export function list_backdrops_json() {
+    let deferred1_0;
+    let deferred1_1;
+    try {
+        const retptr = wasm.__wbindgen_add_to_stack_pointer(-16);
+        wasm.list_backdrops_json(retptr);
+        var r0 = getDataViewMemory0().getInt32(retptr + 4 * 0, true);
+        var r1 = getDataViewMemory0().getInt32(retptr + 4 * 1, true);
+        deferred1_0 = r0;
+        deferred1_1 = r1;
+        return getStringFromWasm0(r0, r1);
+    } finally {
+        wasm.__wbindgen_add_to_stack_pointer(16);
+        wasm.__wbindgen_export3(deferred1_0, deferred1_1, 1);
     }
 }
 

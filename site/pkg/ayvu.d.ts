@@ -1,7 +1,15 @@
 /* tslint:disable */
 /* eslint-disable */
 
+export function get_backdrop_svg(name: string, width: number, height: number): string | undefined;
+
 export function get_character_avatar_svg(id: string): string | undefined;
+
+export function get_character_detail_json(id: string): string | undefined;
+
+export function get_character_pose_svg(id: string, emotion: string): string | undefined;
+
+export function list_backdrops_json(): string;
 
 export function list_characters_json(): string;
 
@@ -11,7 +19,11 @@ export type InitInput = RequestInfo | URL | Response | BufferSource | WebAssembl
 
 export interface InitOutput {
     readonly memory: WebAssembly.Memory;
+    readonly get_backdrop_svg: (a: number, b: number, c: number, d: number, e: number) => void;
     readonly get_character_avatar_svg: (a: number, b: number, c: number) => void;
+    readonly get_character_detail_json: (a: number, b: number, c: number) => void;
+    readonly get_character_pose_svg: (a: number, b: number, c: number, d: number, e: number) => void;
+    readonly list_backdrops_json: (a: number) => void;
     readonly list_characters_json: (a: number) => void;
     readonly render_comic: (a: number, b: number, c: number, d: number, e: number, f: number, g: number) => void;
     readonly __wbindgen_add_to_stack_pointer: (a: number) => number;

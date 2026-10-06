@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ayvu — Inspetor de Personagens & Régua de Proporção</title>
+  <meta name="description" content="Inspetor visual de personagens, expressões e régua fixa de escala para a engine de tirinhas Ayvu (Microsoft Comic Chat).">
+  <link rel="canonical" href="https://ayvu.2lp.in/character.html">
+
+  <style>
+    :root {
+      --bg: #0d1117;
+      --card-bg: #161b22;
+      --card-subtle: #21262d;
+      --border: #30363d;
+      --border-bright: #484f58;
+      --text: #c9d1d9;
+      --text-bright: #f0f6fc;
+      --text-muted: #8b949e;
+      --primary: #f59e0b;
+      --primary-hover: #d97706;
+      --accent: #38bdf8;
+      --success: #238636;
+      --danger: #ef4444;
+      --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+    }
+
+    /* Header */
+    header {
+      background-color: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0.75rem 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo {
+      font-size: 1.6rem;
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--text-bright);
+      letter-spacing: -0.5px;
+    }
+
+    .brand-tag {
+      font-size: 0.7rem;
+      background-color: var(--primary);
+      color: #000;
+      padding: 0.15rem 0.5rem;
+      border-radius: 9999px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .nav-links {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .nav-links a:hover {
+      text-decoration: underline;
+    }
+
+    /* Main Container */
+    main {
+      flex: 1;
+      max-width: 1400px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+    }
+
+    /* Character Selector Bar */
+    .selector-bar {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    }
+
+    .char-nav-group {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .nav-arrow-btn {
+      background: var(--card-subtle);
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.1rem;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .nav-arrow-btn:hover {
+      background: var(--border-bright);
+      border-color: var(--accent);
+    }
+
+    .select-styled {
+      background: #010409;
+      color: var(--text-bright);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.55rem 1rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+      outline: none;
+      cursor: pointer;
+      min-width: 260px;
+    }
+
+    .select-styled:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+    }
+
+    .char-badge-info {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: #010409;
+      padding: 0.4rem 0.8rem;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+    }
+
+    /* Stage Controls Bar */
+    .stage-controls {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .control-label {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .control-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--text);
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .control-toggle input {
+      cursor: pointer;
+      accent-color: var(--accent);
+    }
+
+    /* Section: Fixed Ruler Stage */
+    .stage-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.75rem;
+    }
+
+    .section-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .section-subtitle {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    /* The Fixed Ruler Stage Container */
+    .ruler-stage-container {
+      position: relative;
+      background: #ffffff;
+      border: 2px solid #000;
+      border-radius: 8px;
+      height: 540px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      display: flex;
+      box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Fixed Left Ruler */
+    .fixed-ruler {
+      position: sticky;
+      left: 0;
+      width: 70px;
+      min-width: 70px;
+      height: 100%;
+      background: #f1f3f5;
+      border-right: 2px solid #111;
+      user-select: none;
+      z-index: 20;
+    }
+
+    /* The Canvas / Lineup Stage */
+    .stage-canvas {
+      position: relative;
+      flex: 1;
+      min-width: 700px;
+      height: 100%;
+      background: #fbfbfb;
+      overflow: hidden;
+    }
+
+    /* Backdrop Layer in the Stage */
+    .stage-backdrop-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Grid Guide Overlay */
+    .stage-guides-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Characters Layer in the Stage */
+    .stage-characters-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: flex-end;
+      gap: 3rem;
+      padding-left: 3rem;
+      padding-right: 3rem;
+      z-index: 5;
+    }
+
+    /* Ground Line (Fixed Baseline) */
+    .stage-groundline {
+      position: absolute;
+      bottom: 30px;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: #111;
+      z-index: 10;
+    }
+
+    .stage-ground-fill {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 30px;
+      background: #e9ecef;
+      border-top: 1px dashed #ced4da;
+      z-index: 9;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      font-family: var(--font-mono);
+      color: #6c757d;
+      font-weight: 700;
+      letter-spacing: 1px;
+    }
+
+    /* Character Stand in Stage */
+    .stage-char-stand {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 30px; /* Stands exactly on groundline */
+      transition: transform 0.2s;
+    }
+
+    .stage-char-stand.active-target {
+      filter: drop-shadow(0 0 10px rgba(56, 189, 248, 0.35));
+    }
+
+    .stage-char-stand svg, .stage-char-stand img {
+      display: block;
+      vertical-align: bottom;
+    }
+
+    /* Measurement Labels on Character */
+    .char-height-tag {
+      position: absolute;
+      top: -24px;
+      background: #111827;
+      color: #38bdf8;
+      border: 1px solid #38bdf8;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      z-index: 15;
+    }
+
+    .char-height-line {
+      position: absolute;
+      top: 0;
+      left: -1000px;
+      right: -1000px;
+      height: 1px;
+      border-top: 1px dashed rgba(56, 189, 248, 0.6);
+      pointer-events: none;
+      z-index: 12;
+    }
+
+    .char-anchor-target {
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      border: 2px solid #ef4444;
+      background: rgba(239, 68, 68, 0.25);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      z-index: 16;
+    }
+
+    .char-anchor-target::before, .char-anchor-target::after {
+      content: '';
+      position: absolute;
+      background: #ef4444;
+    }
+
+    .char-anchor-target::before {
+      top: -4px; bottom: -4px; left: 4px; width: 2px;
+    }
+
+    .char-anchor-target::after {
+      left: -4px; right: -4px; top: 4px; height: 2px;
+    }
+
+    .char-name-foot {
+      position: absolute;
+      bottom: -24px;
+      background: #fff;
+      border: 1px solid #222;
+      color: #111;
+      font-size: 0.75rem;
+      font-weight: 800;
+      padding: 0.1rem 0.5rem;
+      border-radius: 4px;
+      white-space: nowrap;
+      z-index: 15;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    /* Comparison Pickers Bar */
+    .compare-bar {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      background: var(--card-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+
+    .compare-chips {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      flex-wrap: wrap;
+    }
+
+    .chip-btn {
+      background: #010409;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.8rem;
+      padding: 0.3rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .chip-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-bright);
+    }
+
+    .chip-btn.active {
+      background: var(--accent);
+      color: #000;
+      border-color: var(--accent);
+      font-weight: 700;
+    }
+
+    /* Section: Enlarged Variations Gallery */
+    .gallery-section {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.25rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+
+    .gallery-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      background: var(--card-subtle);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.75rem 1rem;
+    }
+
+    .bg-toggles {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .bg-toggle-btn {
+      background: #010409;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.8rem;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      transition: all 0.15s;
+    }
+
+    .bg-toggle-btn.active {
+      border-color: var(--primary);
+      color: var(--text-bright);
+      background: rgba(245, 158, 11, 0.15);
+      font-weight: 700;
+    }
+
+    .zoom-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .zoom-btn {
+      background: #010409;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.8rem;
+      padding: 0.3rem 0.6rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .zoom-btn.active {
+      background: var(--primary);
+      color: #000;
+      font-weight: 700;
+      border-color: var(--primary);
+    }
+
+    /* Grid of Enlarged Poses */
+    .poses-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+    }
+
+    .pose-card {
+      background: var(--card-subtle);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.15s, border-color 0.15s;
+    }
+
+    .pose-card:hover {
+      border-color: var(--border-bright);
+      transform: translateY(-2px);
+    }
+
+    .pose-card-header {
+      padding: 0.75rem 1rem;
+      background: #11161d;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .pose-card-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      text-transform: capitalize;
+    }
+
+    .pose-card-dim {
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+    }
+
+    /* Card Visual Frame */
+    .pose-viewport {
+      min-height: 480px;
+      max-height: 520px;
+      padding: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      position: relative;
+    }
+
+    /* Background Modes */
+    .bg-checkerboard {
+      background-color: #ffffff;
+      background-image: linear-gradient(45deg, #e5e7eb 25%, transparent 25%),
+                        linear-gradient(-45deg, #e5e7eb 25%, transparent 25%),
+                        linear-gradient(45deg, transparent 75%, #e5e7eb 75%),
+                        linear-gradient(-45deg, transparent 75%, #e5e7eb 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0px;
+    }
+
+    .bg-white {
+      background-color: #ffffff;
+    }
+
+    .bg-black {
+      background-color: #050505;
+    }
+
+    .pose-viewport svg {
+      display: block;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+      transition: transform 0.2s ease-out;
+    }
+
+    /* Card Footer & Actions */
+    .pose-card-footer {
+      padding: 0.65rem 1rem;
+      background: #11161d;
+      border-top: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    .action-btn {
+      background: #010409;
+      border: 1px solid var(--border);
+      color: var(--text);
+      font-size: 0.75rem;
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      transition: all 0.15s;
+    }
+
+    .action-btn:hover {
+      border-color: var(--accent);
+      color: var(--text-bright);
+    }
+
+    /* Toast Notification */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      background: var(--success);
+      color: #fff;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 700;
+      font-size: 0.85rem;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      display: none;
+      z-index: 100;
+    }
+
+    /* Footer */
+    footer {
+      background: var(--card-bg);
+      border-top: 1px solid var(--border);
+      padding: 1.25rem;
+      text-align: center;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 2rem;
+    }
+
+    footer a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <header>
+    <div class="brand">
+      <div class="logo">🎭</div>
+      <div>
+        <div class="brand-title">Ayvu — Inspetor de Personagens</div>
+      </div>
+      <div class="brand-tag">Régua Fixa</div>
+    </div>
+
+    <div class="nav-links">
+      <a href="./">← Voltar ao Playground</a>
+      <a href="https://codeberg.org/lumenpink/ayvu" target="_blank" rel="noopener">Codeberg ↗</a>
+      <a href="https://lumen.pink" target="_blank" rel="noopener">Lumen Pink ↗</a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main>
+
+    <!-- Top Character Selector Bar -->
+    <div class="selector-bar">
+      <div class="char-nav-group">
+        <button type="button" class="nav-arrow-btn" id="btn-prev-char" title="Personagem anterior (Seta esquerda)">‹</button>
+        <select id="char-select" class="select-styled" aria-label="Selecione o personagem principal">
+          <!-- Populated via JS -->
+        </select>
+        <button type="button" class="nav-arrow-btn" id="btn-next-char" title="Próximo personagem (Seta direita)">›</button>
+      </div>
+
+      <div class="char-badge-info" id="char-metrics-badge">
+        <span>📏 Altura: <strong id="metric-height">440 px</strong></span>
+        <span>|</span>
+        <span>↔ Largura: <strong id="metric-width">160 px</strong></span>
+        <span>|</span>
+        <span>🎯 Balão: <strong id="metric-anchor">50% / 22%</strong></span>
+      </div>
+    </div>
+
+    <!-- Section 1: Fixed Height Ruler Stage -->
+    <section class="stage-section">
+      <div class="section-header">
+        <div>
+          <div class="section-title">
+            <span>📏 Régua Fixa de Altura & Proporção de Escala</span>
+          </div>
+          <div class="section-subtitle">
+            A régua possui coordenadas e chão absolutos (0 a 500 px). O personagem varia em seu tamanho nativo real.
+          </div>
+        </div>
+
+        <div class="stage-controls">
+          <label class="control-label">Cenário:</label>
+          <select id="stage-backdrop-select" class="select-styled" style="min-width: 170px; padding: 0.35rem 0.7rem; font-size: 0.85rem;">
+            <option value="none">Nenhum (Vazio)</option>
+            <option value="ru">RU (Restaurante Universitário)</option>
+            <option value="hu_fachada">HU (Hospital Universitário)</option>
+            <option value="hall_ccs">Hall do CCS</option>
+            <option value="sala_de_aula">Sala de Aula</option>
+            <option value="cafe_ccs">Café do CCS</option>
+            <option value="bu_ufsc">Biblioteca Universitária (BU)</option>
+            <option value="laboratorio">Laboratório</option>
+            <option value="hu_enfermaria">HU Enfermaria</option>
+            <option value="pastoral">Pastoral (Classic 1996)</option>
+            <option value="room">Quarto / Sala</option>
+          </select>
+
+          <label class="control-toggle">
+            <input type="checkbox" id="toggle-guides" checked>
+            <span>Linhas Guia</span>
+          </label>
+
+          <label class="control-toggle">
+            <input type="checkbox" id="toggle-anchor" checked>
+            <span>Âncora de Balão</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Quick Comparison Bar -->
+      <div class="compare-bar">
+        <span class="control-label">Comparar na régua:</span>
+        <div class="compare-chips" id="compare-chips-container">
+          <!-- Quick toggle chips for Armando, Dan, Kirby, Sage, Jordan, Tux -->
+        </div>
+      </div>
+
+      <!-- The Stage -->
+      <div class="ruler-stage-container" id="stage-container">
+        <!-- Fixed Ruler Column (Left) -->
+        <svg class="fixed-ruler" id="fixed-ruler-svg" viewBox="0 0 70 540" preserveAspectRatio="none">
+          <!-- Dynamically generated graduated ruler lines (0 to 500 px) -->
+        </svg>
+
+        <!-- Canvas Stage Area -->
+        <div class="stage-canvas" id="stage-canvas">
+          <!-- Backdrop SVG Layer -->
+          <div class="stage-backdrop-layer" id="stage-backdrop-layer"></div>
+
+          <!-- Guide Lines Layer -->
+          <svg class="stage-guides-layer" id="stage-guides-layer" viewBox="0 0 1000 540" preserveAspectRatio="none">
+            <!-- Reference horizontal dashed guide lines -->
+          </svg>
+
+          <!-- Characters Lineup -->
+          <div class="stage-characters-layer" id="stage-characters-layer">
+            <!-- Active and compared characters will be appended here -->
+          </div>
+
+          <!-- Ground Baseline Line -->
+          <div class="stage-groundline"></div>
+          <div class="stage-ground-fill">GROUNDLINE (CHÃO: Y = 0 PX)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Section 2: Enlarged Known Variations Gallery -->
+    <section class="gallery-section">
+      <div class="section-header">
+        <div>
+          <div class="section-title">
+            <span>🔍 Galeria de Variações Conhecidas (Alta Resolução)</span>
+          </div>
+          <div class="section-subtitle">
+            Avalie traço, nanquim, silhueta e recorte de cada pose em tamanho grande.
+          </div>
+        </div>
+
+        <div class="gallery-controls">
+          <div class="bg-toggles">
+            <span class="control-label" style="margin-right: 0.3rem;">Fundo:</span>
+            <button type="button" class="bg-toggle-btn active" data-bg="checkerboard">🏁 Quadriculado</button>
+            <button type="button" class="bg-toggle-btn" data-bg="white">⚪ Branco Papel</button>
+            <button type="button" class="bg-toggle-btn" data-bg="black">⚫ Preto Nanquim</button>
+          </div>
+
+          <div class="zoom-controls">
+            <span class="control-label" style="margin-right: 0.3rem;">Zoom:</span>
+            <button type="button" class="zoom-btn" data-scale="1">1x</button>
+            <button type="button" class="zoom-btn active" data-scale="1.3">1.3x</button>
+            <button type="button" class="zoom-btn" data-scale="1.7">1.7x</button>
+            <button type="button" class="zoom-btn" data-scale="2.2">2.2x</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Poses Grid -->
+      <div class="poses-grid" id="poses-grid">
+        <!-- Rendered poses cards -->
+      </div>
+    </section>
+
+  </main>
+
+  <div class="toast" id="toast">Copiado com sucesso!</div>
+
+  <!-- Footer -->
+  <footer>
+    Ayvu Comic Strip Engine & Character Inspector • Traço Jim Woodring (Microsoft Comic Chat 1996) • Criado por <a href="https://lumen.pink">Lumen Pink</a>.
+  </footer>
+
+  <!-- Scripts -->
+  <script type="module">
+    import init, {
+      list_characters_json,
+      get_character_detail_json,
+      get_backdrop_svg
+    } from './pkg/ayvu.js';
+
+    let wasmReady = false;
+    let charactersList = [];
+    let currentCharacterId = 'arti';
+    let comparedCharacterIds = new Set();
+    let currentBackgroundMode = 'checkerboard';
+    let currentZoomScale = 1.3;
+    let currentBackdrop = 'none';
+
+    const charSelect = document.getElementById('char-select');
+    const stageBackdropSelect = document.getElementById('stage-backdrop-select');
+    const toggleGuides = document.getElementById('toggle-guides');
+    const toggleAnchor = document.getElementById('toggle-anchor');
+    const stageCharactersLayer = document.getElementById('stage-characters-layer');
+    const stageBackdropLayer = document.getElementById('stage-backdrop-layer');
+    const posesGrid = document.getElementById('poses-grid');
+    const toast = document.getElementById('toast');
+
+    function showToast(msg) {
+      toast.textContent = msg;
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    // Fixed Ruler constants
+    const STAGE_HEIGHT = 540;
+    const GROUND_OFFSET = 30; // 30px from bottom is 0px line
+    const MAX_HEIGHT_PX = 500;
+
+    // Helper: translate height to Y coordinate on stage
+    function heightToY(h) {
+      return STAGE_HEIGHT - GROUND_OFFSET - h;
+    }
+
+    // Draw the fixed ruler markings
+    function renderFixedRuler() {
+      const svg = document.getElementById('fixed-ruler-svg');
+      let out = '';
+
+      // Background
+      out += `<rect x="0" y="0" width="70" height="${STAGE_HEIGHT}" fill="#f8f9fa" />`;
+      // Right edge
+      out += `<line x1="70" y1="0" x2="70" y2="${STAGE_HEIGHT}" stroke="#212529" stroke-width="2" />`;
+
+      // Graduation ticks from 0 to 500 px
+      for (let px = 0; px <= MAX_HEIGHT_PX; px += 10) {
+        const y = heightToY(px);
+        const isMajor = px % 50 === 0;
+        const isMid = px % 25 === 0 && !isMajor;
+
+        const x1 = isMajor ? 32 : (isMid ? 48 : 58);
+        const strokeW = isMajor ? 1.5 : 1;
+        const strokeColor = isMajor ? '#111' : '#6c757d';
+
+        out += `<line x1="${x1}" y1="${y}" x2="70" y2="${y}" stroke="${strokeColor}" stroke-width="${strokeW}" />`;
+
+        if (isMajor) {
+          out += `<text x="28" y="${y + 3.5}" text-anchor="end" font-family="'JetBrains Mono', monospace" font-size="9" font-weight="${px === 0 ? '800' : '700'}" fill="#212529">${px}</text>`;
+        }
+      }
+
+      // Ground baseline tag
+      const groundY = heightToY(0);
+      out += `<line x1="0" y1="${groundY}" x2="70" y2="${groundY}" stroke="#d90429" stroke-width="2" />`;
+      out += `<text x="5" y="${groundY - 4}" font-family="-apple-system, sans-serif" font-size="8" font-weight="800" fill="#d90429">CHÃO</text>`;
+
+      svg.innerHTML = out;
+    }
+
+    // Render guide lines across canvas
+    function renderGuideLines() {
+      const svg = document.getElementById('stage-guides-layer');
+      if (!toggleGuides.checked) {
+        svg.innerHTML = '';
+        return;
+      }
+
+      let out = '';
+      // Guide lines at 100, 200, 300, 320 (Kirby), 390 (Armando), 440 (Arti), 495 (Sage)
+      const notableHeights = [
+        { h: 100, label: '100px' },
+        { h: 200, label: '200px (Cintura/Mesa)' },
+        { h: 300, label: '300px' },
+        { h: 320, label: '320px (Kirby - Menor)', color: '#10b981' },
+        { h: 388, label: '388px (Dan)' },
+        { h: 390, label: '390px (Armando)' },
+        { h: 440, label: '440px (Arti - Alto)', color: '#38bdf8' },
+        { h: 495, label: '495px (Sage - Mais alto)', color: '#a855f7' }
+      ];
+
+      notableHeights.forEach(item => {
+        const y = heightToY(item.h);
+        const col = item.color || 'rgba(108, 117, 125, 0.4)';
+        const dash = item.color ? '4,3' : '2,4';
+        out += `<line x1="0" y1="${y}" x2="1000" y2="${y}" stroke="${col}" stroke-width="1" stroke-dasharray="${dash}" />`;
+      });
+
+      svg.innerHTML = out;
+    }
+
+    // Render Stage Characters
+    function renderStageCharacters() {
+      stageCharactersLayer.innerHTML = '';
+
+      const idsToRender = [currentCharacterId, ...Array.from(comparedCharacterIds)];
+      idsToRender.forEach((id, idx) => {
+        const detailStr = get_character_detail_json(id);
+        if (!detailStr) return;
+        const char = JSON.parse(detailStr);
+
+        const isPrimary = (id === currentCharacterId);
+        const neutralSvg = char.poses.neutral || char.poses[Object.keys(char.poses)[0]] || '';
+
+        const stand = document.createElement('div');
+        stand.className = `stage-char-stand ${isPrimary ? 'active-target' : ''}`;
+        stand.style.width = `${char.width}px`;
+        stand.style.height = `${char.height}px`;
+
+        // Inner SVG container
+        const svgContainer = document.createElement('div');
+        svgContainer.style.width = '100%';
+        svgContainer.style.height = '100%';
+        svgContainer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${char.width} ${char.height}" width="${char.width}" height="${char.height}" preserveAspectRatio="xMidYMid meet">${neutralSvg}</svg>`;
+        stand.appendChild(svgContainer);
+
+        // Top height tag
+        const tag = document.createElement('div');
+        tag.className = 'char-height-tag';
+        tag.textContent = `${char.name}: ${char.height}px`;
+        if (isPrimary) {
+          tag.style.borderColor = 'var(--accent)';
+          tag.style.color = 'var(--accent)';
+        }
+        stand.appendChild(tag);
+
+        // Dashed line from top of character across to ruler
+        if (isPrimary && toggleGuides.checked) {
+          const line = document.createElement('div');
+          line.className = 'char-height-line';
+          stand.appendChild(line);
+        }
+
+        // Speech balloon anchor crosshair
+        if (toggleAnchor.checked && char.balloon_anchor) {
+          const crosshair = document.createElement('div');
+          crosshair.className = 'char-anchor-target';
+          crosshair.style.left = `${char.balloon_anchor.x * char.width}px`;
+          crosshair.style.top = `${char.balloon_anchor.y * char.height}px`;
+          crosshair.title = `Âncora do balão: X=${(char.balloon_anchor.x * 100).toFixed(0)}%, Y=${(char.balloon_anchor.y * 100).toFixed(0)}%`;
+          stand.appendChild(crosshair);
+        }
+
+        // Foot label
+        const foot = document.createElement('div');
+        foot.className = 'char-name-foot';
+        foot.textContent = isPrimary ? `★ ${char.name}` : char.name;
+        stand.appendChild(foot);
+
+        stageCharactersLayer.appendChild(stand);
+      });
+    }
+
+    // Render Backdrop on Stage
+    function renderStageBackdrop() {
+      if (currentBackdrop === 'none' || !wasmReady) {
+        stageBackdropLayer.innerHTML = '';
+        return;
+      }
+
+      const svgContent = get_backdrop_svg(currentBackdrop, 1000, 500);
+      if (svgContent) {
+        stageBackdropLayer.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 500" width="100%" height="${STAGE_HEIGHT - GROUND_OFFSET}" preserveAspectRatio="none" style="position: absolute; bottom: ${GROUND_OFFSET}px; left: 0;">${svgContent}</svg>`;
+      } else {
+        stageBackdropLayer.innerHTML = '';
+      }
+    }
+
+    // Render Poses Gallery
+    function renderPosesGallery() {
+      posesGrid.innerHTML = '';
+      const detailStr = get_character_detail_json(currentCharacterId);
+      if (!detailStr) return;
+      const char = JSON.parse(detailStr);
+
+      // Update metrics badge
+      document.getElementById('metric-height').textContent = `${char.height} px`;
+      document.getElementById('metric-width').textContent = `${char.width} px`;
+      if (char.balloon_anchor) {
+        document.getElementById('metric-anchor').textContent = `${(char.balloon_anchor.x * 100).toFixed(0)}% / ${(char.balloon_anchor.y * 100).toFixed(0)}%`;
+      }
+
+      const poseKeys = Object.keys(char.poses).sort();
+      poseKeys.forEach(poseKey => {
+        const poseSvgContent = char.poses[poseKey];
+
+        const card = document.createElement('div');
+        card.className = 'pose-card';
+
+        // Header
+        const header = document.createElement('div');
+        header.className = 'pose-card-header';
+        header.innerHTML = `
+          <div class="pose-card-title">
+            <span>✨</span>
+            <span>${poseKey}</span>
+          </div>
+          <div class="pose-card-dim">${char.width} × ${char.height} px</div>
+        `;
+        card.appendChild(header);
+
+        // Viewport
+        const viewport = document.createElement('div');
+        viewport.className = `pose-viewport bg-${currentBackgroundMode}`;
+
+        const svgEl = document.createElement('div');
+        svgEl.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${char.width} ${char.height}" width="${char.width * currentZoomScale}" height="${char.height * currentZoomScale}" preserveAspectRatio="xMidYMid meet">${poseSvgContent}</svg>`;
+        viewport.appendChild(svgEl.firstElementChild);
+        card.appendChild(viewport);
+
+        // Footer Actions
+        const footer = document.createElement('div');
+        footer.className = 'pose-card-footer';
+
+        const btnCopySvg = document.createElement('button');
+        btnCopySvg.className = 'action-btn';
+        btnCopySvg.innerHTML = '📋 Copiar SVG';
+        btnCopySvg.addEventListener('click', () => {
+          const fullSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${char.width} ${char.height}" width="${char.width}" height="${char.height}">${poseSvgContent}</svg>`;
+          navigator.clipboard.writeText(fullSvg).then(() => showToast(`SVG de ${char.name} (${poseKey}) copiado!`));
+        });
+
+        const btnDownloadSvg = document.createElement('button');
+        btnDownloadSvg.className = 'action-btn';
+        btnDownloadSvg.innerHTML = '⬇️ Baixar SVG';
+        btnDownloadSvg.addEventListener('click', () => {
+          const fullSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${char.width} ${char.height}" width="${char.width}" height="${char.height}">${poseSvgContent}</svg>`;
+          const blob = new Blob([fullSvg], { type: 'image/svg+xml;charset=utf-8' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${char.id}_${poseKey}.svg`;
+          a.click();
+          URL.revokeObjectURL(url);
+          showToast(`Arquivo ${char.id}_${poseKey}.svg baixado!`);
+        });
+
+        footer.appendChild(btnCopySvg);
+        footer.appendChild(btnDownloadSvg);
+        card.appendChild(footer);
+
+        posesGrid.appendChild(card);
+      });
+    }
+
+    // Refresh all views for current state
+    function updateAllViews() {
+      renderFixedRuler();
+      renderGuideLines();
+      renderStageBackdrop();
+      renderStageCharacters();
+      renderPosesGallery();
+
+      // Update URL query string
+      const url = new URL(window.location);
+      url.searchParams.set('id', currentCharacterId);
+      if (comparedCharacterIds.size > 0) {
+        url.searchParams.set('compare', Array.from(comparedCharacterIds).join(','));
+      } else {
+        url.searchParams.delete('compare');
+      }
+      if (currentBackdrop && currentBackdrop !== 'none') {
+        url.searchParams.set('backdrop', currentBackdrop);
+      } else {
+        url.searchParams.delete('backdrop');
+      }
+      window.history.replaceState({}, '', url);
+    }
+
+    // Populate comparison chips
+    function setupComparisonChips() {
+      const container = document.getElementById('compare-chips-container');
+      container.innerHTML = '';
+
+      const favorites = ['dan', 'armando', 'kirby', 'sage', 'tiki', 'jordan', 'tux'];
+      favorites.forEach(fid => {
+        if (fid === currentCharacterId) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = `chip-btn ${comparedCharacterIds.has(fid) ? 'active' : ''}`;
+        const found = charactersList.find(c => c.id === fid);
+        btn.textContent = found ? `${found.name} (${found.height}px)` : fid;
+
+        btn.addEventListener('click', () => {
+          if (comparedCharacterIds.has(fid)) {
+            comparedCharacterIds.delete(fid);
+          } else {
+            comparedCharacterIds.add(fid);
+          }
+          btn.classList.toggle('active', comparedCharacterIds.has(fid));
+          renderStageCharacters();
+        });
+
+        container.appendChild(btn);
+      });
+    }
+
+    // Switch character
+    function selectCharacter(id) {
+      currentCharacterId = id.toLowerCase();
+      charSelect.value = currentCharacterId;
+      comparedCharacterIds.delete(currentCharacterId);
+      setupComparisonChips();
+      updateAllViews();
+    }
+
+    // Previous / Next character navigation
+    function navigateCharacter(offset) {
+      if (!charactersList.length) return;
+      const curIndex = charactersList.findIndex(c => c.id === currentCharacterId);
+      let nextIndex = (curIndex + offset) % charactersList.length;
+      if (nextIndex < 0) nextIndex = charactersList.length - 1;
+      selectCharacter(charactersList[nextIndex].id);
+    }
+
+    document.getElementById('btn-prev-char').addEventListener('click', () => navigateCharacter(-1));
+    document.getElementById('btn-next-char').addEventListener('click', () => navigateCharacter(1));
+
+    // Keyboard navigation (Left / Right arrows)
+    window.addEventListener('keydown', (e) => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+      if (e.key === 'ArrowLeft') navigateCharacter(-1);
+      if (e.key === 'ArrowRight') navigateCharacter(1);
+    });
+
+    // Background toggle buttons
+    document.querySelectorAll('.bg-toggle-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.bg-toggle-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentBackgroundMode = btn.dataset.bg;
+        document.querySelectorAll('.pose-viewport').forEach(vp => {
+          vp.className = `pose-viewport bg-${currentBackgroundMode}`;
+        });
+      });
+    });
+
+    // Zoom buttons
+    document.querySelectorAll('.zoom-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('.zoom-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        currentZoomScale = parseFloat(btn.dataset.scale);
+        renderPosesGallery();
+      });
+    });
+
+    // Stage backdrop select
+    stageBackdropSelect.addEventListener('change', (e) => {
+      currentBackdrop = e.target.value;
+      renderStageBackdrop();
+    });
+
+    // Guide toggles
+    toggleGuides.addEventListener('change', () => {
+      renderGuideLines();
+      renderStageCharacters();
+    });
+
+    toggleAnchor.addEventListener('change', renderStageCharacters);
+
+    charSelect.addEventListener('change', (e) => {
+      selectCharacter(e.target.value);
+    });
+
+    // Main Init Flow
+    async function main() {
+      try {
+        await init();
+        wasmReady = true;
+
+        const jsonStr = list_characters_json();
+        charactersList = JSON.parse(jsonStr);
+
+        // Populate dropdown
+        charSelect.innerHTML = '';
+        charactersList.forEach(c => {
+          const opt = document.createElement('option');
+          opt.value = c.id;
+          opt.textContent = `${c.name} — ${c.height} px (${c.description || 'Jim Woodring'})`;
+          if (c.id === 'arti') {
+            opt.textContent = `🧥 Arti — 440 px (Novo Personagem)`;
+          }
+          charSelect.appendChild(opt);
+        });
+
+        // Read query params ?id=, ?compare=, ?backdrop=
+        const params = new URLSearchParams(window.location.search);
+        const queryId = params.get('id');
+        if (queryId && charactersList.some(c => c.id === queryId.toLowerCase())) {
+          currentCharacterId = queryId.toLowerCase();
+        } else {
+          currentCharacterId = 'arti';
+        }
+
+        const queryCompare = params.get('compare');
+        if (queryCompare) {
+          queryCompare.split(',').forEach(cid => {
+            const trimmed = cid.trim().toLowerCase();
+            if (trimmed && charactersList.some(c => c.id === trimmed) && trimmed !== currentCharacterId) {
+              comparedCharacterIds.add(trimmed);
+            }
+          });
+        }
+
+        const queryBackdrop = params.get('backdrop');
+        if (queryBackdrop) {
+          currentBackdrop = queryBackdrop.trim().toLowerCase();
+          stageBackdropSelect.value = currentBackdrop;
+        }
+
+        charSelect.value = currentCharacterId;
+        setupComparisonChips();
+        updateAllViews();
+      } catch (err) {
+        console.error("Initialization error:", err);
+        showToast("Erro ao carregar módulo WebAssembly!");
+      }
+    }
+
+    main();
+  </script>
+</body>
+</html>
