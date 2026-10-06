@@ -1,0 +1,17 @@
+{
+  "id": "arti",
+  "name": "Arti",
+  "author": "Lumen Pink",
+  "license": "MIT",
+  "description": "Arti, o acad\u00eamico misterioso de sobretudo preto, \u00f3culos escuros e cabelos longos",
+  "balloon_anchor": {
+    "x": 0.5,
+    "y": 0.22
+  },
+  "poses": {
+    "neutral": "neutral.svg",
+    "happy": "happy.svg",
+    "shouting": "shouting.svg",
+    "thinking": "thinking.svg"
+  }
+}

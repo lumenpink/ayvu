@@ -124,10 +124,9 @@ fn test_all_31_official_comic_chat_characters_present() {
         "veronica", "waf", "xeno",
     ];
 
-    assert_eq!(
-        char_ids.len(),
-        31,
-        "Registry must contain exactly 31 official Comic Chat characters"
+    assert!(
+        char_ids.len() >= 31,
+        "Registry must contain all 31 official Comic Chat characters"
     );
     for id in &expected_31 {
         assert!(

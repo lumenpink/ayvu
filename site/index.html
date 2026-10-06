@@ -540,16 +540,17 @@
 
       <!-- Quick Chips: Characters & Emotions -->
       <div class="toolbar-row">
-        <span class="row-label">🎭 Personagens & Expressões (Originais MS Comic Chat)</span>
+        <span class="row-label">🎭 Personagens & Expressões (Comic Chat + Arti)</span>
         <div style="display: flex; gap: 0.5rem; width: 100%; margin-bottom: 0.5rem; align-items: center;">
           <select id="char-dropdown-select" style="flex: 1; padding: 0.45rem 0.6rem; background: #010409; border: 1px solid var(--border); border-radius: 6px; color: var(--text-bright); font-size: 0.85rem; cursor: pointer;">
-            <option value="" disabled selected>🎭 Escolha entre todos os 31 personagens oficiais...</option>
+            <option value="" disabled selected>🎭 Escolha um personagem (32 disponíveis, incluindo Arti)...</option>
           </select>
           <button type="button" class="btn btn-secondary" id="btn-open-gallery" style="padding: 0.45rem 0.75rem; font-size: 0.8rem; white-space: nowrap; border-color: var(--primary); color: var(--primary);">
-            🖼️ Ver Galeria (31)
+            🖼️ Ver Galeria (32)
           </button>
         </div>
         <div class="chips-group">
+          <button type="button" class="chip" data-insert="Arti (neutral): ">🧥 Arti</button>
           <button type="button" class="chip" data-insert="Armando (neutral): ">🕶️ Armando</button>
           <button type="button" class="chip" data-insert="Tiki (happy): ">🗿 Tiki</button>
           <button type="button" class="chip" data-insert="Tongtyed (laughing): ">🐶 Tongtyed</button>
@@ -699,7 +700,7 @@ Tiki (happy): UAU, ARTE DO JIM WOODRING E BALÕES CLÁSSICOS! [idea]</textarea>
           </tbody>
         </table>
 
-        <h4 style="margin-top: 1.5rem; color: var(--accent);">🎭 Elenco Oficial do MS Comic Chat (31 Personagens)</h4>
+        <h4 style="margin-top: 1.5rem; color: var(--accent);">🎭 Elenco de Personagens (MS Comic Chat + Arti)</h4>
         <p style="font-size: 0.85rem; color: #8b949e; margin-bottom: 0.5rem;">Basta digitar o nome de qualquer um deles seguido de dois pontos no editor (ex: <code>Xeno: Olá!</code>). Clique em qualquer um para inserir:</p>
         <div id="cheatsheet-characters-list" style="display: flex; flex-wrap: wrap; gap: 0.4rem; max-height: 250px; overflow-y: auto; padding: 0.5rem; background: #010409; border: 1px solid var(--border); border-radius: 6px;">
           <!-- Populated dynamically via JS -->
@@ -1165,7 +1166,7 @@ Tiki (happy): Ninguém fica espremido! [idea]`
     function populateDropdown(chars) {
       const select = document.getElementById('char-dropdown-select');
       if (!select) return;
-      select.innerHTML = '<option value="" disabled selected>🎭 Escolha entre todos os 31 personagens oficiais...</option>';
+      select.innerHTML = '<option value="" disabled selected>🎭 Escolha um personagem (32 disponíveis, incluindo Arti)...</option>';
       const sorted = chars.slice().sort((a, b) => a.name.localeCompare(b.name));
       sorted.forEach(c => {
         const opt = document.createElement('option');
