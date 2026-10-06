@@ -1,6 +1,6 @@
 use crate::model::{
-    BalloonType, ComicStrip, DialogueLine, Emotion, Panel, PanelWidth, StickerType, StripLayout,
-    VisualEffect,
+    BalloonType, ComicStrip, DialogueLine, Emotion, Panel, PanelWidth, PropItem, PropType,
+    StickerType, StripLayout, VisualEffect,
 };
 
 /// Parse plain text dialogue script into a structured ComicStrip
@@ -15,6 +15,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
     let mut current_characters: Vec<String> = Vec::new();
     let mut global_characters: Vec<String> = Vec::new();
     let mut current_width: Option<PanelWidth> = None;
+    let mut current_props: Vec<PropItem> = Vec::new();
 
     for raw_line in script.lines() {
         let line = raw_line.trim();
@@ -81,6 +82,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
             if !current_dialogues.is_empty()
                 || !current_effects.is_empty()
                 || !current_characters.is_empty()
+                || !current_props.is_empty()
                 || current_backdrop.is_some()
             {
                 let chars = if !current_characters.is_empty() {
@@ -97,15 +99,16 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                     characters: chars,
                     backdrop: bg,
                     width: w,
+                    props: std::mem::take(&mut current_props),
                 });
             }
             current_width = explicit_w;
             continue;
         }
 
-        // Directives inside panel: [wide], [narrow], [standard], [panoramic], [width: ...]
+        // Directives inside panel: [wide], [narrow], [standard], [panoramic], [width: ...], [prop: ...], stickers
         if line.starts_with('[') && line.ends_with(']') {
-            let inner = &line[1..line.len() - 1].trim();
+            let inner = line[1..line.len() - 1].trim();
             if let Some(pw) = PanelWidth::from_str_loose(inner) {
                 current_width = Some(pw);
                 continue;
@@ -123,6 +126,26 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                         continue;
                     }
                 }
+                if p == "prop" || p == "props" || p == "objeto" || p == "item" {
+                    for part in val.split(',') {
+                        let part = part.trim();
+                        if part.is_empty() {
+                            continue;
+                        }
+                        let (prop_str, target) = if let Some((pr, tg)) = part.split_once('@') {
+                            (pr.trim(), Some(tg.trim().to_string()))
+                        } else {
+                            (part, None)
+                        };
+                        if let Some(pt) = PropType::from_str_loose(prop_str) {
+                            current_props.push(PropItem {
+                                prop_type: pt,
+                                target,
+                            });
+                        }
+                    }
+                    continue;
+                }
             }
             if inner.ends_with('!') {
                 current_effects.push(VisualEffect::Onomatopoeia(inner.to_string()));
@@ -130,6 +153,19 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
             }
             if let Some(sticker) = StickerType::from_str_loose(inner) {
                 current_effects.push(VisualEffect::Sticker(sticker));
+                continue;
+            }
+            // Direct prop tag without prefix: e.g. [cafe @ Dan] or [cafe] or [livro]
+            let (prop_cand, target) = if let Some((pr, tg)) = inner.split_once('@') {
+                (pr.trim(), Some(tg.trim().to_string()))
+            } else {
+                (inner, None)
+            };
+            if let Some(pt) = PropType::from_str_loose(prop_cand) {
+                current_props.push(PropItem {
+                    prop_type: pt,
+                    target,
+                });
                 continue;
             }
         }
@@ -185,6 +221,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
     if !current_dialogues.is_empty()
         || !current_effects.is_empty()
         || !current_characters.is_empty()
+        || !current_props.is_empty()
         || current_backdrop.is_some()
     {
         let chars = if !current_characters.is_empty() {
@@ -201,6 +238,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
             characters: chars,
             backdrop: bg,
             width: w,
+            props: current_props,
         });
     }
 
@@ -209,6 +247,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
         let first = panels.remove(0);
         let all_dialogues = first.dialogues;
         let mut effects = first.effects;
+        let mut props = first.props;
         let p_chars = first.characters;
         let p_bg = first.backdrop;
         let mut grouped = Vec::new();
@@ -226,10 +265,11 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                     characters: p_chars.clone(),
                     backdrop: p_bg.clone(),
                     width: None,
+                    props: std::mem::take(&mut props),
                 });
             }
         }
-        if !chunk.is_empty() || !effects.is_empty() {
+        if !chunk.is_empty() || !effects.is_empty() || !props.is_empty() {
             grouped.push(Panel {
                 id: grouped.len() + 1,
                 dialogues: chunk,
@@ -237,6 +277,7 @@ pub fn parse_dialogue_script(script: &str, title: Option<&str>) -> Result<ComicS
                 characters: p_chars,
                 backdrop: p_bg,
                 width: None,
+                props,
             });
         }
         grouped

@@ -112,6 +112,7 @@ pub fn render_comic_strip_to_svg_with_registry(
         .panel-frame-ink { stroke: #111111; stroke-width: 2.5; stroke-linecap: square; }
         .panel-corner-tick { stroke: #111111; stroke-width: 2.5; }
         .sfx-text { font-family: 'Impact', 'Arial Black', sans-serif; font-size: 24px; font-weight: 900; text-anchor: middle; fill: #d90429; stroke: #ffffff; stroke-width: 1.5; letter-spacing: 2px; }
+        .comic-prop { pointer-events: none; }
     </style></defs>"##);
 
     // Render Title
@@ -408,6 +409,97 @@ fn render_single_panel(
         }
         out.push_str(&slot.pose_svg);
         out.push_str("</g>");
+    }
+
+    // 4.5. Render Props (Academic & comic items in authentic nanquim style)
+    let mut untargeted_count = 0;
+    for prop in &panel.props {
+        let is_targeted = if let Some(target_name) = &prop.target {
+            slots
+                .iter()
+                .any(|s| s.speaker.eq_ignore_ascii_case(target_name))
+        } else {
+            false
+        };
+        if !is_targeted {
+            untargeted_count += 1;
+        }
+    }
+
+    let mut speaker_prop_counts: std::collections::HashMap<String, usize> =
+        std::collections::HashMap::new();
+    let mut untargeted_idx = 0;
+    for prop in &panel.props {
+        let (cx, cy, scale, flipped) = if let Some(target_name) = &prop.target {
+            if let Some(slot) = slots
+                .iter()
+                .find(|s| s.speaker.eq_ignore_ascii_case(target_name))
+            {
+                // Character-held prop: position around hand / waist level
+                let count = speaker_prop_counts.entry(slot.speaker.clone()).or_insert(0);
+                let offset_x = (*count as f64) * 22.0;
+                *count += 1;
+                let (base_cx, flipped) = if slot.flipped {
+                    (slot.char_x + (slot.scaled_w * 0.22) - offset_x, true)
+                } else {
+                    (slot.char_x + (slot.scaled_w * 0.78) + offset_x, false)
+                };
+                let cy = if prop.prop_type == crate::model::PropType::Microphone {
+                    floor_y - 18.0
+                } else {
+                    floor_y - 32.0
+                };
+                (base_cx.clamp(px + 16.0, px + pw - 16.0), cy, 0.95, flipped)
+            } else {
+                let idx = untargeted_idx;
+                untargeted_idx += 1;
+                let cx = if slots.len() == 1 {
+                    if idx % 2 == 0 {
+                        px + 36.0 + ((idx / 2) as f64 * 32.0)
+                    } else {
+                        px + pw - 36.0 - ((idx / 2) as f64 * 32.0)
+                    }
+                } else {
+                    px + (pw * (idx + 1) as f64) / (untargeted_count + 1) as f64
+                };
+                let ground_offset = match prop.prop_type {
+                    crate::model::PropType::Coffee | crate::model::PropType::Book => 10.0,
+                    crate::model::PropType::Laptop => 14.0,
+                    crate::model::PropType::Erlenmeyer => 15.0,
+                    crate::model::PropType::Chalk => 4.0,
+                    crate::model::PropType::Stethoscope => 20.0,
+                    crate::model::PropType::Microphone => 18.0,
+                    crate::model::PropType::Custom(_) => 10.0,
+                };
+                let cy = floor_y - ground_offset;
+                (cx, cy, 0.95, false)
+            }
+        } else {
+            let idx = untargeted_idx;
+            untargeted_idx += 1;
+            let cx = if slots.len() == 1 {
+                if idx % 2 == 0 {
+                    px + 36.0 + ((idx / 2) as f64 * 32.0)
+                } else {
+                    px + pw - 36.0 - ((idx / 2) as f64 * 32.0)
+                }
+            } else {
+                px + (pw * (idx + 1) as f64) / (untargeted_count + 1) as f64
+            };
+            let ground_offset = match prop.prop_type {
+                crate::model::PropType::Coffee | crate::model::PropType::Book => 10.0,
+                crate::model::PropType::Laptop => 14.0,
+                crate::model::PropType::Erlenmeyer => 15.0,
+                crate::model::PropType::Chalk => 4.0,
+                crate::model::PropType::Stethoscope => 20.0,
+                crate::model::PropType::Microphone => 18.0,
+                crate::model::PropType::Custom(_) => 10.0,
+            };
+            let cy = floor_y - ground_offset;
+            (cx, cy, 0.95, false)
+        };
+
+        out.push_str(&crate::props::render_prop_svg(prop, cx, cy, scale, flipped));
     }
 
     // 5. Render Visual Effects (Onomatopoeia & Stickers)

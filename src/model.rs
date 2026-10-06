@@ -167,6 +167,59 @@ impl PanelWidth {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum PropType {
+    Coffee,
+    Book,
+    Laptop,
+    Erlenmeyer,
+    Chalk,
+    Stethoscope,
+    Microphone,
+    Custom(u32),
+}
+
+impl PropType {
+    pub fn from_str_loose(s: &str) -> Option<Self> {
+        match s.trim().to_lowercase().as_str() {
+            "cafe" | "café" | "coffee" | "xicara" | "xícara" | "mug" | "cup" => {
+                Some(PropType::Coffee)
+            }
+            "livro" | "book" | "caderno" | "notebook_paper" | "leitura" => Some(PropType::Book),
+            "laptop" | "notebook" | "computador" | "pc" => Some(PropType::Laptop),
+            "erlenmeyer" | "quimica" | "química" | "laboratorio" | "frasco" | "potion" => {
+                Some(PropType::Erlenmeyer)
+            }
+            "giz" | "chalk" => Some(PropType::Chalk),
+            "estetoscopio" | "estetoscópio" | "stethoscope" | "medico" | "médico" => {
+                Some(PropType::Stethoscope)
+            }
+            "microfone" | "mic" | "microphone" => Some(PropType::Microphone),
+            _ => None,
+        }
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            PropType::Coffee => "cafe",
+            PropType::Book => "livro",
+            PropType::Laptop => "laptop",
+            PropType::Erlenmeyer => "erlenmeyer",
+            PropType::Chalk => "giz",
+            PropType::Stethoscope => "estetoscopio",
+            PropType::Microphone => "microfone",
+            PropType::Custom(_) => "custom",
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PropItem {
+    pub prop_type: PropType,
+    pub target: Option<String>,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Panel {
     pub id: usize,
@@ -179,6 +232,8 @@ pub struct Panel {
     pub backdrop: Option<String>,
     #[serde(default)]
     pub width: Option<PanelWidth>,
+    #[serde(default)]
+    pub props: Vec<PropItem>,
 }
 
 impl Panel {

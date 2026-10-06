@@ -9,6 +9,7 @@ pub mod balloon;
 pub mod character;
 pub mod model;
 pub mod parser;
+pub mod props;
 pub mod renderer;
 
 #[cfg(not(target_arch = "wasm32"))]

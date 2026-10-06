@@ -496,6 +496,7 @@
           <option value="grid">6. Layout Quadrado (Grid 2x2)</option>
           <option value="vertical">7. Layout Webtoon (Vertical Mobile)</option>
           <option value="dynamic">📏 8. Painéis Dinâmicos (Estreito / Padrão / Amplo)</option>
+          <option value="props">☕ 9. Objetos de Cena (Props em Nanquim)</option>
         </select>
         <input type="text" id="title-input" placeholder="Título da Tirinha (opcional)..." value="Ayvu Comic Chat">
       </div>
@@ -578,6 +579,21 @@
           <button type="button" class="chip" data-insert="[shock]">❗ [shock]</button>
           <button type="button" class="chip" data-insert="[idea]">💡 [idea]</button>
           <button type="button" class="chip" data-insert="---">&#10134; Novo Painel (---)</button>
+        </div>
+      </div>
+
+      <!-- Quick Chips: Props -->
+      <div class="toolbar-row">
+        <span class="row-label">☕ Objetos de Cena (Props em Nanquim)</span>
+        <div class="chips-group">
+          <button type="button" class="chip" data-insert="[prop: cafe]">☕ [prop: cafe]</button>
+          <button type="button" class="chip" data-insert="[prop: livro]">📖 [prop: livro]</button>
+          <button type="button" class="chip" data-insert="[prop: laptop]">💻 [prop: laptop]</button>
+          <button type="button" class="chip" data-insert="[prop: erlenmeyer]">🧪 [prop: erlenmeyer]</button>
+          <button type="button" class="chip" data-insert="[prop: giz]">🖍️ [prop: giz]</button>
+          <button type="button" class="chip" data-insert="[prop: estetoscopio]">🩺 [prop: estetoscopio]</button>
+          <button type="button" class="chip" data-insert="[prop: microfone]">🎙️ [prop: microfone]</button>
+          <button type="button" class="chip" data-insert="[prop: cafe @ Dan]">🎯 [prop: cafe @ Dan]</button>
         </div>
       </div>
 
@@ -696,6 +712,11 @@ Tiki (happy): UAU, ARTE DO JIM WOODRING E BALÕES CLÁSSICOS! [idea]</textarea>
               <td>Cenário por Quadro</td>
               <td><code>[backdrop: hu_fachada]</code>, <code>[backdrop: ru]</code>, <code>[backdrop: hall_ccs]</code>, <code>[backdrop: sala_de_aula]</code>, <code>[backdrop: bu_ufsc]</code></td>
               <td>Alterna cenários vetoriais da UFSC (HU, RU Bandejão, Hall CCS, Salas, BU) ou clássicos por painel.</td>
+            </tr>
+            <tr>
+              <td>Objetos de Cena (Props)</td>
+              <td><code>[prop: cafe]</code>, <code>[prop: cafe @ Dan]</code>, <code>[props: livro, laptop]</code></td>
+              <td>Adiciona objetos em nanquim autêntico (café, livro, laptop, erlenmeyer, giz, estetoscópio, microfone) no chão ou nas mãos do personagem.</td>
             </tr>
           </tbody>
         </table>
@@ -853,7 +874,22 @@ Dan: Em um quadro padrão de 280px!
 [characters: Armando, Dan, Tiki]
 Armando: E quando chegam 3 personagens no lab...
 Dan: O quadro se expande automaticamente!
-Tiki (happy): Ninguém fica espremido! [idea]`
+Tiki (happy): Ninguém fica espremido! [idea]`,
+
+      props: `[backdrop: cafe_ccs]
+[prop: cafe @ Dan]
+Dan: Nada como um café fresquinho para começar o turno no CCS!
+---
+[backdrop: bu_ufsc]
+[prop: livro @ Arti]
+[prop: laptop]
+Arti (thinking): Pesquisando na Biblioteca Universitária com meu notebook...
+---
+[backdrop: laboratorio]
+[prop: erlenmeyer @ Dan]
+[prop: estetoscopio @ Arti]
+Dan (surprised): A análise reagiu perfeitamente no erlenmeyer!
+Arti (happy): E o exame clínico está em ordem! [idea]`
     };
 
     const editor = document.getElementById('editor');

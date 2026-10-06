@@ -50,6 +50,7 @@ fn test_comic_chat_backdrops_rendering() {
         }],
         effects: vec![],
         width: None,
+        props: vec![],
     };
 
     let strip = ComicStrip {
@@ -96,6 +97,7 @@ fn test_comic_chat_layout_proportions() {
         ],
         effects: vec![],
         width: None,
+        props: vec![],
     };
 
     let strip = ComicStrip {
@@ -159,6 +161,7 @@ fn test_balloon_arrow_stops_above_character_head() {
         }],
         effects: vec![],
         width: None,
+        props: vec![],
     };
 
     let strip = ComicStrip {
@@ -202,6 +205,7 @@ fn test_characters_face_each_other() {
         ],
         effects: vec![],
         width: None,
+        props: vec![],
     };
 
     let strip = ComicStrip {
@@ -257,6 +261,7 @@ fn test_three_characters_in_single_panel() {
         ],
         effects: vec![],
         width: None,
+        props: vec![],
     };
 
     let strip = ComicStrip {
@@ -429,5 +434,76 @@ Tiki: Largura customizada de 320px
     assert!(
         svg.contains(r#"viewBox="0 0 954.0 312.0""#),
         "Total viewBox must reflect sum of dynamic widths"
+    );
+}
+
+#[test]
+fn test_props_parsing_and_rendering() {
+    let script = r#"
+[characters: Dan, Arti]
+[prop: cafe @ Dan]
+[prop: laptop @ Arti]
+Dan: Tomando um café antes de compilar o código.
+Arti: Já estou com o repositório aberto no notebook!
+---
+[props: livro, erlenmeyer, microfone]
+Dan: O simpósio científico vai começar.
+"#;
+
+    let strip = ayvu::parser::parse_dialogue_script(script, None).unwrap();
+    assert_eq!(strip.panels.len(), 2);
+
+    // Panel 1 props
+    assert_eq!(strip.panels[0].props.len(), 2);
+    assert_eq!(
+        strip.panels[0].props[0].prop_type,
+        ayvu::model::PropType::Coffee
+    );
+    assert_eq!(strip.panels[0].props[0].target, Some("Dan".to_string()));
+    assert_eq!(
+        strip.panels[0].props[1].prop_type,
+        ayvu::model::PropType::Laptop
+    );
+    assert_eq!(strip.panels[0].props[1].target, Some("Arti".to_string()));
+
+    // Panel 2 props (untargeted)
+    assert_eq!(strip.panels[1].props.len(), 3);
+    assert_eq!(
+        strip.panels[1].props[0].prop_type,
+        ayvu::model::PropType::Book
+    );
+    assert_eq!(strip.panels[1].props[0].target, None);
+    assert_eq!(
+        strip.panels[1].props[1].prop_type,
+        ayvu::model::PropType::Erlenmeyer
+    );
+    assert_eq!(
+        strip.panels[1].props[2].prop_type,
+        ayvu::model::PropType::Microphone
+    );
+
+    // Render to SVG
+    let svg = render_comic_strip_to_svg(&strip);
+
+    // Verify SVG elements and classes
+    assert!(
+        svg.contains("class=\"comic-prop prop-cafe\""),
+        "SVG must contain rendered coffee mug prop"
+    );
+    assert!(
+        svg.contains("class=\"comic-prop prop-laptop\""),
+        "SVG must contain rendered laptop prop"
+    );
+    assert!(
+        svg.contains("class=\"comic-prop prop-livro\""),
+        "SVG must contain rendered book prop"
+    );
+    assert!(
+        svg.contains("class=\"comic-prop prop-erlenmeyer\""),
+        "SVG must contain rendered erlenmeyer prop"
+    );
+    assert!(
+        svg.contains("class=\"comic-prop prop-microfone\""),
+        "SVG must contain rendered microphone prop"
     );
 }
