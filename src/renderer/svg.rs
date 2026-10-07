@@ -444,10 +444,13 @@ fn render_single_panel(
                 } else {
                     (slot.char_x + (slot.scaled_w * 0.78) + offset_x, false)
                 };
-                let cy = if prop.prop_type == crate::model::PropType::Microphone {
-                    floor_y - 18.0
-                } else {
-                    floor_y - 32.0
+                let cy = match prop.prop_type {
+                    crate::model::PropType::Microphone => floor_y - 18.0,
+                    crate::model::PropType::Backpack => floor_y - 28.0,
+                    crate::model::PropType::Umbrella => floor_y - 36.0,
+                    crate::model::PropType::Tray => floor_y - 30.0,
+                    crate::model::PropType::Phone => floor_y - 34.0,
+                    _ => floor_y - 32.0,
                 };
                 (base_cx.clamp(px + 16.0, px + pw - 16.0), cy, 0.95, flipped)
             } else {
@@ -463,12 +466,18 @@ fn render_single_panel(
                     px + (pw * (idx + 1) as f64) / (untargeted_count + 1) as f64
                 };
                 let ground_offset = match prop.prop_type {
-                    crate::model::PropType::Coffee | crate::model::PropType::Book => 10.0,
+                    crate::model::PropType::Coffee
+                    | crate::model::PropType::Book
+                    | crate::model::PropType::Caderno => 10.0,
+                    crate::model::PropType::Tray => 6.0,
                     crate::model::PropType::Laptop => 14.0,
                     crate::model::PropType::Erlenmeyer => 15.0,
                     crate::model::PropType::Chalk => 4.0,
                     crate::model::PropType::Stethoscope => 20.0,
                     crate::model::PropType::Microphone => 18.0,
+                    crate::model::PropType::Phone => 12.0,
+                    crate::model::PropType::Backpack => 18.0,
+                    crate::model::PropType::Umbrella => 24.0,
                     crate::model::PropType::Custom(_) => 10.0,
                 };
                 let cy = floor_y - ground_offset;
@@ -487,12 +496,18 @@ fn render_single_panel(
                 px + (pw * (idx + 1) as f64) / (untargeted_count + 1) as f64
             };
             let ground_offset = match prop.prop_type {
-                crate::model::PropType::Coffee | crate::model::PropType::Book => 10.0,
+                crate::model::PropType::Coffee
+                | crate::model::PropType::Book
+                | crate::model::PropType::Caderno => 10.0,
+                crate::model::PropType::Tray => 6.0,
                 crate::model::PropType::Laptop => 14.0,
                 crate::model::PropType::Erlenmeyer => 15.0,
                 crate::model::PropType::Chalk => 4.0,
                 crate::model::PropType::Stethoscope => 20.0,
                 crate::model::PropType::Microphone => 18.0,
+                crate::model::PropType::Phone => 12.0,
+                crate::model::PropType::Backpack => 18.0,
+                crate::model::PropType::Umbrella => 24.0,
                 crate::model::PropType::Custom(_) => 10.0,
             };
             let cy = floor_y - ground_offset;

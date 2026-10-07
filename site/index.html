@@ -498,6 +498,7 @@
           <option value="vertical">7. Layout Webtoon (Vertical Mobile)</option>
           <option value="dynamic">📏 8. Painéis Dinâmicos (Estreito / Padrão / Amplo)</option>
           <option value="props">☕ 9. Objetos de Cena (Props em Nanquim)</option>
+          <option value="campus_tour">🏛️ 10. Tour do Campus UFSC (Praça, CTC, CFH, Pantanal & Capivara)</option>
         </select>
         <input type="text" id="title-input" placeholder="Título da Tirinha (opcional)..." value="Ayvu Comic Chat">
       </div>
@@ -527,6 +528,10 @@
       <div class="toolbar-row">
         <span class="row-label">🖼️ Cenários (Vetoriais Nanquim UFSC & Clássicos)</span>
         <div class="chips-group" id="backdrop-chips">
+          <button type="button" class="chip" data-insert="[backdrop: praca_cidadania]">🏛️ Praça Cidadania</button>
+          <button type="button" class="chip" data-insert="[backdrop: ctc]">💻 CTC Tecnológico</button>
+          <button type="button" class="chip" data-insert="[backdrop: cfh]">🌳 CFH Bosquinho</button>
+          <button type="button" class="chip" data-insert="[backdrop: pantanal]">🦫 Pantanal Capivara</button>
           <button type="button" class="chip" data-insert="[backdrop: hu_fachada]">🏥 Hospital HU</button>
           <button type="button" class="chip" data-insert="[backdrop: ru]">🍽️ RU Bandejão</button>
           <button type="button" class="chip" data-insert="[backdrop: hall_ccs]">🏛️ Hall do CCS</button>
@@ -590,6 +595,11 @@
       <div class="toolbar-row">
         <span class="row-label">☕ Objetos de Cena (Props em Nanquim)</span>
         <div class="chips-group">
+          <button type="button" class="chip" data-insert="[prop: bandeja]">🍱 [prop: bandeja]</button>
+          <button type="button" class="chip" data-insert="[prop: mochila]">🎒 [prop: mochila]</button>
+          <button type="button" class="chip" data-insert="[prop: celular]">📱 [prop: celular]</button>
+          <button type="button" class="chip" data-insert="[prop: guarda_chuva]">☂️ [prop: guarda_chuva]</button>
+          <button type="button" class="chip" data-insert="[prop: caderno]">📓 [prop: caderno]</button>
           <button type="button" class="chip" data-insert="[prop: cafe]">☕ [prop: cafe]</button>
           <button type="button" class="chip" data-insert="[prop: livro]">📖 [prop: livro]</button>
           <button type="button" class="chip" data-insert="[prop: laptop]">💻 [prop: laptop]</button>
@@ -893,7 +903,28 @@ Arti (thinking): Pesquisando na Biblioteca Universitária com meu notebook...
 [prop: erlenmeyer @ Dan]
 [prop: estetoscopio @ Arti]
 Dan (surprised): A análise reagiu perfeitamente no erlenmeyer!
-Arti (happy): E o exame clínico está em ordem! [idea]`
+Arti (happy): E o exame clínico está em ordem! [idea]`,
+
+      campus_tour: `[backdrop: praca_cidadania]
+[prop: mochila @ Arti]
+Arti (happy): Encontrando todo mundo na Praça da Cidadania da UFSC!
+Dan (neutral): Dia perfeito em frente à Reitoria!
+---
+[backdrop: ctc]
+[prop: laptop @ Dan]
+Dan (thinking): Os servidores do CTC compilaram tudo sem warnings!
+Arti (laughing): Código em produção a todo vapor! [idea]
+---
+[backdrop: cfh]
+[prop: caderno @ Arti]
+[prop: guarda_chuva]
+Arti: Conversando na sombra do Bosquinho do CFH com meu caderno de notas.
+Dan: E o guarda-chuva garantido pro tempo imprevisível da Ilha!
+---
+[backdrop: pantanal]
+[prop: celular @ Dan]
+Dan (happy): Olha só a famosa capivara da UFSC descansando na beira do Córrego! [heart]
+Arti (laughing): A verdadeira embaixadora do campus!`
     };
 
     const editor = document.getElementById('editor');

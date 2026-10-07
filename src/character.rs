@@ -86,6 +86,7 @@ impl CharacterPack {
             Emotion::Skeptical => "thinking",
             Emotion::Shouting => "angry",
             Emotion::Laughing => "happy",
+            Emotion::Surprised => "scared",
             _ => "neutral",
         };
 

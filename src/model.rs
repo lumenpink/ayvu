@@ -177,6 +177,11 @@ pub enum PropType {
     Chalk,
     Stethoscope,
     Microphone,
+    Tray,
+    Backpack,
+    Phone,
+    Umbrella,
+    Caderno,
     Custom(u32),
 }
 
@@ -186,8 +191,8 @@ impl PropType {
             "cafe" | "café" | "coffee" | "xicara" | "xícara" | "mug" | "cup" => {
                 Some(PropType::Coffee)
             }
-            "livro" | "book" | "caderno" | "notebook_paper" | "leitura" => Some(PropType::Book),
-            "laptop" | "notebook" | "computador" | "pc" => Some(PropType::Laptop),
+            "livro" | "book" | "leitura" => Some(PropType::Book),
+            "laptop" | "computador" | "pc" => Some(PropType::Laptop),
             "erlenmeyer" | "quimica" | "química" | "laboratorio" | "frasco" | "potion" => {
                 Some(PropType::Erlenmeyer)
             }
@@ -196,6 +201,13 @@ impl PropType {
                 Some(PropType::Stethoscope)
             }
             "microfone" | "mic" | "microphone" => Some(PropType::Microphone),
+            "bandeja" | "bandejao" | "bandejão" | "tray" | "prato_ru" => Some(PropType::Tray),
+            "mochila" | "backpack" | "bag" | "bolsa" => Some(PropType::Backpack),
+            "celular" | "smartphone" | "phone" | "mobile" => Some(PropType::Phone),
+            "guarda_chuva" | "guarda-chuva" | "umbrella" | "sombrinha" => Some(PropType::Umbrella),
+            "caderno" | "bloco" | "notepad" | "spiral_notebook" | "notebook_paper" => {
+                Some(PropType::Caderno)
+            }
             _ => None,
         }
     }
@@ -209,6 +221,11 @@ impl PropType {
             PropType::Chalk => "giz",
             PropType::Stethoscope => "estetoscopio",
             PropType::Microphone => "microfone",
+            PropType::Tray => "bandeja",
+            PropType::Backpack => "mochila",
+            PropType::Phone => "celular",
+            PropType::Umbrella => "guarda_chuva",
+            PropType::Caderno => "caderno",
             PropType::Custom(_) => "custom",
         }
     }

@@ -21,6 +21,18 @@ pub fn get_vector_backdrop_svg(name: &str, px: f64, py: f64, w: f64, h: f64) -> 
         "bu_ufsc" | "bu" | "biblioteca" | "biblioteca_universitaria" => {
             Some(render_bu_ufsc_svg(px, py, w, h))
         }
+        "praca_cidadania" | "praca" | "reitoria" | "cidadania" => {
+            Some(render_praca_cidadania_svg(px, py, w, h))
+        }
+        "ctc" | "engenharia" | "tecnologico" => {
+            Some(render_ctc_svg(px, py, w, h))
+        }
+        "cfh" | "bosquinho" | "humanas" => {
+            Some(render_cfh_svg(px, py, w, h))
+        }
+        "pantanal" | "morro" | "capivara" | "itacorubi" => {
+            Some(render_pantanal_svg(px, py, w, h))
+        }
         "pastoral_vector" | "pastoral_vec" => Some(render_pastoral_vector_svg(px, py, w, h)),
         "room" | "quarto" | "sala" => Some(render_room_svg(px, py, w, h)),
         _ => None,
@@ -38,6 +50,10 @@ pub fn list_available_backdrops() -> &'static [&'static str] {
         "hall_ccs",
         "hu_enfermaria",
         "bu_ufsc",
+        "praca_cidadania",
+        "ctc",
+        "cfh",
+        "pantanal",
         "room",
     ]
 }
@@ -1389,3 +1405,684 @@ fn render_bu_ufsc_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     out.push_str("</g>");
     out
 }
+
+
+
+
+/// Praça da Cidadania (UFSC) - Reitoria facade, palm trees, street lamps, and cobblestone plaza
+fn render_praca_cidadania_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    out.push_str(r##"<g class="backdrop-vector backdrop-praca-cidadania">\"##);
+
+    // Sky tint
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f4f8fb" />\"##
+    ));
+
+    // Distant birds in sky
+    let bird1_x = px + (w * 0.45);
+    let bird1_y = py + 14.0;
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#666666" stroke-width="1.2" stroke-linecap="round" />"##,
+        bird1_x, bird1_y,
+        bird1_x + 4.0, bird1_y - 3.0, bird1_x + 8.0, bird1_y,
+        bird1_x + 12.0, bird1_y - 3.0, bird1_x + 16.0, bird1_y
+    ));
+    let bird2_x = px + (w * 0.52);
+    let bird2_y = py + 20.0;
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#777777" stroke-width="1.0" stroke-linecap="round" />"##,
+        bird2_x, bird2_y,
+        bird2_x + 3.0, bird2_y - 2.5, bird2_x + 6.0, bird2_y,
+        bird2_x + 9.0, bird2_y - 2.5, bird2_x + 12.0, bird2_y
+    ));
+
+    let floor_y = py + h - 16.0;
+
+    // Reitoria UFSC Facade in background
+    let reit_x = px + 44.0;
+    let reit_w = w - 80.0;
+    let reit_y = py + 26.0;
+    let reit_h = floor_y - reit_y - 28.0;
+
+    // Building main body
+    out.push_str(&format!(
+        r##"<rect x="{reit_x:.1}" y="{reit_y:.1}" width="{reit_w:.1}" height="{reit_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="2.5" />\"##
+    ));
+    // Parapet roof rim
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="6" fill="#e1e4e8" stroke="#111111" stroke-width="1.8" />\"##,
+        reit_x - 3.0, reit_y - 4.0, reit_w + 6.0
+    ));
+
+    // Ribbon windows across the building (Modernist concrete & glass)
+    let win_y1 = reit_y + 10.0;
+    let win_y2 = reit_y + 26.0;
+    let win_w = reit_w - 16.0;
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{win_y1:.1}" width="{win_w:.1}" height="10" fill="#24292e" stroke="#111111" stroke-width="1.5" />\"##,
+        reit_x + 8.0
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{win_y2:.1}" width="{win_w:.1}" height="10" fill="#24292e" stroke="#111111" stroke-width="1.5" />\"##,
+        reit_x + 8.0
+    ));
+    // Window vertical mullions
+    let mullion_step = 18.0;
+    let mut mx = reit_x + 16.0;
+    while mx < reit_x + win_w {
+        out.push_str(&format!(
+            r##"<line x1="{mx:.1}" y1="{win_y1:.1}" x2="{mx:.1}" y2="{:.1}" stroke="#8c959f" stroke-width="1" />\"##,
+            win_y1 + 10.0
+        ));
+        out.push_str(&format!(
+            r##"<line x1="{mx:.1}" y1="{win_y2:.1}" x2="{mx:.1}" y2="{:.1}" stroke="#8c959f" stroke-width="1" />\"##,
+            win_y2 + 10.0
+        ));
+        mx += mullion_step;
+    }
+
+    // Central Portico / Entrance
+    let port_w = 48.0;
+    let port_x = reit_x + (reit_w / 2.0) - (port_w / 2.0);
+    let port_y = reit_y + 38.0;
+    let port_h = reit_h - 38.0;
+    out.push_str(&format!(
+        r##"<rect x="{port_x:.1}" y="{port_y:.1}" width="{port_w:.1}" height="{port_h:.1}" fill="#f6f8fa" stroke="#111111" stroke-width="2" />\"##
+    ));
+    // Glass doors
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="36" height="{:.1}" fill="#e6edf5" stroke="#111111" stroke-width="1.5" />\"##,
+        port_x + 6.0, port_y + 8.0, port_h - 8.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />\"##,
+        port_x + 24.0, port_y + 8.0, port_x + 24.0, port_y + port_h
+    ));
+
+    // Sign plate: UFSC REITORIA
+    let sign_w = 44.0;
+    let sign_x = reit_x + (reit_w / 2.0) - (sign_w / 2.0);
+    let sign_y = port_y - 9.0;
+    out.push_str(&format!(
+        r##"<rect x="{sign_x:.1}" y="{sign_y:.1}" width="{sign_w:.1}" height="8" fill="#1b1f23" rx="1" />\"##
+    ));
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="4.5" font-weight="bold" fill="#ffffff" letter-spacing="0.5">UFSC REITORIA</text>\"##,
+        sign_x + (sign_w / 2.0), sign_y + 5.5
+    ));
+
+    // Two Flagpoles with waving flags
+    let flag1_x = port_x + 10.0;
+    out.push_str(&format!(
+        r##"<line x1="{flag1_x:.1}" y1="{reit_y:.1}" x2="{flag1_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.5" />\"##,
+        reit_y - 18.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {flag1_x:.1} {:.1} q 6 -3 12 0 q -6 4 -12 2 Z" fill="#2da44e" stroke="#111111" stroke-width="1" />\"##,
+        reit_y - 18.0
+    ));
+
+    let flag2_x = port_x + port_w - 10.0;
+    out.push_str(&format!(
+        r##"<line x1="{flag2_x:.1}" y1="{reit_y:.1}" x2="{flag2_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.5" />\"##,
+        reit_y - 18.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {flag2_x:.1} {:.1} q 6 -3 12 0 q -6 4 -12 2 Z" fill="#0969da" stroke="#111111" stroke-width="1" />\"##,
+        reit_y - 18.0
+    ));
+
+    // Iconic UFSC Imperial Palm Tree (Left side)
+    let palm_x = px + 22.0;
+    let palm_top_y = py + 18.0;
+    // Trunk
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {floor_y:.1} Q {:.1} {:.1} {:.1} {palm_top_y:.1} L {:.1} {palm_top_y:.1} Q {:.1} {:.1} {:.1} {floor_y:.1} Z" fill="#5c4d3c" stroke="#111111" stroke-width="2" />\"##,
+        palm_x - 3.5, palm_x - 1.0, (floor_y + palm_top_y) / 2.0, palm_x - 2.0,
+        palm_x + 2.0, palm_x + 1.0, (floor_y + palm_top_y) / 2.0, palm_x + 3.5
+    ));
+    // Palm fronds arching out
+    let fronds = [
+        (-22.0, -8.0), (-16.0, -18.0), (0.0, -22.0), (16.0, -18.0), (22.0, -8.0),
+        (-24.0, 4.0), (24.0, 4.0)
+    ];
+    for (fdx, fdy) in fronds {
+        out.push_str(&format!(
+            r##"<path d="M {palm_x:.1} {palm_top_y:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" />\"##,
+            palm_x + (fdx * 0.5), palm_top_y + (fdy * 0.4),
+            palm_x + fdx, palm_top_y + fdy
+        ));
+    }
+
+    // Modern Double Globe Campus Street Lamp (Poste da Praça)
+    let lamp_x = px + w - 30.0;
+    let lamp_head_y = py + 34.0;
+    // Pole
+    out.push_str(&format!(
+        r##"<line x1="{lamp_x:.1}" y1="{lamp_head_y:.1}" x2="{lamp_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.5" />\"##
+    ));
+    // Base ring
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="8" height="4" fill="#24292e" stroke="#111111" stroke-width="1.2" rx="1" />\"##,
+        lamp_x - 4.0, floor_y - 4.0
+    ));
+    // T-bar
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{lamp_head_y:.1}" x2="{:.1}" y2="{lamp_head_y:.1}" stroke="#111111" stroke-width="2.2" />\"##,
+        lamp_x - 10.0, lamp_x + 10.0
+    ));
+    // Globes
+    out.push_str(&format!(
+        r##"<circle cx="{:.1}" cy="{:.1}" r="4.5" fill="#ffffff" stroke="#111111" stroke-width="1.5" />\"##,
+        lamp_x - 10.0, lamp_head_y - 3.5
+    ));
+    out.push_str(&format!(
+        r##"<circle cx="{:.1}" cy="{:.1}" r="4.5" fill="#ffffff" stroke="#111111" stroke-width="1.5" />\"##,
+        lamp_x + 10.0, lamp_head_y - 3.5
+    ));
+
+    // Wooden park bench in foreground right
+    let bench_x = px + w - 75.0;
+    let bench_y = floor_y - 22.0;
+    let bench_w = 34.0;
+    // Cast iron legs
+    out.push_str(&format!(
+        r##"<path d="M {bench_x:.1} {floor_y:.1} L {:.1} {bench_y:.1} L {:.1} {floor_y:.1}" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" />\"##,
+        bench_x + 3.0, bench_x + 6.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {floor_y:.1} L {:.1} {bench_y:.1} L {:.1} {floor_y:.1}" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" />\"##,
+        bench_x + bench_w - 6.0, bench_x + bench_w - 3.0, bench_x + bench_w
+    ));
+    // Wooden slats (3 slats)
+    for i in 0..3 {
+        let slat_y = bench_y + (i as f64 * 3.5);
+        out.push_str(&format!(
+            r##"<rect x="{bench_x:.1}" y="{slat_y:.1}" width="{bench_w:.1}" height="2.5" fill="#d4a373" stroke="#111111" stroke-width="1" rx="0.5" />\"##
+        ));
+    }
+
+    // Plaza paving flagstone perspective lines
+    let mut line_x = px + 10.0;
+    while line_x < px + w {
+        out.push_str(&format!(
+            r##"<line x1="{line_x:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#afb8c1" stroke-width="1" stroke-dasharray="8,5" />\"##,
+            line_x - 8.0, floor_y + 14.0
+        ));
+        line_x += 35.0;
+    }
+
+    // Floor groundline
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        px + w
+    ));
+
+    out.push_str("</g>");
+    out
+}
+
+/// Centro Tecnológico (CTC - UFSC) - Brutalist concrete architecture, tech lab, server rack, cables
+fn render_ctc_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    out.push_str(r##"<g class="backdrop-vector backdrop-ctc">\"##);
+
+    // Wall tint
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f6f8fa" />\"##
+    ));
+
+    let floor_y = py + h - 16.0;
+
+    // Overhead industrial cable ladder / ventilation conduit along ceiling
+    let duct_y = py + 12.0;
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{duct_y:.1}" x2="{:.1}" y2="{duct_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        px + w
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2" />\"##,
+        duct_y + 8.0, px + w, duct_y + 8.0
+    ));
+    // Ladder cross rungs
+    let mut rung_x = px + 12.0;
+    while rung_x < px + w {
+        out.push_str(&format!(
+            r##"<line x1="{rung_x:.1}" y1="{duct_y:.1}" x2="{rung_x:.1}" y2="{:.1}" stroke="#24292e" stroke-width="1.5" />\"##,
+            duct_y + 8.0
+        ));
+        rung_x += 16.0;
+    }
+    // Bundled ethernet cable curves hanging from conduit
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#0969da" stroke-width="1.8" />\"##,
+        px + 30.0, duct_y + 8.0, px + 50.0, duct_y + 16.0, px + 70.0, duct_y + 8.0,
+        px + 90.0, duct_y + 14.0, px + 110.0, duct_y + 8.0
+    ));
+
+    // Massive Brutalist Concrete Pillar on the left
+    let pillar_w = 36.0;
+    let pillar_x = px + 14.0;
+    out.push_str(&format!(
+        r##"<rect x="{pillar_x:.1}" y="{py:.1}" width="{pillar_w:.1}" height="{:.1}" fill="#e1e4e8" stroke="#111111" stroke-width="2.5" />\"##,
+        floor_y - py
+    ));
+    // Pillar chamfered bevel lines
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{py:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#8c959f" stroke-width="1.2" stroke-dasharray="14,4" />\"##,
+        pillar_x + 6.0, pillar_x + 6.0
+    ));
+    // Concrete tie-rod formwork circles (concreto aparente)
+    let formwork_ys = [py + 30.0, py + 65.0, py + 100.0, floor_y - 25.0];
+    for f_y in formwork_ys {
+        out.push_str(&format!(
+            r##"<circle cx="{:.1}" cy="{f_y:.1}" r="2" fill="#afb8c1" stroke="#24292e" stroke-width="1" />\"##,
+            pillar_x + 18.0
+        ));
+    }
+
+    // Concrete Beam Mezzanine / Walkway Balcony in background
+    let balc_y = py + 38.0;
+    let balc_h = 10.0;
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{balc_y:.1}" width="{:.1}" height="{balc_h:.1}" fill="#d0d7de" stroke="#111111" stroke-width="2" />\"##,
+        pillar_x + pillar_w, px + w - (pillar_x + pillar_w)
+    ));
+    // Steel handrail
+    let rail_top_y = balc_y - 14.0;
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{rail_top_y:.1}" x2="{:.1}" y2="{rail_top_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        pillar_x + pillar_w, px + w
+    ));
+    // Balusters
+    let mut b_x = pillar_x + pillar_w + 14.0;
+    while b_x < px + w {
+        out.push_str(&format!(
+            r##"<line x1="{b_x:.1}" y1="{rail_top_y:.1}" x2="{b_x:.1}" y2="{balc_y:.1}" stroke="#24292e" stroke-width="1.2" />\"##
+        ));
+        b_x += 16.0;
+    }
+
+    // Laboratory Door & Window in middle
+    let door_x = px + pillar_w + 24.0;
+    let door_w = 46.0;
+    let door_y = balc_y + balc_h + 12.0;
+    let door_h = floor_y - door_y;
+    // Door frame
+    out.push_str(&format!(
+        r##"<rect x="{door_x:.1}" y="{door_y:.1}" width="{door_w:.1}" height="{door_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="2" />\"##
+    ));
+    // Glass window panel
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="34" height="42" fill="#e6edf5" stroke="#111111" stroke-width="1.5" />\"##,
+        door_x + 6.0, door_y + 8.0
+    ));
+    // Reflection glare
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffffff" stroke-width="2" />\"##,
+        door_x + 12.0, door_y + 16.0, door_x + 24.0, door_y + 36.0
+    ));
+
+    // Department Wall Sign
+    let sign_w = 54.0;
+    let sign_x = door_x + door_w + 12.0;
+    let sign_y = door_y + 2.0;
+    out.push_str(&format!(
+        r##"<rect x="{sign_x:.1}" y="{sign_y:.1}" width="{sign_w:.1}" height="22" fill="#1b1f23" stroke="#111111" stroke-width="1.5" rx="1.5" />\"##
+    ));
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="5" font-weight="bold" fill="#58a6ff" letter-spacing="0.5">CTC TECNOLÓGICO</text>\"##,
+        sign_x + (sign_w / 2.0), sign_y + 9.0
+    ));
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="3.8" fill="#c9d1d9">LAB SISTEMAS &amp; IA</text>\"##,
+        sign_x + (sign_w / 2.0), sign_y + 17.0
+    ));
+
+    // High-Tech Server Rack Cabinet on right
+    let rack_w = 32.0;
+    let rack_x = px + w - rack_w - 12.0;
+    let rack_y = floor_y - 82.0;
+    let rack_h = 82.0;
+    // Cabinet
+    out.push_str(&format!(
+        r##"<rect x="{rack_x:.1}" y="{rack_y:.1}" width="{rack_w:.1}" height="{rack_h:.1}" fill="#161b22" stroke="#111111" stroke-width="2.5" rx="2" />\"##
+    ));
+    // Server units
+    for u in 0..5 {
+        let uy = rack_y + 6.0 + (u as f64 * 14.5);
+        out.push_str(&format!(
+            r##"<rect x="{:.1}" y="{uy:.1}" width="26" height="11" fill="#21262d" stroke="#30363d" stroke-width="1" rx="1" />\"##,
+            rack_x + 3.0
+        ));
+        // Status LED lights (Green/Blue/Yellow)
+        let led_color = if u % 2 == 0 { "#238636" } else { "#1f6feb" };
+        out.push_str(&format!(
+            r##"<circle cx="{:.1}" cy="{:.1}" r="1.3" fill="{led_color}" />\"##,
+            rack_x + 7.0, uy + 5.5
+        ));
+        out.push_str(&format!(
+            r##"<circle cx="{:.1}" cy="{:.1}" r="1.3" fill="#238636" />\"##,
+            rack_x + 11.5, uy + 5.5
+        ));
+        // Drive slots
+        out.push_str(&format!(
+            r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#484f58" stroke-width="1" />\"##,
+            rack_x + 16.0, uy + 5.5, rack_x + 26.0, uy + 5.5
+        ));
+    }
+
+    // Floor line
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        px + w
+    ));
+
+    // Floor antistatic grid lines
+    let mut fg_x = px + 10.0;
+    while fg_x < px + w {
+        out.push_str(&format!(
+            r##"<line x1="{fg_x:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#afb8c1" stroke-width="1" stroke-dasharray="6,4" />\"##,
+            fg_x - 10.0, floor_y + 14.0
+        ));
+        fg_x += 30.0;
+    }
+
+    out.push_str("</g>");
+    out
+}
+
+/// Centro de Filosofia e Ciências Humanas (CFH - UFSC) - Bosquinho, student mural, native trees
+fn render_cfh_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    out.push_str(r##"<g class="backdrop-vector backdrop-cfh">\"##);
+
+    // Forest / outdoor air tint
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f2f7f4" />\"##
+    ));
+
+    let floor_y = py + h - 16.0;
+
+    // Distant brick pavilion wall of CFH building in background
+    let wall_x = px + 30.0;
+    let wall_w = w - 60.0;
+    let wall_y = py + 34.0;
+    let wall_h = floor_y - wall_y - 20.0;
+    // Brick wall fill
+    out.push_str(&format!(
+        r##"<rect x="{wall_x:.1}" y="{wall_y:.1}" width="{wall_w:.1}" height="{wall_h:.1}" fill="#faede8" stroke="#111111" stroke-width="2" />\"##
+    ));
+    // Brick joint texture lines
+    let mut b_y = wall_y + 6.0;
+    while b_y < wall_y + wall_h {
+        out.push_str(&format!(
+            r##"<line x1="{wall_x:.1}" y1="{b_y:.1}" x2="{:.1}" y2="{b_y:.1}" stroke="#e0b4a4" stroke-width="0.8" stroke-dasharray="10,3" />\"##,
+            wall_x + wall_w
+        ));
+        b_y += 8.0;
+    }
+    // Concrete lintel roof over brick wall
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="7" fill="#d0d7de" stroke="#111111" stroke-width="1.8" />\"##,
+        wall_x - 4.0, wall_y - 5.0, wall_w + 8.0
+    ));
+
+    // Bosquinho Canopy Overhead (Lush organic tree curves)
+    out.push_str(&format!(
+        r##"<path d="M {px:.1} {py:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {py:.1} Z" fill="#2d6a4f" stroke="#111111" stroke-width="2.5" />\"##,
+        px + 30.0, py + 26.0, px + 70.0, py + 14.0,
+        px + 120.0, py + 28.0, px + 170.0, py + 16.0,
+        px + 220.0, py + 30.0, px + 270.0, py + 18.0,
+        px + (w - 20.0), py + 24.0, px + w
+    ));
+    // Liana / hanging vine curves
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#1b4332" stroke-width="1.8" stroke-linecap="round" />\"##,
+        px + 45.0, py + 20.0, px + 40.0, py + 38.0, px + 46.0, py + 48.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#1b4332" stroke-width="1.8" stroke-linecap="round" />\"##,
+        px + 190.0, py + 22.0, px + 196.0, py + 42.0, px + 192.0, py + 52.0
+    ));
+
+    // Native tree trunk on left (Bosquinho Fig tree)
+    let trunk_x = px + 16.0;
+    out.push_str(&format!(
+        r##"<path d="M {trunk_x:.1} {py:.1} Q {:.1} {:.1} {:.1} {floor_y:.1} L {:.1} {floor_y:.1} Q {:.1} {:.1} {:.1} {py:.1} Z" fill="#523a28" stroke="#111111" stroke-width="2.5" />\"##,
+        trunk_x + 8.0, (py + floor_y) / 2.0, trunk_x + 4.0,
+        trunk_x + 18.0,
+        trunk_x + 16.0, (py + floor_y) / 2.0, trunk_x + 12.0
+    ));
+
+    // Student Mural Board ("MURAL DO CFH") in center-right
+    let mural_w = 68.0;
+    let mural_h = 42.0;
+    let mural_x = px + (w / 2.0) - 20.0;
+    let mural_y = py + 42.0;
+    // Wooden frame & cork board
+    out.push_str(&format!(
+        r##"<rect x="{mural_x:.1}" y="{mural_y:.1}" width="{mural_w:.1}" height="{mural_h:.1}" fill="#d4a373" stroke="#111111" stroke-width="2" rx="1.5" />\"##
+    ));
+    // Header title
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="4" font-weight="bold" fill="#111111" letter-spacing="0.5">MURAL CFH</text>\"##,
+        mural_x + (mural_w / 2.0), mural_y + 6.0
+    ));
+
+    // Overlapping Student Posters / Flyers
+    // Poster 1: Assembleia
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="18" height="14" fill="#ffffff" stroke="#111111" stroke-width="1" />\"##,
+        mural_x + 5.0, mural_y + 9.0
+    ));
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" font-family="'Helvetica Neue', Arial, sans-serif" font-size="3" font-weight="bold" fill="#cf222e">ASSEMBLEIA</text>\"##,
+        mural_x + 6.0, mural_y + 14.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#57606a" stroke-width="0.8" />\"##,
+        mural_x + 6.0, mural_y + 18.0, mural_x + 20.0, mural_y + 18.0
+    ));
+
+    // Poster 2: Cineclube
+    out.push_str(&format!(
+        r##"<g transform="rotate(-3, {:.1}, {:.1})">\"##,
+        mural_x + 28.0, mural_y + 10.0
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="18" height="15" fill="#fdf0d5" stroke="#111111" stroke-width="1" />\"##,
+        mural_x + 25.0, mural_y + 9.0
+    ));
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" font-family="'Helvetica Neue', Arial, sans-serif" font-size="3" font-weight="bold" fill="#003049">CINECLUBE</text>\"##,
+        mural_x + 26.5, mural_y + 15.0
+    ));
+    out.push_str("</g>");
+
+    // Poster 3: Festa no Bosquinho / Sarau
+    out.push_str(&format!(
+        r##"<g transform="rotate(4, {:.1}, {:.1})">\"##,
+        mural_x + 48.0, mural_y + 14.0
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="16" height="18" fill="#ffd166" stroke="#111111" stroke-width="1" />\"##,
+        mural_x + 46.0, mural_y + 12.0
+    ));
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" font-family="'Helvetica Neue', Arial, sans-serif" font-size="3" font-weight="bold" fill="#111111">SARAU</text>\"##,
+        mural_x + 48.0, mural_y + 19.0
+    ));
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" font-family="'Helvetica Neue', Arial, sans-serif" font-size="2.4" fill="#333333">BOSQUINHO</text>\"##,
+        mural_x + 47.0, mural_y + 24.0
+    ));
+    out.push_str("</g>");
+
+    // Rustic wooden picnic bench under the trees on the right
+    let tbl_x = px + w - 55.0;
+    let tbl_y = floor_y - 20.0;
+    // Table slab
+    out.push_str(&format!(
+        r##"<rect x="{tbl_x:.1}" y="{tbl_y:.1}" width="42" height="3" fill="#8d6e63" stroke="#111111" stroke-width="1.5" />\"##
+    ));
+    // A-frame legs
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{tbl_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        tbl_x + 8.0, tbl_x + 3.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{tbl_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        tbl_x + 34.0, tbl_x + 39.0
+    ));
+
+    // Floor line
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        px + w
+    ));
+
+    // Gravel pathway dots & pebbles (saibro)
+    let pebbles = [
+        (px + 45.0, floor_y + 4.0),
+        (px + 85.0, floor_y + 8.0),
+        (px + 140.0, floor_y + 5.0),
+        (px + 200.0, floor_y + 9.0),
+        (px + 260.0, floor_y + 4.0),
+    ];
+    for (pb_x, pb_y) in pebbles {
+        out.push_str(&format!(
+            r##"<circle cx="{pb_x:.1}" cy="{pb_y:.1}" r="1.5" fill="#8c959f" />\"##
+        ));
+    }
+
+    out.push_str("</g>");
+    out
+}
+
+/// Bairro Pantanal / Bacia do Itacorubi (UFSC) - Morro da Cruz, stream, bike lane, and iconic capybara
+fn render_pantanal_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    out.push_str(r##"<g class="backdrop-vector backdrop-pantanal">\"##);
+
+    // Sky tint
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f1f6fb" />\"##
+    ));
+
+    let floor_y = py + h - 16.0;
+
+    // Morro da Cruz (Mountain Ridge) in background with antenna tower
+    let morro_y = py + 30.0;
+    out.push_str(&format!(
+        r##"<path d="M {px:.1} {morro_y:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} L {:.1} {floor_y:.1} L {px:.1} {floor_y:.1} Z" fill="#e2ede5" stroke="#111111" stroke-width="2" />\"##,
+        px + (w * 0.25), morro_y - 18.0, px + (w * 0.55), morro_y - 6.0,
+        px + (w * 0.78), morro_y - 14.0, px + w, morro_y + 4.0,
+        px + w
+    ));
+
+    // Antenna Tower on the ridge crest
+    let ant_x = px + (w * 0.25);
+    let ant_top_y = morro_y - 32.0;
+    out.push_str(&format!(
+        r##"<line x1="{ant_x:.1}" y1="{ant_top_y:.1}" x2="{ant_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.8" />\"##,
+        morro_y - 18.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />\"##,
+        ant_x - 3.5, ant_top_y + 5.0, ant_x + 3.5, ant_top_y + 5.0
+    ));
+    out.push_str(&format!(
+        r##"<circle cx="{ant_x:.1}" cy="{ant_top_y:.1}" r="1.5" fill="#cf222e" />\"##
+    ));
+
+    // Riparian wetland / Córrego da UFSC water bank
+    let stream_y = floor_y - 32.0;
+    out.push_str(&format!(
+        r##"<path d="M {px:.1} {stream_y:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {stream_y:.1} L {:.1} {floor_y:.1} L {px:.1} {floor_y:.1} Z" fill="#d8e8e6" stroke="#111111" stroke-width="1.8" />\"##,
+        px + (w * 0.3), stream_y + 6.0, px + (w * 0.6), stream_y - 4.0,
+        px + (w * 0.85), stream_y + 5.0, px + w,
+        px + w
+    ));
+    // Water ripples
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />\"##,
+        px + 40.0, stream_y + 10.0, px + 80.0, stream_y + 10.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />\"##,
+        px + 140.0, stream_y + 12.0, px + 190.0, stream_y + 12.0
+    ));
+
+    // Marsh reeds & cattails (Taboas do Pantanal)
+    let reed_bases = [px + 22.0, px + 30.0, px + w - 45.0, px + w - 32.0];
+    for rx in reed_bases {
+        out.push_str(&format!(
+            r##"<path d="M {rx:.1} {floor_y:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#2d6a4f" stroke-width="1.8" stroke-linecap="round" />\"##,
+            rx - 3.0, floor_y - 18.0, rx - 1.0, floor_y - 32.0
+        ));
+        out.push_str(&format!(
+            r##"<rect x="{:.1}" y="{:.1}" width="2.5" height="9" fill="#582f0e" rx="1.2" />\"##,
+            rx - 2.25, floor_y - 28.0
+        ));
+    }
+
+    // Iconic UFSC Capybara (Resting calmly on the grass near water)
+    let capy_x = px + w - 85.0;
+    let capy_y = floor_y - 18.0;
+    // Capybara body (plump, rounded back)
+    out.push_str(&format!(
+        r##"<path d="M {capy_x:.1} {floor_y:.1} C {:.1} {:.1} {:.1} {:.1} {:.1} {capy_y:.1} C {:.1} {:.1} {:.1} {:.1} {:.1} {floor_y:.1} Z" fill="#7f5539" stroke="#111111" stroke-width="2" stroke-linejoin="round" />\"##,
+        capy_x - 4.0, floor_y - 14.0, capy_x - 14.0, capy_y + 2.0, capy_x + 10.0,
+        capy_x + 22.0, capy_y - 2.0, capy_x + 28.0, floor_y - 10.0, capy_x + 28.0
+    ));
+    // Capybara head & snout (facing left)
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Z" fill="#9c6644" stroke="#111111" stroke-width="1.8" stroke-linejoin="round" />\"##,
+        capy_x - 4.0, capy_y + 4.0,
+        capy_x - 14.0, capy_y + 2.0, capy_x - 12.0, capy_y + 10.0,
+        capy_x - 4.0, capy_y + 12.0, capy_x - 4.0, capy_y + 4.0
+    ));
+    // Cute small ear
+    out.push_str(&format!(
+        r##"<ellipse cx="{:.1}" cy="{:.1}" rx="2" ry="1.5" fill="#582f0e" stroke="#111111" stroke-width="1" />\"##,
+        capy_x - 3.0, capy_y + 3.0
+    ));
+    // Calm closed eye (sleeping/relaxed)
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" />\"##,
+        capy_x - 9.0, capy_y + 6.0, capy_x - 7.5, capy_y + 7.0, capy_x - 6.0, capy_y + 6.0
+    ));
+
+    // Campus Bike Lane (Ciclovia da UFSC) in foreground
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        px + w
+    ));
+    // Dashed center line of bike path
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffd166" stroke-width="2" stroke-dasharray="10,6" />\"##,
+        floor_y + 7.0, px + w, floor_y + 7.0
+    ));
+
+    // Stenciled Bicycle Icon on lane
+    let bike_x = px + 60.0;
+    let bike_y = floor_y + 7.0;
+    out.push_str(&format!(
+        r##"<circle cx="{:.1}" cy="{bike_y:.1}" r="3.5" fill="none" stroke="#ffffff" stroke-width="1" />\"##,
+        bike_x - 6.0
+    ));
+    out.push_str(&format!(
+        r##"<circle cx="{:.1}" cy="{bike_y:.1}" r="3.5" fill="none" stroke="#ffffff" stroke-width="1" />\"##,
+        bike_x + 6.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {bike_y:.1} L {:.1} {:.1} L {:.1} {bike_y:.1} L {:.1} {:.1} L {:.1} {:.1}" fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="round" />\"##,
+        bike_x - 6.0, bike_x - 1.0, bike_y - 4.0, bike_x + 6.0, bike_x + 2.0, bike_y - 5.0, bike_x + 4.0, bike_y - 5.0
+    ));
+
+    out.push_str("</g>");
+    out
+}
+

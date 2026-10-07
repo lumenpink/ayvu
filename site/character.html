@@ -484,6 +484,41 @@
       font-weight: 700;
     }
 
+    .lineup-actions {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-left: auto;
+      flex-wrap: wrap;
+    }
+
+    .btn-lineup {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: #161b22;
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      font-size: 0.8rem;
+      font-weight: 600;
+      padding: 0.35rem 0.75rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      white-space: nowrap;
+    }
+
+    .btn-lineup:hover {
+      background: #21262d;
+      border-color: var(--accent);
+      color: var(--accent);
+      transform: translateY(-1px);
+    }
+
+    .btn-lineup:active {
+      transform: translateY(0);
+    }
+
     /* Section: Enlarged Variations Gallery */
     .gallery-section {
       background: var(--card-bg);
@@ -767,6 +802,10 @@
             <option value="sala_de_aula">Sala de Aula</option>
             <option value="cafe_ccs">Café do CCS</option>
             <option value="bu_ufsc">Biblioteca Universitária (BU)</option>
+            <option value="praca_cidadania">Praça da Cidadania (UFSC)</option>
+            <option value="ctc">CTC (Centro Tecnológico)</option>
+            <option value="cfh">CFH (Bosquinho)</option>
+            <option value="pantanal">Pantanal / Córrego (Capivara)</option>
             <option value="laboratorio">Laboratório</option>
             <option value="hu_enfermaria">HU Enfermaria</option>
             <option value="pastoral">Pastoral (Classic 1996)</option>
@@ -790,6 +829,18 @@
         <span class="control-label">Comparar na régua:</span>
         <div class="compare-chips" id="compare-chips-container">
           <!-- Quick toggle chips for Armando, Dan, Kirby, Sage, Jordan, Tux -->
+        </div>
+
+        <div class="lineup-actions">
+          <button type="button" class="btn-lineup" id="btn-export-svg" title="Exportar vetor SVG da régua com a formação de personagens">
+            <span>🎨 SVG Lineup</span>
+          </button>
+          <button type="button" class="btn-lineup" id="btn-export-png" title="Exportar imagem PNG da régua com a formação de personagens">
+            <span>📥 PNG Lineup</span>
+          </button>
+          <button type="button" class="btn-lineup" id="btn-copy-link" title="Copiar link com parâmetros desta comparação">
+            <span>🔗 Copiar Link</span>
+          </button>
         </div>
       </div>
 
@@ -1234,6 +1285,7 @@
     stageBackdropSelect.addEventListener('change', (e) => {
       currentBackdrop = e.target.value;
       renderStageBackdrop();
+      updateAllViews();
     });
 
     // Guide toggles
@@ -1246,6 +1298,167 @@
 
     charSelect.addEventListener('change', (e) => {
       selectCharacter(e.target.value);
+    });
+
+    // Generate Standalone Lineup SVG
+    function generateLineupSvg() {
+      const idsToRender = [currentCharacterId, ...Array.from(comparedCharacterIds)];
+      let totalCharsWidth = 0;
+      const charsData = [];
+      idsToRender.forEach(id => {
+        const detailStr = get_character_detail_json(id);
+        if (!detailStr) return;
+        const char = JSON.parse(detailStr);
+        totalCharsWidth += char.width + 45;
+        charsData.push(char);
+      });
+
+      const rulerW = 70;
+      const stageW = Math.max(850, rulerW + totalCharsWidth + 80);
+      const stageH = STAGE_HEIGHT; // 540
+      const groundY = stageH - GROUND_OFFSET; // 510
+
+      let svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${stageW}" height="${stageH}" viewBox="0 0 ${stageW} ${stageH}">\n`;
+      svg += `<defs>\n`;
+      svg += `  <style>\n`;
+      svg += `    .ruler-text { font-family: monospace; font-size: 8px; fill: #666; }\n`;
+      svg += `    .label-tag { font-family: 'Helvetica Neue', Arial, sans-serif; font-size: 11px; font-weight: bold; fill: #111; }\n`;
+      svg += `    .ground-text { font-family: monospace; font-size: 9px; font-weight: bold; fill: #555; letter-spacing: 1px; }\n`;
+      svg += `  </style>\n`;
+      svg += `</defs>\n`;
+
+      // Canvas background
+      svg += `<rect width="${stageW}" height="${stageH}" fill="#ffffff" />\n`;
+
+      // Backdrop if active
+      if (currentBackdrop && currentBackdrop !== 'none' && wasmReady) {
+        const bdSvg = get_backdrop_svg(currentBackdrop, stageW - rulerW, groundY);
+        if (bdSvg) {
+          svg += `<g transform="translate(${rulerW}, 0)">${bdSvg}</g>\n`;
+        }
+      }
+
+      // Ground area
+      svg += `<rect x="0" y="${groundY}" width="${stageW}" height="${GROUND_OFFSET}" fill="#f1f3f5" />\n`;
+      svg += `<line x1="0" y1="${groundY}" x2="${stageW}" y2="${groundY}" stroke="#111111" stroke-width="2.5" />\n`;
+      svg += `<text x="${rulerW + 20}" y="${groundY + 18}" class="ground-text">GROUNDLINE (CHÃO: Y = 0 PX)</text>\n`;
+
+      // Fixed ruler on the left
+      svg += `<g class="ruler">\n`;
+      svg += `  <rect x="0" y="0" width="${rulerW}" height="${stageH}" fill="#f8f9fa" />\n`;
+      svg += `  <line x1="${rulerW}" y1="0" x2="${rulerW}" y2="${stageH}" stroke="#212529" stroke-width="2" />\n`;
+
+      for (let px = 0; px <= MAX_HEIGHT_PX; px += 10) {
+        const y = heightToY(px);
+        const isMajor = px % 50 === 0;
+        const isMid = px % 25 === 0 && !isMajor;
+        const tickLen = isMajor ? 24 : (isMid ? 15 : 8);
+
+        svg += `  <line x1="${rulerW - tickLen}" y1="${y}" x2="${rulerW}" y2="${y}" stroke="${isMajor ? '#111' : '#666'}" stroke-width="${isMajor ? 1.5 : 1}" />\n`;
+        if (isMajor) {
+          svg += `  <text x="${rulerW - tickLen - 6}" y="${y + 3}" text-anchor="end" class="ruler-text">${px}px</text>\n`;
+        }
+      }
+      svg += `</g>\n`;
+
+      // Draw Guide lines across stage
+      if (toggleGuides.checked) {
+        for (let px = 50; px <= MAX_HEIGHT_PX; px += 50) {
+          const y = heightToY(px);
+          svg += `<line x1="${rulerW}" y1="${y}" x2="${stageW}" y2="${y}" stroke="#e5e7eb" stroke-dasharray="4,4" stroke-width="1" />\n`;
+        }
+      }
+
+      // Draw Characters
+      let currentX = rulerW + 40;
+      charsData.forEach((char) => {
+        const isPrimary = (char.id === currentCharacterId);
+        const poseSvg = char.poses.neutral || char.poses[Object.keys(char.poses)[0]] || '';
+        const charY = groundY - char.height;
+
+        // Character shadow on ground
+        svg += `<ellipse cx="${currentX + (char.width / 2)}" cy="${groundY}" rx="${char.width * 0.38}" ry="4" fill="#000000" opacity="0.15" />\n`;
+
+        // Height tag above head
+        const tagY = charY - 14;
+        svg += `<rect x="${currentX + (char.width / 2) - 36}" y="${tagY - 12}" width="72" height="16" rx="3" fill="#111827" stroke="${isPrimary ? '#38bdf8' : '#888'}" stroke-width="1" />\n`;
+        svg += `<text x="${currentX + (char.width / 2)}" y="${tagY}" text-anchor="middle" font-family="monospace" font-size="9" font-weight="bold" fill="${isPrimary ? '#38bdf8' : '#fff'}">${char.height} px</text>\n`;
+
+        // Height guide dashed line from head to ruler
+        if (isPrimary && toggleGuides.checked) {
+          svg += `<line x1="${rulerW}" y1="${charY}" x2="${currentX}" y2="${charY}" stroke="#38bdf8" stroke-dasharray="3,3" stroke-width="1" />\n`;
+        }
+
+        // Character SVG artwork
+        svg += `<g transform="translate(${currentX}, ${charY})">\n`;
+        svg += `  ${poseSvg}\n`;
+        svg += `</g>\n`;
+
+        // Foot label
+        svg += `<text x="${currentX + (char.width / 2)}" y="${groundY + 16}" text-anchor="middle" class="label-tag">${isPrimary ? '★ ' : ''}${char.name}</text>\n`;
+
+        currentX += char.width + 45;
+      });
+
+      svg += `</svg>`;
+      return { svg, width: stageW, height: stageH };
+    }
+
+    // Export SVG Button
+    document.getElementById('btn-export-svg').addEventListener('click', () => {
+      const { svg } = generateLineupSvg();
+      const blob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `ayvu-lineup-${currentCharacterId}.svg`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Lineup SVG exportado com sucesso!');
+    });
+
+    // Export PNG Button
+    document.getElementById('btn-export-png').addEventListener('click', () => {
+      const { svg, width, height } = generateLineupSvg();
+      const canvas = document.createElement('canvas');
+      canvas.width = width * 2;
+      canvas.height = height * 2;
+      const ctx = canvas.getContext('2d');
+      ctx.scale(2, 2);
+
+      const img = new Image();
+      const svgBlob = new Blob([svg], { type: 'image/svg+xml;charset=utf-8' });
+      const url = URL.createObjectURL(svgBlob);
+
+      img.onload = () => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, width, height);
+        ctx.drawImage(img, 0, 0);
+        URL.revokeObjectURL(url);
+
+        canvas.toBlob((blob) => {
+          if (!blob) return;
+          const pngUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = pngUrl;
+          a.download = `ayvu-lineup-${currentCharacterId}.png`;
+          a.click();
+          URL.revokeObjectURL(pngUrl);
+          showToast('Lineup PNG exportado com sucesso!');
+        }, 'image/png');
+      };
+
+      img.src = url;
+    });
+
+    // Copy Share Link Button
+    document.getElementById('btn-copy-link').addEventListener('click', () => {
+      const url = window.location.href;
+      navigator.clipboard.writeText(url).then(() => {
+        showToast('Link de comparação copiado para a área de transferência!');
+      }).catch(() => {
+        prompt('Copie o link abaixo:', url);
+      });
     });
 
     // Main Init Flow

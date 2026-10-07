@@ -77,6 +77,10 @@ pub fn list_backdrops_json() -> String {
         "laboratorio",
         "hu_enfermaria",
         "bu_ufsc",
+        "praca_cidadania",
+        "ctc",
+        "cfh",
+        "pantanal",
         "pastoral",
         "room",
     ];

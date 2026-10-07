@@ -78,6 +78,31 @@ Returns current running version metadata.
 }
 ```
 
+### `GET /characters`
+Returns metadata for all available character packs in the registry.
+
+**Response (HTTP 200):**
+```json
+[
+  {
+    "id": "arti",
+    "name": "Arti",
+    "author": "Lumen Pink",
+    "license": "CC-BY",
+    "description": "Arti, o acadêmico misterioso de sobretudo preto, óculos escuros e cabelos longos",
+    "emotions": ["angry", "happy", "laughing", "neutral", "sad", "scared", "shouting", "thinking"]
+  },
+  {
+    "id": "armando",
+    "name": "Armando",
+    "author": "Jim Woodring",
+    "license": "MIT",
+    "description": "Bohemian beatnik artist with beret, goatee and dark shades",
+    "emotions": ["angry", "happy", "laughing", "neutral", "sad", "shouting", "thinking"]
+  }
+]
+```
+
 ---
 
 ## 3. CORS Support

@@ -507,3 +507,156 @@ Dan: O simpósio científico vai começar.
         "SVG must contain rendered microphone prop"
     );
 }
+
+#[test]
+fn test_arti_canonical_eight_poses() {
+    let registry = CharacterRegistry::default();
+    let arti = registry.get("arti").expect("Arti pack must exist");
+
+    assert_eq!(arti.id, "arti");
+    assert_eq!(arti.author, "Lumen Pink");
+    assert_eq!(arti.license, "CC-BY");
+    assert_eq!(arti.balloon_anchor.x, 0.5);
+    assert_eq!(arti.balloon_anchor.y, 0.22);
+
+    let canonical_keys = [
+        "neutral", "happy", "shouting", "thinking", "angry", "sad", "laughing", "scared",
+    ];
+
+    assert_eq!(
+        arti.poses.len(),
+        8,
+        "Arti must have all 8 canonical Jim Woodring poses"
+    );
+
+    for key in &canonical_keys {
+        let pose_svg = arti
+            .poses
+            .get(*key)
+            .unwrap_or_else(|| panic!("Arti must have pose '{}'", key));
+        assert!(
+            !pose_svg.is_empty(),
+            "Arti pose '{}' must not be empty",
+            key
+        );
+        assert!(
+            pose_svg.contains("data:image/png;base64,"),
+            "Arti pose '{}' must contain embedded 1-bit base64 nanquim artwork",
+            key
+        );
+        assert!(
+            pose_svg.contains("width=\"160\" height=\"440\""),
+            "Arti pose '{}' must have authentic 160x440 dimensions",
+            key
+        );
+    }
+
+    // Verify retrieval via Emotion enum (including Surprised -> scared fallback)
+    assert!(!arti.get_pose_svg(&Emotion::Neutral).is_empty());
+    assert!(!arti.get_pose_svg(&Emotion::Happy).is_empty());
+    assert!(!arti.get_pose_svg(&Emotion::Shouting).is_empty());
+    assert!(!arti.get_pose_svg(&Emotion::Thinking).is_empty());
+    assert!(!arti.get_pose_svg(&Emotion::Angry).is_empty());
+    assert!(!arti.get_pose_svg(&Emotion::Sad).is_empty());
+    assert!(!arti.get_pose_svg(&Emotion::Laughing).is_empty());
+    assert!(!arti.get_pose_svg(&Emotion::Surprised).is_empty());
+}
+
+#[test]
+fn test_ufsc_campus_expansion_backdrops() {
+    let script = r#"
+[backdrop: praca_cidadania]
+Arti: Encontrando a turma na Praça da Cidadania!
+---
+[backdrop: ctc]
+Dan: Desenvolvendo sistemas modernos no CTC.
+---
+[backdrop: cfh]
+Arti: Leitura sossegada no Bosquinho do CFH.
+---
+[backdrop: pantanal]
+Dan: Admirando a capivara às margens do Córrego no Pantanal!
+"#;
+    let strip = ayvu::parser::parse_dialogue_script(script, Some("Campus Expansion Tour"))
+        .expect("Parse script");
+    let svg = render_comic_strip_to_svg(&strip);
+
+    assert!(
+        svg.contains("backdrop-praca-cidadania"),
+        "Must render Praça da Cidadania vector backdrop"
+    );
+    assert!(
+        svg.contains("UFSC REITORIA"),
+        "Must contain UFSC Reitoria building facade"
+    );
+
+    assert!(
+        svg.contains("backdrop-ctc"),
+        "Must render CTC vector backdrop"
+    );
+    assert!(
+        svg.contains("CTC TECNOLÓGICO"),
+        "Must contain CTC Centro Tecnológico header"
+    );
+
+    assert!(
+        svg.contains("backdrop-cfh"),
+        "Must render CFH Bosquinho vector backdrop"
+    );
+    assert!(
+        svg.contains("MURAL CFH"),
+        "Must contain CFH student notice board"
+    );
+
+    assert!(
+        svg.contains("backdrop-pantanal"),
+        "Must render Pantanal vector backdrop"
+    );
+}
+
+#[test]
+fn test_expanded_props_parsing_and_rendering() {
+    let script = r#"
+[characters: Dan, Arti]
+[prop: bandeja @ Dan]
+[prop: mochila @ Arti]
+Dan: Almoçando no RU com a bandeja cheia.
+Arti: Carregando todos os livros na mochila.
+---
+[props: celular, guarda_chuva, caderno]
+Dan: Conectado e prevenido para a chuva em Floripa!
+Arti: Tomando notas no caderno espiral.
+"#;
+    let strip = ayvu::parser::parse_dialogue_script(script, None).unwrap();
+    assert_eq!(strip.panels.len(), 2);
+
+    assert_eq!(
+        strip.panels[0].props[0].prop_type,
+        ayvu::model::PropType::Tray
+    );
+    assert_eq!(
+        strip.panels[0].props[1].prop_type,
+        ayvu::model::PropType::Backpack
+    );
+
+    assert_eq!(
+        strip.panels[1].props[0].prop_type,
+        ayvu::model::PropType::Phone
+    );
+    assert_eq!(
+        strip.panels[1].props[1].prop_type,
+        ayvu::model::PropType::Umbrella
+    );
+    assert_eq!(
+        strip.panels[1].props[2].prop_type,
+        ayvu::model::PropType::Caderno
+    );
+
+    let svg = render_comic_strip_to_svg(&strip);
+    assert!(svg.contains("class=\"comic-prop prop-bandeja\""));
+    assert!(svg.contains("class=\"comic-prop prop-mochila\""));
+    assert!(svg.contains("class=\"comic-prop prop-celular\""));
+    assert!(svg.contains("class=\"comic-prop prop-guarda_chuva\""));
+    assert!(svg.contains("class=\"comic-prop prop-caderno\""));
+}
+

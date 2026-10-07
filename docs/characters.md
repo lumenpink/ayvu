@@ -155,6 +155,67 @@ Accept: application/json
       "shouting",
       "thinking"
     ]
+  },
+  {
+    "id": "arti",
+    "name": "Arti",
+    "author": "Lumen Pink",
+    "license": "CC-BY",
+    "description": "Arti, o acadêmico misterioso de sobretudo preto, óculos escuros e cabelos longos",
+    "emotions": [
+      "angry",
+      "happy",
+      "laughing",
+      "neutral",
+      "sad",
+      "scared",
+      "shouting",
+      "thinking"
+    ]
   }
 ]
 ```
+
+---
+
+## 6. Official Character Roster (32 Characters)
+
+Ayvu includes 32 bundled characters ready for instant dialogue rendering:
+
+| Category | Characters |
+| :--- | :--- |
+| **Official Comic Chat (Jim Woodring, 1996)** | `anna`, `armando`, `bolo`, `buck`, `connor`, `cro`, `dan`, `denise`, `glenda`, `hugh`, `jordan`, `kevin`, `kirby`, `kwensa`, `lance`, `lynnea`, `margaret`, `maynard`, `mike`, `pedagog`, `rainbow`, `rebecca`, `sage`, `scotty`, `susan`, `tiki`, `tongtyed`, `tux`, `veronica`, `waf`, `xeno` (31 characters) |
+| **Ayvu Original Roster** | `arti` (Arti, o acadêmico misterioso de sobretudo preto e óculos escuros, 160×440 px, 8 expressões canônicas completas) |
+
+### Character Spotlight: Arti
+
+* **Slug / ID**: `arti`
+* **Author**: Lumen Pink
+* **License**: CC-BY
+* **Native Size**: 160 px wide × 440 px high
+* **Speech Anchor**: `x: 0.50, y: 0.22` (mouth area right below dark shades)
+* **8 Canonical Expressions**:
+  1. `neutral`: Postura ereta, sobretudo fechado, olhar enigmático.
+  2. `happy`: Sorriso amigável e acolhedor, mantendo o charme acadêmico.
+  3. `shouting`: Boca aberta exclamando no microfone ou em debate acalorado.
+  4. `thinking`: Braço apoiado, reflexão profunda sobre teorias e código.
+  5. `angry`: Sobrancelhas franzidas, postura tensa e indignada.
+  6. `sad`: Cabeça ligeiramente inclinada, expressão melancólica.
+  7. `laughing`: Gargalhada aberta e espontânea.
+  8. `scared`: Expressão assustada/surpresa, postura recuada.
+
+---
+
+## 7. Character Inspector & Absolute Ruler (`site/character.html`)
+
+Ayvu provides a dedicated web-based **Character Inspector**:
+
+* **Régua Fixa de Altura**: Régua milimétrica com escala vertical absoluta de 0 a 500 px e linha de chão fixa (`Y = 0 px`). Permite comparar proporções anatômicas reais entre personagens (ex.: Arti com 440 px vs. Armando com 210 px vs. Kirby com 160 px).
+* **Comparação Multi-Personagem (Lineup)**: Seleção simultânea de personagens para avaliar silhuetas lado a lado.
+* **Projeção em Cenários Vetoriais**: Teste de enquadramento sobre os cenários oficiais da UFSC (`praca_cidadania`, `ctc`, `cfh`, `pantanal`, `ru`, `bu_ufsc`, etc.).
+* **Exportação & Compartilhamento**:
+  - `🎨 SVG Lineup`: Exporta vetor SVG completo e autônomo com a régua e personagens.
+  - `📥 PNG Lineup`: Exporta imagem PNG nítida em resolução Retina (2x).
+  - `🔗 Copiar Link`: Compartilha a configuração exata via URL parameters (`?id=arti&compare=dan,armando&backdrop=praca_cidadania`).
+* **Galeria de Variações em Alta Resolução**: Grade com zoom de até 2.2x e alternância de fundos (quadriculado de transparência, branco papel e preto nanquim) para auditoria fina de traço e recorte.
+
