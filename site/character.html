@@ -986,6 +986,18 @@
         }
       }
 
+      // Highlight MAX character height: 495 px (Sage)
+      const yMax = heightToY(495);
+      out += `<line x1="0" y1="${yMax}" x2="70" y2="${yMax}" stroke="#8b5cf6" stroke-width="2.5" />`;
+      out += `<rect x="2" y="${yMax - 7}" width="34" height="13" rx="2" fill="#8b5cf6" />`;
+      out += `<text x="19" y="${yMax + 2.5}" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="7" font-weight="800" fill="#ffffff">MAX 495</text>`;
+
+      // Highlight MIN character height: 313 px (Veronica)
+      const yMin = heightToY(313);
+      out += `<line x1="0" y1="${yMin}" x2="70" y2="${yMin}" stroke="#10b981" stroke-width="2.5" />`;
+      out += `<rect x="2" y="${yMin - 7}" width="34" height="13" rx="2" fill="#10b981" />`;
+      out += `<text x="19" y="${yMin + 2.5}" text-anchor="middle" font-family="'JetBrains Mono', monospace" font-size="7" font-weight="800" fill="#ffffff">MIN 313</text>`;
+
       // Ground baseline tag
       const groundY = heightToY(0);
       out += `<line x1="0" y1="${groundY}" x2="70" y2="${groundY}" stroke="#d90429" stroke-width="2" />`;
@@ -1003,24 +1015,23 @@
       }
 
       let out = '';
-      // Guide lines at 100, 200, 300, 320 (Kirby), 390 (Armando), 440 (Arti), 495 (Sage)
-      const notableHeights = [
-        { h: 100, label: '100px' },
-        { h: 200, label: '200px (Cintura/Mesa)' },
-        { h: 300, label: '300px' },
-        { h: 320, label: '320px (Kirby - Menor)', color: '#10b981' },
-        { h: 388, label: '388px (Dan)' },
-        { h: 390, label: '390px (Armando)' },
-        { h: 440, label: '440px (Arti - Alto)', color: '#38bdf8' },
-        { h: 495, label: '495px (Sage - Mais alto)', color: '#a855f7' }
-      ];
-
-      notableHeights.forEach(item => {
-        const y = heightToY(item.h);
-        const col = item.color || 'rgba(108, 117, 125, 0.4)';
-        const dash = item.color ? '4,3' : '2,4';
-        out += `<line x1="0" y1="${y}" x2="1000" y2="${y}" stroke="${col}" stroke-width="1" stroke-dasharray="${dash}" />`;
+      // Subtle regular grid lines at 100, 200, 300, 400
+      [100, 200, 300, 400].forEach(h => {
+        const y = heightToY(h);
+        out += `<line x1="0" y1="${y}" x2="1000" y2="${y}" stroke="rgba(108, 117, 125, 0.25)" stroke-width="1" stroke-dasharray="2,4" />`;
       });
+
+      // Reference Line 1: MIN character (Veronica - 313px) - Thicker green dashed line
+      const yMin = heightToY(313);
+      out += `<line x1="0" y1="${yMin}" x2="1000" y2="${yMin}" stroke="#10b981" stroke-width="2" stroke-dasharray="8,4" />`;
+      out += `<rect x="805" y="${yMin - 8}" width="185" height="16" rx="3" fill="#10b981" opacity="0.9" />`;
+      out += `<text x="897" y="${yMin + 3.5}" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">▼ PISO MÍN: Veronica (313 px)</text>`;
+
+      // Reference Line 2: MAX character (Sage - 495px) - Thicker purple dashed line
+      const yMax = heightToY(495);
+      out += `<line x1="0" y1="${yMax}" x2="1000" y2="${yMax}" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="8,4" />`;
+      out += `<rect x="825" y="${yMax - 8}" width="165" height="16" rx="3" fill="#8b5cf6" opacity="0.9" />`;
+      out += `<text x="907" y="${yMax + 3.5}" text-anchor="middle" font-family="-apple-system, BlinkMacSystemFont, sans-serif" font-size="9" font-weight="bold" fill="#ffffff">▲ TETO MÁX: Sage (495 px)</text>`;
 
       svg.innerHTML = out;
     }
@@ -1359,14 +1370,35 @@
           svg += `  <text x="${rulerW - tickLen - 6}" y="${y + 3}" text-anchor="end" class="ruler-text">${px}px</text>\n`;
         }
       }
+      // Ruler ticks for MAX and MIN characters
+      const yMax = heightToY(495);
+      const yMin = heightToY(313);
+
+      svg += `  <line x1="0" y1="${yMax}" x2="${rulerW}" y2="${yMax}" stroke="#8b5cf6" stroke-width="2.5" />\n`;
+      svg += `  <rect x="2" y="${yMax - 6}" width="32" height="12" rx="2" fill="#8b5cf6" />\n`;
+      svg += `  <text x="18" y="${yMax + 2.5}" text-anchor="middle" font-family="monospace" font-size="6.5" font-weight="bold" fill="#ffffff">MAX 495</text>\n`;
+
+      svg += `  <line x1="0" y1="${yMin}" x2="${rulerW}" y2="${yMin}" stroke="#10b981" stroke-width="2.5" />\n`;
+      svg += `  <rect x="2" y="${yMin - 6}" width="32" height="12" rx="2" fill="#10b981" />\n`;
+      svg += `  <text x="18" y="${yMin + 2.5}" text-anchor="middle" font-family="monospace" font-size="6.5" font-weight="bold" fill="#ffffff">MIN 313</text>\n`;
+
       svg += `</g>\n`;
 
       // Draw Guide lines across stage
       if (toggleGuides.checked) {
-        for (let px = 50; px <= MAX_HEIGHT_PX; px += 50) {
+        for (let px = 100; px <= 400; px += 100) {
           const y = heightToY(px);
-          svg += `<line x1="${rulerW}" y1="${y}" x2="${stageW}" y2="${y}" stroke="#e5e7eb" stroke-dasharray="4,4" stroke-width="1" />\n`;
+          svg += `<line x1="${rulerW}" y1="${y}" x2="${stageW}" y2="${y}" stroke="#e5e7eb" stroke-dasharray="2,4" stroke-width="1" />\n`;
         }
+
+        // Prominent MAX and MIN reference guide lines across the lineup
+        svg += `<line x1="${rulerW}" y1="${yMax}" x2="${stageW}" y2="${yMax}" stroke="#8b5cf6" stroke-dasharray="8,4" stroke-width="2" />\n`;
+        svg += `<rect x="${stageW - 175}" y="${yMax - 8}" width="165" height="16" rx="3" fill="#8b5cf6" opacity="0.9" />\n`;
+        svg += `<text x="${stageW - 92}" y="${yMax + 3.5}" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#ffffff">▲ TETO MÁX: Sage (495 px)</text>\n`;
+
+        svg += `<line x1="${rulerW}" y1="${yMin}" x2="${stageW}" y2="${yMin}" stroke="#10b981" stroke-dasharray="8,4" stroke-width="2" />\n`;
+        svg += `<rect x="${stageW - 195}" y="${yMin - 8}" width="185" height="16" rx="3" fill="#10b981" opacity="0.9" />\n`;
+        svg += `<text x="${stageW - 102}" y="${yMin + 3.5}" text-anchor="middle" font-family="sans-serif" font-size="9" font-weight="bold" fill="#ffffff">▼ PISO MÍN: Veronica (313 px)</text>\n`;
       }
 
       // Draw Characters
