@@ -9,7 +9,7 @@
   "license": "GPL-3.0-or-later",
   "repository": {
     "type": "git",
-    "url": "https://codeberg.org/lumenpink/ayvu"
+    "url": "https://git.2lp.in/lumen/ayvu"
   },
   "files": [
     "ayvu_bg.wasm",

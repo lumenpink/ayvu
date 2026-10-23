@@ -330,4 +330,3 @@ fn render_caderno_svg() -> String {
     s.push_str(r##"<polygon points="8.5,10 10.5,10 9.5,13" fill="#24292e" stroke="#111111" stroke-width="0.6" />"##);
     s
 }
-

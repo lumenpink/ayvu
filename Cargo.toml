@@ -6,7 +6,7 @@ authors = ["Lumen Pink <hi@lumen.pink>"]
 description = "Declarative comic strip generator inspired by Microsoft Comic Chat"
 license = "GPL-3.0-or-later"
 homepage = "https://ayvu.2lp.in"
-repository = "https://codeberg.org/lumenpink/ayvu"
+repository = "https://git.2lp.in/lumen/ayvu"
 
 [lib]
 crate-type = ["cdylib", "rlib"]

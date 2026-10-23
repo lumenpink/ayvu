@@ -239,10 +239,7 @@ fn handle_request(mut request: tiny_http::Request) {
         (&Method::Get, "/character") | (&Method::Get, "/character.json") => {
             let registry = CharacterRegistry::default();
             let id = query
-                .and_then(|q| {
-                    q.split('&')
-                        .find_map(|pair| pair.strip_prefix("id="))
-                })
+                .and_then(|q| q.split('&').find_map(|pair| pair.strip_prefix("id=")))
                 .unwrap_or("arti");
 
             if let Some(detail) = registry.get_detail(id) {

@@ -32,7 +32,8 @@ fn test_wasm_artifacts_and_html_integration() {
         "site/index.html should integrate WASM module"
     );
 
-    let char_html = fs::read_to_string("site/character.html").expect("site/character.html readable");
+    let char_html =
+        fs::read_to_string("site/character.html").expect("site/character.html readable");
     assert!(
         char_html.contains("./pkg/ayvu.js"),
         "site/character.html should integrate WASM module"

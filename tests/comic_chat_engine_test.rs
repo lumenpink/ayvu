@@ -516,8 +516,8 @@ fn test_arti_canonical_eight_poses() {
     assert_eq!(arti.id, "arti");
     assert_eq!(arti.author, "Lumen Pink");
     assert_eq!(arti.license, "CC-BY");
-    assert_eq!(arti.balloon_anchor.x, 0.5);
-    assert_eq!(arti.balloon_anchor.y, 0.22);
+    assert_eq!(arti.balloon_anchor.x, 0.45);
+    assert_eq!(arti.balloon_anchor.y, 0.12);
 
     let canonical_keys = [
         "neutral", "happy", "shouting", "thinking", "angry", "sad", "laughing", "scared",
@@ -545,8 +545,8 @@ fn test_arti_canonical_eight_poses() {
             key
         );
         assert!(
-            pose_svg.contains("width=\"160\" height=\"440\""),
-            "Arti pose '{}' must have authentic 160x440 dimensions",
+            pose_svg.contains("width=\"157\" height=\"396\""),
+            "Arti pose '{}' must have authentic 157x396 dimensions",
             key
         );
     }
@@ -659,4 +659,3 @@ Arti: Tomando notas no caderno espiral.
     assert!(svg.contains("class=\"comic-prop prop-guarda_chuva\""));
     assert!(svg.contains("class=\"comic-prop prop-caderno\""));
 }
-

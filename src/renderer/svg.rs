@@ -162,6 +162,7 @@ struct CharacterSlot {
     flipped: bool,
 }
 
+#[allow(clippy::too_many_arguments)]
 fn render_single_panel(
     out: &mut String,
     panel: &Panel,

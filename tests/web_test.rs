@@ -85,8 +85,8 @@ fn test_character_inspector_page_and_server_endpoints() {
     assert_eq!(resp_api.status(), 200);
     let body_api = resp_api.into_string().expect("json response body");
     assert!(body_api.contains("\"id\":\"arti\""));
-    assert!(body_api.contains("\"width\":160.0"));
-    assert!(body_api.contains("\"height\":440.0"));
+    assert!(body_api.contains("\"width\":157.0"));
+    assert!(body_api.contains("\"height\":396.0"));
     assert!(body_api.contains("\"poses\""));
 
     handle.stop();

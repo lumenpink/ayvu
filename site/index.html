@@ -287,12 +287,177 @@
       min-height: 340px;
       overflow: auto;
       box-shadow: inset 0 2px 8px rgba(0,0,0,0.2);
+      position: relative;
+      cursor: zoom-in;
     }
 
     #preview-container svg {
       max-width: 100%;
       height: auto;
       border-radius: 4px;
+      transition: transform 0.15s ease-out;
+    }
+
+    /* Preview Header & Controls */
+    .preview-header-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 0.5rem 0.75rem;
+    }
+
+    .preview-info-text {
+      font-size: 0.8rem;
+      color: #8b949e;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .preview-toolbar-btns {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .btn-toolbar {
+      background: #010409;
+      border: 1px solid var(--border);
+      color: var(--text-bright);
+      padding: 0.35rem 0.65rem;
+      border-radius: 6px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s ease;
+    }
+
+    .btn-toolbar:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: #11161d;
+    }
+
+    .btn-toolbar-accent {
+      border-color: var(--primary);
+      color: var(--primary);
+      background: rgba(245, 158, 11, 0.1);
+    }
+    .btn-toolbar-accent:hover {
+      background: var(--primary);
+      color: #000;
+    }
+
+    /* Fullscreen Modal Lightbox */
+    .comic-lightbox {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(5, 7, 10, 0.94);
+      backdrop-filter: blur(10px);
+      z-index: 9999;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .comic-lightbox.active {
+      display: flex;
+    }
+
+    .lightbox-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1.25rem;
+      background: rgba(13, 17, 23, 0.85);
+      border-bottom: 1px solid var(--border);
+      z-index: 10;
+    }
+
+    .lightbox-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-bright);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lightbox-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .lightbox-badge {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      background: #010409;
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .lightbox-canvas-area {
+      flex: 1;
+      overflow: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      cursor: grab;
+      position: relative;
+    }
+
+    .lightbox-canvas-area:active {
+      cursor: grabbing;
+    }
+
+    .lightbox-comic-wrapper {
+      transform-origin: center center;
+      transition: transform 0.15s ease-out;
+      background: #ffffff;
+      padding: 1rem;
+      border-radius: 8px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+      display: inline-block;
+      max-width: 95vw;
+      max-height: 85vh;
+    }
+
+    .lightbox-comic-wrapper svg {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-height: 80vh;
+    }
+
+    .lightbox-hint {
+      position: absolute;
+      bottom: 1rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(13, 17, 23, 0.85);
+      border: 1px solid var(--border);
+      color: #8b949e;
+      font-size: 0.75rem;
+      padding: 0.35rem 0.8rem;
+      border-radius: 20px;
+      pointer-events: none;
+      z-index: 10;
     }
 
     /* Cheatsheet styles */
@@ -646,7 +811,28 @@ Tiki (happy): UAU, ARTE DO JIM WOODRING E BALÕES CLÁSSICOS! [idea]</textarea>
 
       <!-- Preview Tab -->
       <div class="tab-content active" id="preview-tab">
-        <div id="preview-container">
+        <div class="preview-header-bar">
+          <div class="preview-info-text">
+            <span>👁️ Prévia da Tirinha</span>
+            <span style="font-size: 0.75rem; color: #6e7681;">(Clique na tirinha para tela cheia)</span>
+          </div>
+          <div class="preview-toolbar-btns">
+            <button type="button" class="btn-toolbar" id="btn-zoom-in" title="Aumentar Zoom na Prévia">
+              <span>➕ Zoom</span>
+            </button>
+            <button type="button" class="btn-toolbar" id="btn-zoom-out" title="Diminuir Zoom na Prévia">
+              <span>➖ Zoom</span>
+            </button>
+            <button type="button" class="btn-toolbar" id="btn-zoom-reset" title="Tamanho Padrão (100%)">
+              <span>100%</span>
+            </button>
+            <button type="button" class="btn-toolbar btn-toolbar-accent" id="btn-fullscreen-preview" title="Abrir em Tela Cheia / Zoom Máximo">
+              <span>⛶ Tela Cheia</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="preview-container" title="Clique duplo ou no botão ⛶ para abrir em Tela Cheia">
           <div id="preview">Carregando preview...</div>
         </div>
       </div>
@@ -774,6 +960,39 @@ Tiki (happy): UAU, ARTE DO JIM WOODRING E BALÕES CLÁSSICOS! [idea]</textarea>
   </footer>
 
   <div class="toast" id="toast">Copiado para a área de transferência!</div>
+
+  <!-- Fullscreen Modal Lightbox -->
+  <div class="comic-lightbox" id="comic-lightbox" aria-modal="true" role="dialog" aria-label="Visualização em Tela Cheia da Tirinha">
+    <div class="lightbox-topbar">
+      <div class="lightbox-title">
+        <span>🗨️ Tirinha em Tela Cheia</span>
+        <span class="lightbox-badge" id="lightbox-zoom-level">100%</span>
+      </div>
+      <div class="lightbox-controls">
+        <button type="button" class="btn-toolbar" id="btn-lb-zoom-in" title="Aumentar Zoom (Atalho: +)">
+          <span>➕ Zoom</span>
+        </button>
+        <button type="button" class="btn-toolbar" id="btn-lb-zoom-out" title="Diminuir Zoom (Atalho: -)">
+          <span>➖ Zoom</span>
+        </button>
+        <button type="button" class="btn-toolbar" id="btn-lb-zoom-fit" title="Ajustar à Tela (Atalho: 0)">
+          <span>📐 Ajustar</span>
+        </button>
+        <button type="button" class="btn-toolbar" id="btn-lb-zoom-100" title="Tamanho Original (100%)">
+          <span>100%</span>
+        </button>
+        <button type="button" class="btn-toolbar btn-toolbar-accent" id="btn-lb-close" title="Fechar (Esc)">
+          <span>✕ Fechar</span>
+        </button>
+      </div>
+    </div>
+    <div class="lightbox-canvas-area" id="lightbox-canvas-area" title="Use a roda do mouse ou pinch para zoom; arraste para mover">
+      <div class="lightbox-comic-wrapper" id="lightbox-comic-wrapper">
+        <div id="lightbox-comic-content"></div>
+      </div>
+      <div class="lightbox-hint">💡 Dica: Arraste para mover • Roda do mouse ou pinch para zoom • Tecla Esc para fechar</div>
+    </div>
+  </div>
 
   <script type="module">
     import init, { render_comic, list_characters_json, get_character_avatar_svg } from './pkg/ayvu.js';
@@ -1325,6 +1544,236 @@ Arti (laughing): A verdadeira embaixadora do campus!`
         switchToTab('gallery-tab');
       });
     }
+
+    // --- Interactive Zoom & Fullscreen Lightbox ---
+    let previewZoom = 1.0;
+    const previewContainer = document.getElementById('preview-container');
+    const btnZoomIn = document.getElementById('btn-zoom-in');
+    const btnZoomOut = document.getElementById('btn-zoom-out');
+    const btnZoomReset = document.getElementById('btn-zoom-reset');
+    const btnFullscreen = document.getElementById('btn-fullscreen-preview');
+
+    function applyPreviewZoom() {
+      const svg = preview.querySelector('svg');
+      if (svg) {
+        svg.style.transform = `scale(${previewZoom})`;
+        svg.style.transformOrigin = 'center top';
+        if (previewZoom > 1.0) {
+          previewContainer.style.overflow = 'auto';
+          svg.style.maxWidth = 'none';
+        } else {
+          svg.style.maxWidth = '100%';
+        }
+      }
+    }
+
+    if (btnZoomIn) {
+      btnZoomIn.addEventListener('click', () => {
+        previewZoom = Math.min(previewZoom + 0.25, 3.0);
+        applyPreviewZoom();
+      });
+    }
+    if (btnZoomOut) {
+      btnZoomOut.addEventListener('click', () => {
+        previewZoom = Math.max(previewZoom - 0.25, 0.5);
+        applyPreviewZoom();
+      });
+    }
+    if (btnZoomReset) {
+      btnZoomReset.addEventListener('click', () => {
+        previewZoom = 1.0;
+        applyPreviewZoom();
+      });
+    }
+
+    // Lightbox Modal state
+    const lightbox = document.getElementById('comic-lightbox');
+    const lightboxContent = document.getElementById('lightbox-comic-content');
+    const lightboxWrapper = document.getElementById('lightbox-comic-wrapper');
+    const lightboxCanvas = document.getElementById('lightbox-canvas-area');
+    const lightboxZoomLevel = document.getElementById('lightbox-zoom-level');
+    const btnLbClose = document.getElementById('btn-lb-close');
+    const btnLbZoomIn = document.getElementById('btn-lb-zoom-in');
+    const btnLbZoomOut = document.getElementById('btn-lb-zoom-out');
+    const btnLbZoomFit = document.getElementById('btn-lb-zoom-fit');
+    const btnLbZoom100 = document.getElementById('btn-lb-zoom-100');
+
+    let lbScale = 1.0;
+    let lbPanX = 0;
+    let lbPanY = 0;
+    let isDragging = false;
+    let startDragX = 0;
+    let startDragY = 0;
+
+    function updateLightboxTransform() {
+      if (lightboxWrapper) {
+        lightboxWrapper.style.transform = `translate(${lbPanX}px, ${lbPanY}px) scale(${lbScale})`;
+      }
+      if (lightboxZoomLevel) {
+        lightboxZoomLevel.textContent = `${Math.round(lbScale * 100)}%`;
+      }
+    }
+
+    function openLightbox() {
+      const svg = preview.querySelector('svg');
+      if (!svg) return;
+      lightboxContent.innerHTML = svg.outerHTML;
+      lightbox.classList.add('active');
+      document.body.style.overflow = 'hidden';
+
+      // Auto fit to screen
+      fitLightboxToScreen();
+    }
+
+    function fitLightboxToScreen() {
+      const svg = lightboxContent.querySelector('svg');
+      if (!svg) return;
+      const svgW = svg.viewBox.baseVal.width || svg.clientWidth || 880;
+      const svgH = svg.viewBox.baseVal.height || svg.clientHeight || 320;
+      const screenW = window.innerWidth * 0.92;
+      const screenH = (window.innerHeight - 80) * 0.88;
+
+      const scaleW = screenW / svgW;
+      const scaleH = screenH / svgH;
+      lbScale = Math.min(scaleW, scaleH, 2.5);
+      if (lbScale < 0.5) lbScale = 0.5;
+      lbPanX = 0;
+      lbPanY = 0;
+      updateLightboxTransform();
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove('active');
+      document.body.style.overflow = '';
+      lightboxContent.innerHTML = '';
+    }
+
+    if (btnFullscreen) {
+      btnFullscreen.addEventListener('click', openLightbox);
+    }
+
+    // Double-click on preview opens fullscreen
+    if (previewContainer) {
+      previewContainer.addEventListener('dblclick', openLightbox);
+      previewContainer.addEventListener('click', (e) => {
+        // If clicking on svg directly
+        if (e.target.closest('svg')) {
+          openLightbox();
+        }
+      });
+    }
+
+    if (btnLbClose) btnLbClose.addEventListener('click', closeLightbox);
+    if (btnLbZoomIn) {
+      btnLbZoomIn.addEventListener('click', () => {
+        lbScale = Math.min(lbScale * 1.25, 5.0);
+        updateLightboxTransform();
+      });
+    }
+    if (btnLbZoomOut) {
+      btnLbZoomOut.addEventListener('click', () => {
+        lbScale = Math.max(lbScale / 1.25, 0.3);
+        updateLightboxTransform();
+      });
+    }
+    if (btnLbZoomFit) btnLbZoomFit.addEventListener('click', fitLightboxToScreen);
+    if (btnLbZoom100) {
+      btnLbZoom100.addEventListener('click', () => {
+        lbScale = 1.0;
+        lbPanX = 0;
+        lbPanY = 0;
+        updateLightboxTransform();
+      });
+    }
+
+    // Mouse Wheel Zoom in Lightbox
+    if (lightboxCanvas) {
+      lightboxCanvas.addEventListener('wheel', (e) => {
+        e.preventDefault();
+        const delta = e.deltaY < 0 ? 1.15 : 0.87;
+        lbScale = Math.max(0.3, Math.min(lbScale * delta, 5.0));
+        updateLightboxTransform();
+      }, { passive: false });
+
+      // Pan Dragging
+      lightboxCanvas.addEventListener('mousedown', (e) => {
+        if (e.button !== 0) return; // Only left mouse button
+        isDragging = true;
+        startDragX = e.clientX - lbPanX;
+        startDragY = e.clientY - lbPanY;
+      });
+
+      window.addEventListener('mousemove', (e) => {
+        if (!isDragging) return;
+        lbPanX = e.clientX - startDragX;
+        lbPanY = e.clientY - startDragY;
+        updateLightboxTransform();
+      });
+
+      window.addEventListener('mouseup', () => {
+        isDragging = false;
+      });
+
+      // Touch Pinch and Pan for Mobile Devices
+      let initialDist = 0;
+      let initialScale = 1.0;
+      let startTouchX = 0;
+      let startTouchY = 0;
+
+      lightboxCanvas.addEventListener('touchstart', (e) => {
+        if (e.touches.length === 1) {
+          isDragging = true;
+          startTouchX = e.touches[0].clientX - lbPanX;
+          startTouchY = e.touches[0].clientY - lbPanY;
+        } else if (e.touches.length === 2) {
+          isDragging = false;
+          initialDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          initialScale = lbScale;
+        }
+      }, { passive: true });
+
+      lightboxCanvas.addEventListener('touchmove', (e) => {
+        if (e.touches.length === 1 && isDragging) {
+          lbPanX = e.touches[0].clientX - startTouchX;
+          lbPanY = e.touches[0].clientY - startTouchY;
+          updateLightboxTransform();
+        } else if (e.touches.length === 2) {
+          const currentDist = Math.hypot(
+            e.touches[0].clientX - e.touches[1].clientX,
+            e.touches[0].clientY - e.touches[1].clientY
+          );
+          if (initialDist > 0) {
+            lbScale = Math.max(0.3, Math.min(initialScale * (currentDist / initialDist), 5.0));
+            updateLightboxTransform();
+          }
+        }
+      }, { passive: true });
+
+      lightboxCanvas.addEventListener('touchend', () => {
+        isDragging = false;
+        initialDist = 0;
+      });
+    }
+
+    // Keyboard Shortcuts (Esc to close, + / - to zoom, 0 to fit)
+    window.addEventListener('keydown', (e) => {
+      if (lightbox && lightbox.classList.contains('active')) {
+        if (e.key === 'Escape') {
+          closeLightbox();
+        } else if (e.key === '+' || e.key === '=') {
+          lbScale = Math.min(lbScale * 1.25, 5.0);
+          updateLightboxTransform();
+        } else if (e.key === '-' || e.key === '_') {
+          lbScale = Math.max(lbScale / 1.25, 0.3);
+          updateLightboxTransform();
+        } else if (e.key === '0') {
+          fitLightboxToScreen();
+        }
+      }
+    });
 
     // Initial render
     renderStrip();

@@ -2,20 +2,20 @@
   "id": "arti",
   "name": "Arti",
   "author": "Lumen Pink",
-  "license": "MIT",
-  "description": "Arti, o acadêmico misterioso de sobretudo preto, óculos escuros e cabelos longos",
+  "license": "CC-BY",
+  "description": "Arti, o acadêmico misterioso de sobretudo preto, cabelos longos lisos, óculos de grau e calça saruel",
   "balloon_anchor": {
-    "x": 0.5,
-    "y": 0.22
+    "x": 0.45,
+    "y": 0.12
   },
   "poses": {
     "neutral": "neutral.svg",
     "happy": "happy.svg",
+    "laughing": "laughing.svg",
     "shouting": "shouting.svg",
     "thinking": "thinking.svg",
     "angry": "angry.svg",
     "sad": "sad.svg",
-    "laughing": "laughing.svg",
     "scared": "scared.svg"
   }
 }

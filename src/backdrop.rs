@@ -24,15 +24,9 @@ pub fn get_vector_backdrop_svg(name: &str, px: f64, py: f64, w: f64, h: f64) -> 
         "praca_cidadania" | "praca" | "reitoria" | "cidadania" => {
             Some(render_praca_cidadania_svg(px, py, w, h))
         }
-        "ctc" | "engenharia" | "tecnologico" => {
-            Some(render_ctc_svg(px, py, w, h))
-        }
-        "cfh" | "bosquinho" | "humanas" => {
-            Some(render_cfh_svg(px, py, w, h))
-        }
-        "pantanal" | "morro" | "capivara" | "itacorubi" => {
-            Some(render_pantanal_svg(px, py, w, h))
-        }
+        "ctc" | "engenharia" | "tecnologico" => Some(render_ctc_svg(px, py, w, h)),
+        "cfh" | "bosquinho" | "humanas" => Some(render_cfh_svg(px, py, w, h)),
+        "pantanal" | "morro" | "capivara" | "itacorubi" => Some(render_pantanal_svg(px, py, w, h)),
         "pastoral_vector" | "pastoral_vec" => Some(render_pastoral_vector_svg(px, py, w, h)),
         "room" | "quarto" | "sala" => Some(render_room_svg(px, py, w, h)),
         _ => None,
@@ -1406,9 +1400,6 @@ fn render_bu_ufsc_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     out
 }
 
-
-
-
 /// Praça da Cidadania (UFSC) - Reitoria facade, palm trees, street lamps, and cobblestone plaza
 fn render_praca_cidadania_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
@@ -1544,8 +1535,13 @@ fn render_praca_cidadania_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     ));
     // Palm fronds arching out
     let fronds = [
-        (-22.0, -8.0), (-16.0, -18.0), (0.0, -22.0), (16.0, -18.0), (22.0, -8.0),
-        (-24.0, 4.0), (24.0, 4.0)
+        (-22.0, -8.0),
+        (-16.0, -18.0),
+        (0.0, -22.0),
+        (16.0, -18.0),
+        (22.0, -8.0),
+        (-24.0, 4.0),
+        (24.0, 4.0),
     ];
     for (fdx, fdy) in fronds {
         out.push_str(&format!(
@@ -1760,11 +1756,13 @@ fn render_ctc_svg(px: f64, py: f64, w: f64, h: f64) -> String {
         let led_color = if u % 2 == 0 { "#238636" } else { "#1f6feb" };
         out.push_str(&format!(
             r##"<circle cx="{:.1}" cy="{:.1}" r="1.3" fill="{led_color}" />\"##,
-            rack_x + 7.0, uy + 5.5
+            rack_x + 7.0,
+            uy + 5.5
         ));
         out.push_str(&format!(
             r##"<circle cx="{:.1}" cy="{:.1}" r="1.3" fill="#238636" />\"##,
-            rack_x + 11.5, uy + 5.5
+            rack_x + 11.5,
+            uy + 5.5
         ));
         // Drive slots
         out.push_str(&format!(
@@ -1889,7 +1887,8 @@ fn render_cfh_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     // Poster 2: Cineclube
     out.push_str(&format!(
         r##"<g transform="rotate(-3, {:.1}, {:.1})">\"##,
-        mural_x + 28.0, mural_y + 10.0
+        mural_x + 28.0,
+        mural_y + 10.0
     ));
     out.push_str(&format!(
         r##"<rect x="{:.1}" y="{:.1}" width="18" height="15" fill="#fdf0d5" stroke="#111111" stroke-width="1" />\"##,
@@ -1904,7 +1903,8 @@ fn render_cfh_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     // Poster 3: Festa no Bosquinho / Sarau
     out.push_str(&format!(
         r##"<g transform="rotate(4, {:.1}, {:.1})">\"##,
-        mural_x + 48.0, mural_y + 14.0
+        mural_x + 48.0,
+        mural_y + 14.0
     ));
     out.push_str(&format!(
         r##"<rect x="{:.1}" y="{:.1}" width="16" height="18" fill="#ffd166" stroke="#111111" stroke-width="1" />\"##,
@@ -2024,7 +2024,8 @@ fn render_pantanal_svg(px: f64, py: f64, w: f64, h: f64) -> String {
         ));
         out.push_str(&format!(
             r##"<rect x="{:.1}" y="{:.1}" width="2.5" height="9" fill="#582f0e" rx="1.2" />\"##,
-            rx - 2.25, floor_y - 28.0
+            rx - 2.25,
+            floor_y - 28.0
         ));
     }
 
@@ -2085,4 +2086,3 @@ fn render_pantanal_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     out.push_str("</g>");
     out
 }
-
