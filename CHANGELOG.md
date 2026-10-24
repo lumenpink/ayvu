@@ -7,5 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **ci:** remover campo permissions incompativel com forgejo actions (closes #15)
+
 ### Added
 - Inicialização do repositório em conformidade com o padrão GOST.
