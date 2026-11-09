@@ -13,4 +13,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ci:** remover campo permissions incompativel com forgejo actions (closes #15)
 
 ### Added
+- **feat:** implementar suporte ao protocolo xdg e auto-updater da banca (closes #14)
 - Inicialização do repositório em conformidade com o padrão GOST.

@@ -15,6 +15,12 @@ pub mod renderer;
 #[cfg(not(target_arch = "wasm32"))]
 pub mod server;
 
+#[cfg(not(target_arch = "wasm32"))]
+pub mod config;
+
+#[cfg(not(target_arch = "wasm32"))]
+pub mod updater;
+
 #[cfg(feature = "wasm")]
 pub mod wasm;
 

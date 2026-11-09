@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+use std::process::Command;
 use tempfile::tempdir;
 
 #[test]
@@ -68,6 +69,39 @@ auto_update = true
 }
 
 #[test]
+fn test_config_mutators_and_persistence() {
+    let temp = tempdir().expect("tempdir");
+    let config_dir = temp.path().join("config");
+    env::set_var("XDG_CONFIG_HOME", &config_dir);
+
+    let mut cfg = ayvu::config::Config::default();
+    cfg.set_channel("nightly");
+    cfg.pin_version(Some("0.1.0-test.1".to_string()));
+    cfg.set_auto_check(false);
+    cfg.set_auto_update(true);
+
+    assert_eq!(cfg.channel, "nightly");
+    assert!(cfg.pinned);
+    assert_eq!(cfg.pin, "0.1.0-test.1");
+    assert!(!cfg.auto_check);
+    assert!(cfg.auto_update);
+
+    assert!(cfg.save().is_ok());
+
+    let loaded = ayvu::config::Config::load();
+    assert_eq!(loaded.channel, "nightly");
+    assert!(loaded.pinned);
+    assert_eq!(loaded.pin, "0.1.0-test.1");
+    assert!(!loaded.auto_check);
+    assert!(loaded.auto_update);
+
+    let mut unpinned = loaded;
+    unpinned.unpin_version();
+    assert!(!unpinned.pinned);
+    assert!(unpinned.pin.is_empty());
+}
+
+#[test]
 fn test_atomic_binary_replacement_and_rollback() {
     let temp = tempdir().expect("tempdir");
     let bin_path = temp.path().join("ayvu");
@@ -86,4 +120,54 @@ fn test_atomic_binary_replacement_and_rollback() {
     let rollback_res = ayvu::updater::rollback(&bin_path);
     assert!(rollback_res.is_ok());
     assert_eq!(fs::read(&bin_path).unwrap(), b"original-v1-binary");
+}
+
+#[test]
+fn test_cli_config_commands() {
+    let temp = tempdir().expect("tempdir");
+    let config_dir = temp.path().join("cfg");
+    let state_dir = temp.path().join("st");
+
+    let bin = env!("CARGO_BIN_EXE_ayvu");
+
+    // ayvu config set-channel nightly
+    let out = Command::new(bin)
+        .env("XDG_CONFIG_HOME", &config_dir)
+        .env("XDG_STATE_HOME", &state_dir)
+        .args(["config", "set-channel", "nightly"])
+        .output()
+        .expect("set-channel failed");
+    assert!(out.status.success());
+
+    // ayvu config get
+    let out = Command::new(bin)
+        .env("XDG_CONFIG_HOME", &config_dir)
+        .env("XDG_STATE_HOME", &state_dir)
+        .args(["config", "get"])
+        .output()
+        .expect("config get failed");
+    assert!(out.status.success());
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert!(stdout.contains("channel = \"nightly\""));
+
+    // ayvu config pin
+    let out = Command::new(bin)
+        .env("XDG_CONFIG_HOME", &config_dir)
+        .env("XDG_STATE_HOME", &state_dir)
+        .args(["config", "pin", "0.2.0-pinned"])
+        .output()
+        .expect("config pin failed");
+    assert!(out.status.success());
+
+    // ayvu config show
+    let out = Command::new(bin)
+        .env("XDG_CONFIG_HOME", &config_dir)
+        .env("XDG_STATE_HOME", &state_dir)
+        .args(["config", "show"])
+        .output()
+        .expect("config show failed");
+    assert!(out.status.success());
+    let stdout = String::from_utf8_lossy(&out.stdout);
+    assert!(stdout.contains("Pinned:      true"));
+    assert!(stdout.contains("Pin:         0.2.0-pinned"));
 }
