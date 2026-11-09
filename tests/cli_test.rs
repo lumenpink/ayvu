@@ -67,4 +67,3 @@ fn test_lib_version_function() {
     assert_eq!(ayvu::version(), expected_version);
     assert_eq!(ayvu::VERSION, expected_version);
 }
-

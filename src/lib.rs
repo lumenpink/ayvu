@@ -18,7 +18,7 @@ pub mod server;
 #[cfg(feature = "wasm")]
 pub mod wasm;
 
-pub const VERSION: &str = env!("CARGO_PKG_VERSION");
+pub const VERSION: &str = env!("AYVU_CANONICAL_VERSION");
 
 pub fn version() -> &'static str {
     VERSION

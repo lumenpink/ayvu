@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Changed
+- **cli:** responder com versao canonica na flag --version (closes #17)
 - **docs:** adequar README ao teto normativo de 50 linhas do GOST-20 (closes #21)
 - **ci:** remover campo permissions incompativel com forgejo actions (closes #15)
 
