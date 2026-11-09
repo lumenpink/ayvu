@@ -42,3 +42,29 @@ fn test_cli_render_command() {
     assert!(svg_content.contains("Test from CLI!"));
     assert!(svg_content.contains("Works great!"));
 }
+
+#[test]
+fn test_cli_version_flag() {
+    let expected_version = include_str!("../VERSION").trim();
+    let output = Command::new(env!("CARGO_BIN_EXE_ayvu"))
+        .arg("--version")
+        .output()
+        .expect("failed to execute ayvu --version");
+
+    assert!(output.status.success());
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains(expected_version),
+        "Expected version '{}' in stdout, got '{}'",
+        expected_version,
+        stdout
+    );
+}
+
+#[test]
+fn test_lib_version_function() {
+    let expected_version = include_str!("../VERSION").trim();
+    assert_eq!(ayvu::version(), expected_version);
+    assert_eq!(ayvu::VERSION, expected_version);
+}
+
