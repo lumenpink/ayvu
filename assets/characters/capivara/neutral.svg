@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 360" width="180" height="360">
+  <!-- Capivara Body Base in authentic ink hatching -->
+  <!-- Back leg & rump -->
+  <path d="M40,240 C20,200 30,160 65,140 C85,125 110,120 135,130 C155,140 165,165 160,195 C155,225 150,260 145,340 L125,340 C125,300 120,260 110,245 C95,245 85,270 80,340 L60,340 C55,290 50,260 40,240 Z" fill="#2b231d" stroke="#111111" stroke-width="2.5" stroke-linejoin="round" />
+  <!-- Torso & Front chest -->
+  <path d="M65,140 C85,110 115,95 130,95 C145,95 165,115 168,145 C170,175 165,220 155,260 L145,340 L125,340 L130,260 C120,200 100,165 65,140 Z" fill="#3a2f27" />
+  <!-- Head & Snout (distinctive capybara boxy snout) -->
+  <path d="M110,95 C110,65 125,45 150,45 C165,45 175,55 175,80 C175,110 165,135 140,135 C125,135 110,120 110,95 Z" fill="#4a3c32" stroke="#111111" stroke-width="2.5" />
+  <!-- Small Ear -->
+  <path d="M115,55 C110,40 120,35 128,45 Z" fill="#2b231d" stroke="#111111" stroke-width="1.8" />
+  <!-- Fur hatching in nanquim -->
+  <path d="M60,160 L50,170 M75,150 L65,162 M90,145 L80,158 M120,150 L112,165 M140,170 L132,185 M135,210 L128,225" stroke="#111111" stroke-width="1.2" stroke-linecap="round" />
+  <!-- Neutral Expression: placid semicircular eye & calm snout line -->
+  <ellipse cx="148" cy="68" rx="4" ry="2.5" fill="#111111" />
+  <circle cx="150" cy="67" r="1" fill="#ffffff" />
+  <!-- Nostril -->
+  <circle cx="170" cy="75" r="2" fill="#111111" />
+  <path d="M168,82 C162,85 155,84 150,83" stroke="#111111" stroke-width="1.8" stroke-linecap="round" fill="none" />
+</svg>

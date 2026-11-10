@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 380" width="190" height="380">
+  <path d="M50,330 C20,345 5,360 2,370 C20,368 45,355 70,345 Z" fill="#243823" stroke="#111111" stroke-width="2" stroke-linejoin="round" />
+  <path d="M55,200 L45,195 L52,215 L42,210 L50,230 L40,225 L48,245 L38,240 L46,260 L36,255 L44,275" stroke="#111111" stroke-width="2" fill="#1b2a1a" />
+  <path d="M60,150 C50,190 45,260 55,340 L85,340 C90,300 95,260 110,230 C125,245 135,290 140,340 L160,340 C155,270 145,210 135,160 C125,140 100,135 75,140 Z" fill="#2d472c" stroke="#111111" stroke-width="2.5" stroke-linejoin="round" />
+  <path d="M80,145 C100,145 120,160 128,195 C132,230 125,270 120,320 L100,320 C105,270 108,230 100,190 C92,165 85,155 80,145 Z" fill="#c9a84a" stroke="#111111" stroke-width="1.8" />
+  <line x1="95" y1="180" x2="115" y2="180" stroke="#111111" stroke-width="1.2" />
+  <line x1="98" y1="205" x2="120" y2="205" stroke="#111111" stroke-width="1.2" />
+  <line x1="102" y1="230" x2="122" y2="230" stroke="#111111" stroke-width="1.2" />
+  <!-- Arm raised touching jaw in thinking pose -->
+  <path d="M125,185 C135,170 145,160 140,145 C135,140 128,145 125,155 C122,165 120,175 125,185 Z" fill="#2d472c" stroke="#111111" stroke-width="2" />
+  <path d="M70,140 C75,100 95,80 120,80 C135,80 170,95 185,105 C188,110 185,120 170,125 C150,130 130,135 105,138 Z" fill="#2d472c" stroke="#111111" stroke-width="2.5" stroke-linejoin="round" />
+  <path d="M105,138 L170,126 C172,132 165,138 150,140 L100,145 Z" fill="#c9a84a" stroke="#111111" stroke-width="1.8" />
+  <!-- Eye turned upward in reflection -->
+  <circle cx="118" cy="88" r="5" fill="#f0c808" stroke="#111111" stroke-width="1.8" />
+  <ellipse cx="118" cy="85" rx="1.5" ry="3" fill="#111111" />
+  <path d="M112,82 L124,80" stroke="#111111" stroke-width="2" stroke-linecap="round" />
+  <circle cx="178" cy="104" r="2" fill="#111111" />
+  <polygon points="145,127 148,122 151,127" fill="#ffffff" stroke="#111111" stroke-width="1" />
+</svg>

@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 360" width="180" height="360">
+  <path d="M40,240 C20,200 30,160 65,140 C85,125 110,120 135,130 C155,140 165,165 160,195 C155,225 150,260 145,340 L125,340 C125,300 120,260 110,245 C95,245 85,270 80,340 L60,340 C55,290 50,260 40,240 Z" fill="#2b231d" stroke="#111111" stroke-width="2.5" stroke-linejoin="round" />
+  <path d="M65,140 C85,110 115,95 130,95 C145,95 165,115 168,145 C170,175 165,220 155,260 L145,340 L125,340 L130,260 C120,200 100,165 65,140 Z" fill="#3a2f27" />
+  <path d="M110,95 C110,65 125,45 150,45 C165,45 175,55 175,80 C175,110 165,135 140,135 C125,135 110,120 110,95 Z" fill="#4a3c32" stroke="#111111" stroke-width="2.5" />
+  <path d="M115,55 C110,40 120,35 128,45 Z" fill="#2b231d" stroke="#111111" stroke-width="1.8" />
+  <!-- Spiked nervous fur hatching -->
+  <path d="M60,160 L45,168 M75,150 L60,158 M90,145 L78,154 M120,150 L110,162 M140,170 L130,182" stroke="#111111" stroke-width="1.5" stroke-linecap="round" />
+  <!-- Scared Expression: huge wide pupils, sweat drop, wavy mouth -->
+  <circle cx="147" cy="66" r="6" fill="#ffffff" stroke="#111111" stroke-width="2" />
+  <circle cx="147" cy="66" r="2" fill="#111111" />
+  <!-- Sweat drop -->
+  <path d="M132,50 C130,53 129,56 131,58 C133,58 134,56 132,50 Z" fill="#00b4d8" />
+  <circle cx="170" cy="74" r="2" fill="#111111" />
+  <path d="M168,85 Q160,80 154,86 T144,82" stroke="#111111" stroke-width="2" stroke-linecap="round" fill="none" />
+</svg>

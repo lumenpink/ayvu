@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 380" width="190" height="380">
+  <path d="M50,330 C20,345 5,360 2,370 C20,368 45,355 70,345 Z" fill="#243823" stroke="#111111" stroke-width="2" stroke-linejoin="round" />
+  <path d="M55,200 L45,195 L52,215 L42,210 L50,230 L40,225 L48,245 L38,240 L46,260 L36,255 L44,275" stroke="#111111" stroke-width="2" fill="#1b2a1a" />
+  <path d="M60,150 C50,190 45,260 55,340 L85,340 C90,300 95,260 110,230 C125,245 135,290 140,340 L160,340 C155,270 145,210 135,160 C125,140 100,135 75,140 Z" fill="#2d472c" stroke="#111111" stroke-width="2.5" stroke-linejoin="round" />
+  <path d="M80,145 C100,145 120,160 128,195 C132,230 125,270 120,320 L100,320 C105,270 108,230 100,190 C92,165 85,155 80,145 Z" fill="#c9a84a" stroke="#111111" stroke-width="1.8" />
+  <line x1="95" y1="180" x2="115" y2="180" stroke="#111111" stroke-width="1.2" />
+  <line x1="98" y1="205" x2="120" y2="205" stroke="#111111" stroke-width="1.2" />
+  <line x1="102" y1="230" x2="122" y2="230" stroke="#111111" stroke-width="1.2" />
+  <path d="M125,185 C140,195 145,215 135,230 C130,235 120,235 118,225 C115,215 120,195 125,185 Z" fill="#2d472c" stroke="#111111" stroke-width="2" />
+  <path d="M70,140 C75,100 95,80 120,80 C135,80 170,95 185,105 C188,110 185,120 170,125 C150,130 130,135 105,138 Z" fill="#2d472c" stroke="#111111" stroke-width="2.5" stroke-linejoin="round" />
+  <path d="M105,138 L170,126 C172,132 165,138 150,140 L100,145 Z" fill="#c9a84a" stroke="#111111" stroke-width="1.8" />
+  <!-- Angry Eye: slanted brow, slit pupil -->
+  <path d="M110,84 L126,90" stroke="#111111" stroke-width="2.8" stroke-linecap="round" />
+  <circle cx="118" cy="93" r="4.5" fill="#f0c808" />
+  <line x1="118" y1="89" x2="118" y2="97" stroke="#111111" stroke-width="2" />
+  <circle cx="178" cy="104" r="2.2" fill="#111111" />
+  <!-- Clamped jagged teeth -->
+  <polygon points="135,128 138,121 141,128" fill="#ffffff" stroke="#111111" stroke-width="1" />
+  <polygon points="146,127 149,120 152,127" fill="#ffffff" stroke="#111111" stroke-width="1" />
+  <polygon points="157,125 160,119 163,125" fill="#ffffff" stroke="#111111" stroke-width="1" />
+  <polygon points="168,124 171,118 174,124" fill="#ffffff" stroke="#111111" stroke-width="1" />
+</svg>

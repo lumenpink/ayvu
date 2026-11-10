@@ -7,8 +7,10 @@ use ayvu::renderer::render_comic_strip_to_svg;
 fn test_native_roster_composition() {
     let characters = ayvu::assets::list_available_characters();
 
-    // Must contain exactly the 6 native characters
-    let expected = vec!["aly", "arti", "billi", "lu", "raio", "sombra"];
+    // Must contain the native and thematic characters
+    let expected = vec![
+        "aly", "arti", "billi", "capivara", "jacare", "lu", "raio", "sombra",
+    ];
     for id in &expected {
         assert!(
             characters.contains(id),
@@ -18,8 +20,8 @@ fn test_native_roster_composition() {
     }
     assert_eq!(
         characters.len(),
-        6,
-        "Roster must have exactly 6 characters, got: {:?}",
+        8,
+        "Roster must have exactly 8 characters, got: {:?}",
         characters
     );
 

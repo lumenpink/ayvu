@@ -4,7 +4,9 @@ use crate::character::{Anchor, CharacterPack};
 use std::collections::HashMap;
 
 pub fn list_available_characters() -> Vec<&'static str> {
-    vec!["aly", "arti", "billi", "lu", "raio", "sombra"]
+    vec![
+        "aly", "arti", "billi", "capivara", "jacare", "lu", "raio", "sombra",
+    ]
 }
 
 pub fn get_character(id: &str) -> Option<CharacterPack> {
@@ -15,6 +17,8 @@ pub fn get_character(id: &str) -> Option<CharacterPack> {
         "aly" => Some(load_aly()),
         "lu" => Some(load_lu()),
         "raio" => Some(load_raio()),
+        "capivara" => Some(load_capivara()),
+        "jacare" | "jacaré" => Some(load_jacare()),
         _ => None,
     }
 }
@@ -27,6 +31,8 @@ pub fn load_official_packs() -> Vec<CharacterPack> {
         load_aly(),
         load_lu(),
         load_raio(),
+        load_capivara(),
+        load_jacare(),
     ]
 }
 
@@ -323,6 +329,105 @@ fn load_raio() -> CharacterPack {
             .to_string(),
         balloon_anchor: Anchor { x: 0.50, y: 0.19 },
         hand_anchor: Anchor { x: 0.71, y: 0.50 },
+        pose_hand_anchors: HashMap::new(),
+        poses,
+    }
+}
+
+fn load_capivara() -> CharacterPack {
+    let mut poses = HashMap::new();
+    poses.insert(
+        "neutral".to_string(),
+        include_str!("../assets/characters/capivara/neutral.svg").to_string(),
+    );
+    poses.insert(
+        "happy".to_string(),
+        include_str!("../assets/characters/capivara/happy.svg").to_string(),
+    );
+    poses.insert(
+        "laughing".to_string(),
+        include_str!("../assets/characters/capivara/laughing.svg").to_string(),
+    );
+    poses.insert(
+        "shouting".to_string(),
+        include_str!("../assets/characters/capivara/shouting.svg").to_string(),
+    );
+    poses.insert(
+        "thinking".to_string(),
+        include_str!("../assets/characters/capivara/thinking.svg").to_string(),
+    );
+    poses.insert(
+        "angry".to_string(),
+        include_str!("../assets/characters/capivara/angry.svg").to_string(),
+    );
+    poses.insert(
+        "sad".to_string(),
+        include_str!("../assets/characters/capivara/sad.svg").to_string(),
+    );
+    poses.insert(
+        "scared".to_string(),
+        include_str!("../assets/characters/capivara/scared.svg").to_string(),
+    );
+
+    CharacterPack {
+        id: "capivara".to_string(),
+        name: "Capivara".to_string(),
+        author: "Lumen Pink".to_string(),
+        license: "CC-BY".to_string(),
+        description: "Capivara da Trindade, mascote da UFSC de porte sereno e traço em nanquim"
+            .to_string(),
+        balloon_anchor: Anchor { x: 0.72, y: 0.28 },
+        hand_anchor: Anchor { x: 0.68, y: 0.62 },
+        pose_hand_anchors: HashMap::new(),
+        poses,
+    }
+}
+
+fn load_jacare() -> CharacterPack {
+    let mut poses = HashMap::new();
+    poses.insert(
+        "neutral".to_string(),
+        include_str!("../assets/characters/jacare/neutral.svg").to_string(),
+    );
+    poses.insert(
+        "happy".to_string(),
+        include_str!("../assets/characters/jacare/happy.svg").to_string(),
+    );
+    poses.insert(
+        "laughing".to_string(),
+        include_str!("../assets/characters/jacare/laughing.svg").to_string(),
+    );
+    poses.insert(
+        "shouting".to_string(),
+        include_str!("../assets/characters/jacare/shouting.svg").to_string(),
+    );
+    poses.insert(
+        "thinking".to_string(),
+        include_str!("../assets/characters/jacare/thinking.svg").to_string(),
+    );
+    poses.insert(
+        "angry".to_string(),
+        include_str!("../assets/characters/jacare/angry.svg").to_string(),
+    );
+    poses.insert(
+        "sad".to_string(),
+        include_str!("../assets/characters/jacare/sad.svg").to_string(),
+    );
+    poses.insert(
+        "scared".to_string(),
+        include_str!("../assets/characters/jacare/scared.svg").to_string(),
+    );
+
+    CharacterPack {
+        id: "jacare".to_string(),
+        name: "Jacaré".to_string(),
+        author: "Lumen Pink".to_string(),
+        license: "CC-BY".to_string(),
+        description:
+            "Jacaré-do-papo-amarelo do Córrego da Trindade, ícone lendário da UFSC em nanquim"
+                .to_string(),
+        balloon_anchor: Anchor { x: 0.75, y: 0.32 },
+        hand_anchor: Anchor { x: 0.64, y: 0.58 },
         pose_hand_anchors: HashMap::new(),
         poses,
     }

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 190 380" width="190" height="380">
+  <path d="M50,330 C20,345 5,360 2,370 C20,368 45,355 70,345 Z" fill="#243823" stroke="#111111" stroke-width="2" stroke-linejoin="round" />
+  <path d="M55,200 L45,195 L52,215 L42,210 L50,230 L40,225 L48,245 L38,240 L46,260 L36,255 L44,275" stroke="#111111" stroke-width="2" fill="#1b2a1a" />
+  <path d="M60,150 C50,190 45,260 55,340 L85,340 C90,300 95,260 110,230 C125,245 135,290 140,340 L160,340 C155,270 145,210 135,160 C125,140 100,135 75,140 Z" fill="#2d472c" stroke="#111111" stroke-width="2.5" stroke-linejoin="round" />
+  <path d="M80,145 C100,145 120,160 128,195 C132,230 125,270 120,320 L100,320 C105,270 108,230 100,190 C92,165 85,155 80,145 Z" fill="#c9a84a" stroke="#111111" stroke-width="1.8" />
+  <line x1="95" y1="180" x2="115" y2="180" stroke="#111111" stroke-width="1.2" />
+  <line x1="98" y1="205" x2="120" y2="205" stroke="#111111" stroke-width="1.2" />
+  <line x1="102" y1="230" x2="122" y2="230" stroke="#111111" stroke-width="1.2" />
+  <!-- Arm raised slightly in shouting gesticulation -->
+  <path d="M125,180 C145,175 155,190 150,210 C145,220 135,225 130,215 C125,205 122,190 125,180 Z" fill="#2d472c" stroke="#111111" stroke-width="2" />
+  <!-- Wide-open roaring jaws -->
+  <path d="M70,140 C75,90 95,65 120,65 C135,65 170,75 188,85 C190,92 185,102 170,110 L105,125 Z" fill="#2d472c" stroke="#111111" stroke-width="2.5" stroke-linejoin="round" />
+  <!-- Lower jaw dropped wide -->
+  <path d="M105,125 L175,148 C170,165 145,170 125,160 L100,145 Z" fill="#c9a84a" stroke="#111111" stroke-width="2" />
+  <!-- Gaping red throat inside -->
+  <path d="M110,125 L168,112 L165,145 Z" fill="#c1121f" stroke="#111111" stroke-width="1" />
+  <!-- Sharp rows of white teeth -->
+  <polygon points="120,118 123,124 126,118" fill="#ffffff" />
+  <polygon points="135,115 138,122 141,115" fill="#ffffff" />
+  <polygon points="150,112 153,120 156,112" fill="#ffffff" />
+  <polygon points="130,135 133,128 136,135" fill="#ffffff" />
+  <polygon points="145,140 148,132 151,140" fill="#ffffff" />
+  <!-- Fierce open eye -->
+  <circle cx="118" cy="80" r="6" fill="#f0c808" stroke="#111111" stroke-width="2" />
+  <circle cx="118" cy="80" r="2.5" fill="#111111" />
+  <circle cx="180" cy="85" r="2.2" fill="#111111" />
+</svg>

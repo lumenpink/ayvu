@@ -37,9 +37,11 @@ fn test_default_registry_contains_presets() {
     assert!(registry.contains_id("aly"));
     assert!(registry.contains_id("lu"));
     assert!(registry.contains_id("raio"));
+    assert!(registry.contains_id("capivara"));
+    assert!(registry.contains_id("jacare"));
 
     let list = registry.list_metadata();
-    assert_eq!(list.len(), 6);
+    assert_eq!(list.len(), 8);
 }
 
 #[test]

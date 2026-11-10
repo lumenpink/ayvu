@@ -1,0 +1,25 @@
+{
+  "id": "jacare",
+  "name": "Jacaré",
+  "author": "Lumen Pink",
+  "license": "CC-BY",
+  "description": "Jacaré-do-papo-amarelo do Córrego da Trindade, ícone lendário da UFSC em nanquim",
+  "balloon_anchor": {
+    "x": 0.75,
+    "y": 0.32
+  },
+  "hand_anchor": {
+    "x": 0.64,
+    "y": 0.58
+  },
+  "poses": {
+    "neutral": "neutral.svg",
+    "happy": "happy.svg",
+    "laughing": "laughing.svg",
+    "shouting": "shouting.svg",
+    "thinking": "thinking.svg",
+    "angry": "angry.svg",
+    "sad": "sad.svg",
+    "scared": "scared.svg"
+  }
+}

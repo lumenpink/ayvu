@@ -116,6 +116,8 @@ impl CharacterPack {
     pub fn dimensions(&self) -> (f64, f64) {
         match self.id.to_lowercase().as_str() {
             "arti" => (157.0, 396.0),
+            "capivara" => (180.0, 360.0),
+            "jacare" => (190.0, 380.0),
             "sombra" | "billi" | "aly" | "lu" | "raio" => (160.0, 440.0),
             _ => (160.0, 440.0),
         }
@@ -243,7 +245,12 @@ impl CharacterRegistry {
 
         // 2. Check if speaker directly matches a character ID or character name
         for (id, pack) in &self.packs {
-            if id == &speaker_lower || pack.name.to_lowercase() == speaker_lower {
+            let unaccented = speaker_lower.replace('é', "e").replace('á', "a");
+            if id == &speaker_lower
+                || pack.name.to_lowercase() == speaker_lower
+                || id == &unaccented
+                || pack.name.to_lowercase().replace('é', "e") == unaccented
+            {
                 self.speaker_cache.insert(speaker_lower.clone(), id.clone());
                 return pack.clone();
             }
