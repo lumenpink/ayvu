@@ -20,6 +20,10 @@ fn default_anchor() -> Anchor {
     Anchor::default()
 }
 
+fn default_hand_anchor() -> Anchor {
+    Anchor { x: 0.65, y: 0.58 }
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CharacterManifest {
     pub id: String,
@@ -32,6 +36,10 @@ pub struct CharacterManifest {
     pub description: String,
     #[serde(default = "default_anchor")]
     pub balloon_anchor: Anchor,
+    #[serde(default = "default_hand_anchor")]
+    pub hand_anchor: Anchor,
+    #[serde(default)]
+    pub pose_hand_anchors: HashMap<String, Anchor>,
     pub poses: HashMap<String, String>,
 }
 
@@ -45,6 +53,7 @@ pub struct CharacterMetadata {
     pub width: f64,
     pub height: f64,
     pub balloon_anchor: Anchor,
+    pub hand_anchor: Anchor,
     pub emotions: Vec<String>,
 }
 
@@ -58,6 +67,7 @@ pub struct CharacterDetail {
     pub width: f64,
     pub height: f64,
     pub balloon_anchor: Anchor,
+    pub hand_anchor: Anchor,
     pub emotions: Vec<String>,
     pub poses: HashMap<String, String>,
 }
@@ -70,6 +80,8 @@ pub struct CharacterPack {
     pub license: String,
     pub description: String,
     pub balloon_anchor: Anchor,
+    pub hand_anchor: Anchor,
+    pub pose_hand_anchors: HashMap<String, Anchor>,
     pub poses: HashMap<String, String>,
 }
 
@@ -106,6 +118,15 @@ impl CharacterPack {
             "arti" => (157.0, 396.0),
             "sombra" | "billi" | "aly" | "lu" | "raio" => (160.0, 440.0),
             _ => (160.0, 440.0),
+        }
+    }
+
+    pub fn get_hand_anchor(&self, emotion: &Emotion) -> Anchor {
+        let key = emotion.as_str();
+        if let Some(anchor) = self.pose_hand_anchors.get(key) {
+            *anchor
+        } else {
+            self.hand_anchor
         }
     }
 }
@@ -178,6 +199,7 @@ impl CharacterRegistry {
                     width,
                     height,
                     balloon_anchor: pack.balloon_anchor,
+                    hand_anchor: pack.hand_anchor,
                     emotions,
                 });
             }
@@ -199,6 +221,7 @@ impl CharacterRegistry {
                 width,
                 height,
                 balloon_anchor: pack.balloon_anchor,
+                hand_anchor: pack.hand_anchor,
                 emotions,
                 poses: pack.poses.clone(),
             })
@@ -269,6 +292,8 @@ impl CharacterRegistry {
                                     license: manifest.license,
                                     description: manifest.description,
                                     balloon_anchor: manifest.balloon_anchor,
+                                    hand_anchor: manifest.hand_anchor,
+                                    pose_hand_anchors: manifest.pose_hand_anchors,
                                     poses,
                                 });
                                 loaded += 1;

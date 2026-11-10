@@ -7,6 +7,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- **core:** alinhar props nas maos dos personagens via ancoras anatomicas (closes #18)
+
 ### Changed
 - **core:** adotar elenco nativo (arti, sombra, billi, aly, lu, raio) em nanquim vetorial e purgar legados do comic chat (closes #22)
 - **cli:** responder com versao canonica na flag --version (closes #17)

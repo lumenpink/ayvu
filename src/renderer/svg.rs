@@ -158,6 +158,7 @@ struct CharacterSlot {
     scale: f64,
     scaled_w: f64,
     mouth: Point,
+    hand: Point,
     pose_svg: String,
     flipped: bool,
 }
@@ -358,6 +359,18 @@ fn render_single_panel(
             .map(|d| d.emotion.clone())
             .unwrap_or(Emotion::Neutral);
 
+        let hand_anchor = pack.get_hand_anchor(&emotion);
+        let hand_x = if flipped {
+            char_x + ((1.0 - hand_anchor.x) * scaled_w)
+        } else {
+            char_x + (hand_anchor.x * scaled_w)
+        };
+        let hand_y = char_y + (hand_anchor.y * scaled_h);
+        let hand = Point {
+            x: hand_x,
+            y: hand_y,
+        };
+
         let pose_svg = pack.get_pose_svg(&emotion).to_string();
 
         slots.push(CharacterSlot {
@@ -368,6 +381,7 @@ fn render_single_panel(
             scale,
             scaled_w,
             mouth,
+            hand,
             pose_svg,
             flipped,
         });
@@ -436,24 +450,24 @@ fn render_single_panel(
                 .iter()
                 .find(|s| s.speaker.eq_ignore_ascii_case(target_name))
             {
-                // Character-held prop: position around hand / waist level
+                // Character-held prop: position around hand anchor
                 let count = speaker_prop_counts.entry(slot.speaker.clone()).or_insert(0);
-                let offset_x = (*count as f64) * 22.0;
+                let offset_x = (*count as f64) * 16.0;
                 *count += 1;
-                let (base_cx, flipped) = if slot.flipped {
-                    (slot.char_x + (slot.scaled_w * 0.22) - offset_x, true)
+                let (grip_x, grip_y) = prop.prop_type.grip_offset();
+                let prop_scale = 0.95;
+                let base_x = if slot.flipped {
+                    slot.hand.x - offset_x - (grip_x * prop_scale)
                 } else {
-                    (slot.char_x + (slot.scaled_w * 0.78) + offset_x, false)
+                    slot.hand.x + offset_x - (grip_x * prop_scale)
                 };
-                let cy = match prop.prop_type {
-                    crate::model::PropType::Microphone => floor_y - 18.0,
-                    crate::model::PropType::Backpack => floor_y - 28.0,
-                    crate::model::PropType::Umbrella => floor_y - 36.0,
-                    crate::model::PropType::Tray => floor_y - 30.0,
-                    crate::model::PropType::Phone => floor_y - 34.0,
-                    _ => floor_y - 32.0,
-                };
-                (base_cx.clamp(px + 16.0, px + pw - 16.0), cy, 0.95, flipped)
+                let base_y = slot.hand.y - (grip_y * prop_scale);
+                (
+                    base_x.clamp(px + 12.0, px + pw - 12.0),
+                    base_y,
+                    prop_scale,
+                    slot.flipped,
+                )
             } else {
                 let idx = untargeted_idx;
                 untargeted_idx += 1;

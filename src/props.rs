@@ -10,10 +10,21 @@ pub fn render_prop_svg(prop: &PropItem, cx: f64, cy: f64, scale: f64, flipped: b
         format!(r#" transform="translate({cx:.1}, {cy:.1}) scale({scale:.2}, {scale:.2})""#)
     };
 
+    let class_name = if prop.target.is_some() {
+        format!(
+            "comic-prop prop-item prop-anchored prop-{}",
+            prop.prop_type.as_str()
+        )
+    } else {
+        format!(
+            "comic-prop prop-item prop-ground prop-{}",
+            prop.prop_type.as_str()
+        )
+    };
+
     out.push_str(&format!(
-        r##"<g class="comic-prop prop-{}"{}>"##,
-        prop.prop_type.as_str(),
-        flip_transform
+        r##"<g class="{}"{}>"##,
+        class_name, flip_transform
     ));
 
     match prop.prop_type {

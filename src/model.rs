@@ -232,6 +232,23 @@ impl PropType {
             PropType::Custom(_) => "custom",
         }
     }
+
+    pub fn grip_offset(&self) -> (f64, f64) {
+        match self {
+            PropType::Coffee => (6.0, 4.0),
+            PropType::Book | PropType::Caderno => (2.0, 6.0),
+            PropType::Microphone => (0.0, 10.0),
+            PropType::Phone => (0.0, 5.0),
+            PropType::Tray => (0.0, 3.0),
+            PropType::Laptop => (0.0, 8.0),
+            PropType::Erlenmeyer => (0.0, 10.0),
+            PropType::Chalk => (0.0, 2.0),
+            PropType::Stethoscope => (0.0, 12.0),
+            PropType::Backpack => (-4.0, 14.0),
+            PropType::Umbrella => (0.0, 18.0),
+            PropType::Custom(_) => (0.0, 4.0),
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

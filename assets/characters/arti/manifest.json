@@ -8,6 +8,10 @@
     "x": 0.45,
     "y": 0.12
   },
+  "hand_anchor": {
+    "x": 0.65,
+    "y": 0.55
+  },
   "poses": {
     "neutral": "neutral.svg",
     "happy": "happy.svg",

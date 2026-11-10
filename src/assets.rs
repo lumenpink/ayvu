@@ -78,6 +78,8 @@ fn load_arti() -> CharacterPack {
             "Arti, o acadêmico misterioso de sobretudo preto, cabelos longos lisos, óculos de grau e calça saruel"
                 .to_string(),
         balloon_anchor: Anchor { x: 0.45, y: 0.12 },
+        hand_anchor: Anchor { x: 0.65, y: 0.55 },
+        pose_hand_anchors: HashMap::new(),
         poses,
     }
 }
@@ -124,6 +126,8 @@ fn load_sombra() -> CharacterPack {
         license: "CC-BY".to_string(),
         description: "Silhueta humanoide feminina em nanquim com estampa S no peito".to_string(),
         balloon_anchor: Anchor { x: 0.50, y: 0.19 },
+        hand_anchor: Anchor { x: 0.71, y: 0.50 },
+        pose_hand_anchors: HashMap::new(),
         poses,
     }
 }
@@ -171,6 +175,8 @@ fn load_billi() -> CharacterPack {
         description: "Billi, silhueta humanoide feminina em nanquim com estampa B no peito"
             .to_string(),
         balloon_anchor: Anchor { x: 0.50, y: 0.19 },
+        hand_anchor: Anchor { x: 0.71, y: 0.50 },
+        pose_hand_anchors: HashMap::new(),
         poses,
     }
 }
@@ -218,6 +224,8 @@ fn load_aly() -> CharacterPack {
         description: "Aly, silhueta humanoide feminina em nanquim com estampa A no peito"
             .to_string(),
         balloon_anchor: Anchor { x: 0.50, y: 0.19 },
+        hand_anchor: Anchor { x: 0.71, y: 0.50 },
+        pose_hand_anchors: HashMap::new(),
         poses,
     }
 }
@@ -265,6 +273,8 @@ fn load_lu() -> CharacterPack {
         description: "Lu, silhueta humanoide feminina em nanquim com estampa L no peito"
             .to_string(),
         balloon_anchor: Anchor { x: 0.50, y: 0.19 },
+        hand_anchor: Anchor { x: 0.71, y: 0.50 },
+        pose_hand_anchors: HashMap::new(),
         poses,
     }
 }
@@ -312,6 +322,8 @@ fn load_raio() -> CharacterPack {
         description: "Raio, silhueta humanoide masculina em branco com contorno preto e estampa R"
             .to_string(),
         balloon_anchor: Anchor { x: 0.50, y: 0.19 },
+        hand_anchor: Anchor { x: 0.71, y: 0.50 },
+        pose_hand_anchors: HashMap::new(),
         poses,
     }
 }
