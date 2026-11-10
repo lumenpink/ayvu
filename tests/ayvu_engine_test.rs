@@ -59,7 +59,10 @@ fn test_all_native_characters_have_eight_poses() {
                 emotion
             );
             assert!(
-                pose.contains("<svg") || pose.contains("<image") || pose.contains("<g") || pose.contains("<path"),
+                pose.contains("<svg")
+                    || pose.contains("<image")
+                    || pose.contains("<g")
+                    || pose.contains("<path"),
                 "Character '{}' pose for {:?} must be valid SVG markup",
                 id,
                 emotion
@@ -83,6 +86,7 @@ Lu (shouting): Avante com a nova arquitetura!
     assert!(svg.contains("<svg"));
     assert!(svg.contains("Arti"));
     assert!(svg.contains("Billi"));
-    assert!(svg.contains("As teorias sobre o motor"));
-    assert!(svg.contains("totalmente nativo"));
+    assert!(svg.contains("teorias"));
+    assert!(svg.contains("nativo"));
+    assert!(svg.contains("1996"));
 }

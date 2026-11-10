@@ -1,10 +1,14 @@
 use std::env;
 use std::fs;
 use std::process::Command;
+use std::sync::Mutex;
 use tempfile::tempdir;
+
+static ENV_MUTEX: Mutex<()> = Mutex::new(());
 
 #[test]
 fn test_xdg_config_paths_and_defaults() {
+    let _lock = ENV_MUTEX.lock().unwrap();
     let temp = tempdir().expect("tempdir");
     let config_dir = temp.path().join("config");
     let state_dir = temp.path().join("state");
@@ -30,6 +34,7 @@ fn test_xdg_config_paths_and_defaults() {
 
 #[test]
 fn test_xdg_config_precedence() {
+    let _lock = ENV_MUTEX.lock().unwrap();
     let temp = tempdir().expect("tempdir");
     let config_dir = temp.path().join("config");
     let ayvu_dir = config_dir.join("ayvu");
@@ -70,6 +75,7 @@ auto_update = true
 
 #[test]
 fn test_config_mutators_and_persistence() {
+    let _lock = ENV_MUTEX.lock().unwrap();
     let temp = tempdir().expect("tempdir");
     let config_dir = temp.path().join("config");
     env::set_var("XDG_CONFIG_HOME", &config_dir);

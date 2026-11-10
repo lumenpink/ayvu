@@ -1,0 +1,21 @@
+{
+  "id": "raio",
+  "name": "Raio",
+  "author": "Lumen Pink",
+  "license": "CC-BY",
+  "description": "Raio, silhueta humanoide masculina em branco com contorno preto e estampa R",
+  "balloon_anchor": {
+    "x": 0.5,
+    "y": 0.19
+  },
+  "poses": {
+    "neutral": "neutral.svg",
+    "happy": "happy.svg",
+    "laughing": "laughing.svg",
+    "shouting": "shouting.svg",
+    "thinking": "thinking.svg",
+    "angry": "angry.svg",
+    "sad": "sad.svg",
+    "scared": "scared.svg"
+  }
+}

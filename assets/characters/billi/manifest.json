@@ -1,0 +1,21 @@
+{
+  "id": "billi",
+  "name": "Billi",
+  "author": "Lumen Pink",
+  "license": "CC-BY",
+  "description": "Billi, silhueta humanoide feminina em nanquim com estampa B no peito",
+  "balloon_anchor": {
+    "x": 0.5,
+    "y": 0.19
+  },
+  "poses": {
+    "neutral": "neutral.svg",
+    "happy": "happy.svg",
+    "laughing": "laughing.svg",
+    "shouting": "shouting.svg",
+    "thinking": "thinking.svg",
+    "angry": "angry.svg",
+    "sad": "sad.svg",
+    "scared": "scared.svg"
+  }
+}

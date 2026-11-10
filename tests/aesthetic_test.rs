@@ -70,18 +70,34 @@ fn test_anti_crossing_balloons() {
 }
 
 #[test]
-fn test_classic_comic_chat_characters_available() {
+fn test_native_ayvu_characters_available() {
     let registry = CharacterRegistry::default();
     assert!(
-        registry.get("tiki").is_some(),
-        "Deve conter a personagem clássica Tiki"
+        registry.get("arti").is_some(),
+        "Deve conter o personagem nativo Arti"
     );
     assert!(
-        registry.get("jordan").is_some(),
-        "Deve conter o personagem clássico Jordan"
+        registry.get("sombra").is_some(),
+        "Deve conter a personagem nativa Sombra"
     );
     assert!(
-        registry.get("armando").is_some(),
-        "Deve conter o personagem clássico Armando"
+        registry.get("billi").is_some(),
+        "Deve conter a personagem nativa Billi"
+    );
+    assert!(
+        registry.get("aly").is_some(),
+        "Deve conter a personagem nativa Aly"
+    );
+    assert!(
+        registry.get("lu").is_some(),
+        "Deve conter a personagem nativa Lu"
+    );
+    assert!(
+        registry.get("raio").is_some(),
+        "Deve conter o personagem nativo Raio"
+    );
+    assert!(
+        registry.get("tiki").is_none(),
+        "Nao deve conter personagens legados do Comic Chat"
     );
 }
