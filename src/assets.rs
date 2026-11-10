@@ -694,6 +694,10 @@ fn load_arti() -> CharacterPack {
     }
 }
 
+pub fn list_available_characters() -> Vec<&'static str> {
+    vec!["armando", "dan", "tiki"]
+}
+
 pub fn get_character(id: &str) -> Option<CharacterPack> {
     match id.to_lowercase().as_str() {
         "anna" => Some(load_anna()),

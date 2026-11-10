@@ -12,6 +12,7 @@ pub enum Emotion {
     Thinking,
     Skeptical,
     Surprised,
+    Scared,
     Custom(String),
 }
 
@@ -28,6 +29,7 @@ impl Emotion {
             "thinking" | "pensando" | "pensativo" | "thought" => Emotion::Thinking,
             "skeptical" | "cético" | "cetico" | "duvidoso" | "sus" => Emotion::Skeptical,
             "surprised" | "surpreso" | "espantado" | "wow" => Emotion::Surprised,
+            "scared" | "assustado" | "medo" => Emotion::Scared,
             other => Emotion::Custom(other.to_string()),
         }
     }
@@ -44,6 +46,7 @@ impl Emotion {
             Emotion::Thinking => "thinking",
             Emotion::Skeptical => "skeptical",
             Emotion::Surprised => "surprised",
+            Emotion::Scared => "scared",
             Emotion::Custom(s) => s.as_str(),
         }
     }
