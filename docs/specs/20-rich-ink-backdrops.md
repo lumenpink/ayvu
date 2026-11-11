@@ -5,12 +5,13 @@ Os cenários anteriores utilizavam geometria simplista (retângulos básicos e l
 
 ## 2. Árvore de Decisão
 - **Alternativa Descartada (Bitmaps rasterizados / Fotos convertidas em JPEG/PNG):** Descartado por inflar o repositório/binário e quebrar a escalabilidade vetorial SVG do motor.
-- **Alternativa Descartada (Manter geometria plana minimalista):** Descartado por falta de densidade visual e profundidade espacial.
-- **Abordagem Escolhida (Arquitetura Vetorial de Nanquim com Hachuras):**
-  1. Utilizar traços finos de nanquim (`stroke="#111111"`, espessuras `1.0` a `2.0`).
-  2. Implementar hachuras paralelas e cruzadas (*cross-hatching*) para volumetria, sombras de edifícios, texturas de tijolos, madeira, folhagens e asfalto.
-  3. Composição em perspectiva com linhas de fuga e planos de profundidade (fundo, meio e chão).
-  4. Manter total compatibilidade com a linha de piso e sombras de contato dos personagens.
+- **Alternativa Descartada (Manter geometria plana minimalista com cores primárias saturadas):** Descartado formalmente por resultar na estética "estilo Paint" amadora, que colide com a linguagem gráfica do Comic Chat e do elenco nativo em nanquim.
+- **Abordagem Escolhida (Nanquim Rico Comic Chat / Jim Woodring Style):**
+  1. Nanquim vetorial puro: Traços finos (`stroke="#111111"` ou `#1a1a1a`, espessuras de `0.7` a `2.0`).
+  2. Texturização via hachuras: Sombras, luz e volume desenhados com hachuras paralelas, cruzadas (*cross-hatching*) e pontilhados finos.
+  3. Paleta de papel de quadrinho: Fundos e lavagens restritos a tons neutros (`#ffffff`, `#faf9f5`, `#f2f1ea`, `#e5e3d8`), sem cores plásticas primárias/secundárias (sem amarelos, azuis ou verdes de Paint).
+  4. Erradicação de texto tipográfico artificial: Proibido o uso de `<text font-family="...">` com rótulos estáticos digitais em letreiros de parede ("CAFÉ CCS", "RU", etc.). A identidade do local emerge da arquitetura e dos elementos materiais em cena.
+  5. Perspectiva e densidade arquitetônica: Desenho expressivo com pontos de fuga, vigas, tábuas de piso com nós de madeira, azulejos com juntas desenhadas, esquadrias com profundidade e vegetação orgânica.
 
 ## 3. Catálogo de Cenários (Total: 18)
 ### Cenários Anteriores Reestilizados:

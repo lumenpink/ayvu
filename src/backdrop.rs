@@ -1,5 +1,6 @@
 // Authentic vector-based comic backdrops in clean hand-inked comic style
-// Includes academic settings (UFSC inspired) and classic comic strips
+// Inspired by Jim Woodring (Microsoft Comic Chat) and real UFSC campus architectural references.
+// Strict Ink Guidelines: Zero system fonts/labels (<text>), zero saturated paint colors, pure ink strokes & hatching.
 
 pub fn get_vector_backdrop_svg(name: &str, px: f64, py: f64, w: f64, h: f64) -> Option<String> {
     match name.to_lowercase().as_str() {
@@ -64,1345 +65,772 @@ pub fn list_available_backdrops() -> &'static [&'static str] {
     ]
 }
 
-/// Sala de Aula (Classroom) - Blackboard with chalk formulas, eraser, window to campus, wooden floor
+/// Helper para tramas de hachuras paralelas diagonais em nanquim
+fn ink_hatch_lines(out: &mut String, x1: f64, y1: f64, x2: f64, y2: f64, step: f64) {
+    let mut cur = y1;
+    while cur <= y2 {
+        out.push_str(&format!(
+            r##"<line x1="{x1:.1}" y1="{cur:.1}" x2="{x2:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.6" opacity="0.55" />"##,
+            cur - 4.0
+        ));
+        cur += step;
+    }
+}
+
+/// 1. Sala de Aula UFSC - Lousa verde-escura ampla com formulas e graficos em giz organico, janelas basculantes com vista pro campus e carteiras universitarias
 fn render_classroom_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
+    let floor_y = py + h - 22.0;
     out.push_str(r##"<g class="backdrop-vector backdrop-classroom">"##);
 
-    // Wall tint
+    // Parede de alvenaria e rodapé
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fcfcfc" />"##
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#faf9f5" />"##
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{floor_y:.1}" width="{w:.1}" height="{:.1}" fill="#f0ede3" stroke="#111111" stroke-width="1.4" />"##,
+        h - (floor_y - py)
     ));
 
-    // Window on the left side
-    let win_x = px + 12.0;
-    let win_y = py + 22.0;
-    let win_w = 48.0;
-    let win_h = 75.0;
-    // Window frame
+    // Janelas basculantes da UFSC à esquerda com vista para árvores do campus
+    let win_x = px + 10.0;
+    let win_y = py + 16.0;
+    let win_w = (w * 0.28).min(70.0);
+    let win_h = 100.0;
     out.push_str(&format!(
-        r##"<rect x="{win_x:.1}" y="{win_y:.1}" width="{win_w:.1}" height="{win_h:.1}" fill="#f0f6fc" stroke="#111111" stroke-width="2" />"##
+        r##"<rect x="{win_x:.1}" y="{win_y:.1}" width="{win_w:.1}" height="{win_h:.1}" fill="#f2f5f4" stroke="#111111" stroke-width="1.8" />"##
     ));
-    // Window panes
-    let win_mid_x = win_x + (win_w / 2.0);
-    let win_mid_y = win_y + (win_h / 2.0);
+    // Bandeiras basculantes entreabertas
+    for i in 1..4 {
+        let by = win_y + (i as f64 * (win_h / 4.0));
+        out.push_str(&format!(
+            r##"<line x1="{win_x:.1}" y1="{by:.1}" x2="{:.1}" y2="{by:.1}" stroke="#111111" stroke-width="1.4" />"##,
+            win_x + win_w
+        ));
+        out.push_str(&format!(
+            r##"<line x1="{:.1}" y1="{by:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" stroke-dasharray="2,2" />"##,
+            win_x + 4.0, win_x + win_w - 4.0, by - 6.0
+        ));
+    }
+    // Folhagens e galhos da mata da UFSC vistos através da janela em nanquim
     out.push_str(&format!(
-        r##"<line x1="{win_mid_x:.1}" y1="{win_y:.1}" x2="{win_mid_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.5" />"##,
-        win_y + win_h
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{win_x:.1}" y1="{win_mid_y:.1}" x2="{:.1}" y2="{win_mid_y:.1}" stroke="#111111" stroke-width="1.5" />"##,
-        win_x + win_w
-    ));
-    // Tree silhouette outside window
-    out.push_str(&format!(
-        r##"<path d="M {x1:.1} {y1:.1} q 10 -15 20 -2 q 12 -12 18 10" fill="none" stroke="#666666" stroke-width="1.2" />"##,
-        x1 = win_x + 5.0,
-        y1 = win_y + win_h - 10.0
-    ));
-
-    // Large Chalkboard (Quadro Negro)
-    let board_x = px + 68.0;
-    let board_y = py + 18.0;
-    let board_w = w - 82.0;
-    let board_h = 88.0;
-
-    // Wood frame
-    out.push_str(&format!(
-        r##"<rect x="{board_x:.1}" y="{board_y:.1}" width="{board_w:.1}" height="{board_h:.1}" fill="#24292e" stroke="#111111" stroke-width="3" rx="2" />"##
-    ));
-    // Inner board
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="#1b1f23" stroke="#30363d" stroke-width="1" />"##,
-        board_x + 4.0,
-        board_y + 4.0,
-        board_w - 8.0,
-        board_h - 8.0
+        r##"<path d="M {:.1} {:.1} q 8 -12 18 -4 q 12 -16 22 2 q 10 -8 18 10 M {:.1} {:.1} q 10 14 2 24" fill="none" stroke="#222222" stroke-width="1.2" />"##,
+        win_x + 4.0, win_y + win_h - 12.0, win_x + 10.0, win_y + win_h - 40.0
     ));
 
-    // Chalk tray at bottom
+    // Lousa panorâmica tradicional da UFSC (moldura de madeira/alumínio e quadro verde-escuro)
+    let board_x = win_x + win_w + 14.0;
+    let board_y = py + 16.0;
+    let board_w = (px + w - board_x - 12.0).max(80.0);
+    let board_h = 95.0;
+
+    out.push_str(&format!(
+        r##"<rect x="{board_x:.1}" y="{board_y:.1}" width="{board_w:.1}" height="{board_h:.1}" fill="#1a2621" stroke="#111111" stroke-width="2.2" rx="1.5" />"##
+    ));
+    // Calha inferior de giz e apagador de madeira
     let tray_y = board_y + board_h;
     out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{tray_y:.1}" x2="{:.1}" y2="{tray_y:.1}" stroke="#111111" stroke-width="4" stroke-linecap="round" />"##,
-        board_x - 2.0,
-        board_x + board_w + 2.0
-    ));
-    // Chalk piece & eraser
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="14" height="6" fill="#e1e4e8" stroke="#111111" stroke-width="1" />"##,
-        board_x + 10.0,
-        tray_y - 7.0
+        r##"<rect x="{:.1}" y="{tray_y:.1}" width="{:.1}" height="5.0" fill="#dedbd2" stroke="#111111" stroke-width="1.5" />"##,
+        board_x - 4.0, board_w + 8.0
     ));
     out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffffff" stroke-width="2.5" />"##,
-        board_x + 30.0,
-        tray_y - 3.0,
-        board_x + 38.0,
-        tray_y - 3.0
+        r##"<rect x="{:.1}" y="{:.1}" width="16.0" height="7.0" fill="#f4f1ea" stroke="#111111" stroke-width="1.0" rx="1" />"##,
+        board_x + 14.0, tray_y - 6.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffffff" stroke-width="2.2" stroke-linecap="round" />"##,
+        board_x + 36.0, tray_y - 2.5, board_x + 46.0, tray_y - 2.5
     ));
 
-    // Chalk writings / formulas on board
-    let font = r##"font-family="'Comic Sans MS', cursive, sans-serif" font-size="8" fill="#d1d5da" opacity="0.85""##;
+    // Cálculos, integrais e gráficos feitos a mão livre em giz no quadro (sem qualquer fonte digital!)
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" {font}>UFSC - CALCULO I</text>"##,
-        board_x + 12.0,
-        board_y + 20.0
+        r##"<path d="M {:.1} {:.1} c -4 -10 6 -12 2 -22 c -3 -8 -8 2 -6 8 M {:.1} {:.1} l 14 0 M {:.1} {:.1} l 8 16 l 8 -16 M {:.1} {:.1} q 10 -4 16 2" fill="none" stroke="#f0efe8" stroke-width="1.3" opacity="0.88" />"##,
+        board_x + 18.0, board_y + 40.0,
+        board_x + 12.0, board_y + 30.0,
+        board_x + 38.0, board_y + 26.0,
+        board_x + 58.0, board_y + 34.0
+    ));
+    // Eixos cartesianos com parábola e hachuras da área sob a curva
+    let gx = board_x + board_w - 55.0;
+    let gy = board_y + 22.0;
+    out.push_str(&format!(
+        r##"<line x1="{gx:.1}" y1="{:.1}" x2="{gx:.1}" y2="{:.1}" stroke="#f0efe8" stroke-width="1.2" opacity="0.85" />"##,
+        gy + 50.0, gy
     ));
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" {font}>f&apos;(x) = lim &#916;x&#8594;0</text>"##,
-        board_x + 12.0,
-        board_y + 36.0
+        r##"<line x1="{gx:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#f0efe8" stroke-width="1.2" opacity="0.85" />"##,
+        gy + 45.0, gx + 45.0, gy + 45.0
     ));
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" {font}>&#8747; e^x dx = e^x + C</text>"##,
-        board_x + 12.0,
-        board_y + 52.0
+        r##"<path d="M {gx:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#f0efe8" stroke-width="1.4" opacity="0.9" />"##,
+        gy + 45.0, gx + 20.0, gy + 4.0, gx + 40.0, gy + 45.0
     ));
-    // Quick parabola sketch on the right side of the board
+    // Hachura da integral sob a curva
+    for k in 0..5 {
+        let hx = gx + 6.0 + (k as f64 * 6.0);
+        out.push_str(&format!(
+            r##"<line x1="{hx:.1}" y1="{:.1}" x2="{hx:.1}" y2="{:.1}" stroke="#f0efe8" stroke-width="0.8" stroke-dasharray="2,2" opacity="0.75" />"##,
+            gy + 44.0, gy + 20.0 + (k as f64 * 3.0)
+        ));
+    }
+
+    // Carteira universitária com prancheta de braço em primeiro plano
+    let desk_x = px + 18.0;
+    let desk_y = floor_y - 28.0;
     out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} q 16 28 32 0" fill="none" stroke="#d1d5da" stroke-width="1.2" stroke-dasharray="2,2" opacity="0.75" />"##,
-        board_x + board_w - 46.0,
-        board_y + 35.0
+        r##"<path d="M {desk_x:.1} {desk_y:.1} l 28 -6 l 14 18 l -28 6 z" fill="#eae5d8" stroke="#111111" stroke-width="1.5" />"##
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{desk_x:.1}" y1="{desk_y:.1}" x2="{desk_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.0" />"##
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.8" />"##,
+        desk_x + 28.0, desk_y - 6.0, desk_x + 28.0
     ));
 
-    // Floor baseline & perspective floor planks
-    let floor_y = py + h - 16.0;
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.5" stroke-dasharray="10,3" />"##,
-        px + w
-    ));
+    // Tábuas de assoalho em perspectiva
+    for i in 0..6 {
+        let fx = px + (i as f64 * (w / 5.0));
+        out.push_str(&format!(
+            r##"<line x1="{fx:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.0" opacity="0.45" />"##,
+            fx + 18.0, py + h
+        ));
+    }
 
     out.push_str("</g>");
     out
 }
 
-/// Café do CCS - Coffee tables, steam lines, pendant lamp, pergola greenery
+/// 2. Café do CCS - Máquina de expresso detalhada, vitrine de salgados, pérgola de madeira com samambaias e xadrez de ladrilho
 fn render_cafe_ccs_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
+    let floor_y = py + h - 22.0;
     out.push_str(r##"<g class="backdrop-vector backdrop-cafe-ccs">"##);
 
-    // Light warm background
+    // Fundo aconchegante
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafbfc" />"##
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#faf8f5" />"##
     ));
 
-    // Pergola ceiling wooden beams
-    for i in 0..5 {
-        let beam_x = px + 10.0 + (i as f64 * 55.0);
+    // Pérgola de vigas de madeira no teto
+    for i in 0..7 {
+        let vx = px + 6.0 + (i as f64 * (w / 6.0));
         out.push_str(&format!(
-            r##"<line x1="{beam_x:.1}" y1="{py:.1}" x2="{:.1}" y2="{:.1}" stroke="#24292e" stroke-width="2" />"##,
-            beam_x + 20.0,
-            py + 28.0
+            r##"<line x1="{vx:.1}" y1="{py:.1}" x2="{:.1}" y2="{:.1}" stroke="#222222" stroke-width="2.4" />"##,
+            vx + 14.0, py + 24.0
         ));
     }
-    // Overhead crossbar
     out.push_str(&format!(
         r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.5" />"##,
-        py + 26.0,
-        px + w,
-        py + 26.0
+        py + 23.0, px + w, py + 23.0
     ));
 
-    // Pendant lamp hanging from ceiling
-    let lamp_x = px + (w / 2.0);
+    // Folhagens de samambaias e jiboias penduradas na pérgola
     out.push_str(&format!(
-        r##"<line x1="{lamp_x:.1}" y1="{py:.1}" x2="{lamp_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.5" />"##,
-        py + 44.0
-    ));
-    // Lamp shade
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} Z" fill="#24292e" stroke="#111111" stroke-width="1.5" />"##,
-        lamp_x - 12.0,
-        py + 54.0,
-        lamp_x + 12.0,
-        py + 54.0,
-        lamp_x,
-        py + 44.0
-    ));
-    // Light bulb dot
-    out.push_str(&format!(
-        r##"<circle cx="{lamp_x:.1}" cy="{:.1}" r="3" fill="#ffe58f" stroke="#111111" stroke-width="0.8" />"##,
-        py + 55.0
+        r##"<path d="M {:.1} {:.1} q -8 18 2 28 q 6 -14 2 -24 M {:.1} {:.1} q 10 16 -2 26" fill="none" stroke="#222222" stroke-width="1.4" />"##,
+        px + 24.0, py + 23.0, px + 36.0, py + 23.0
     ));
 
-    // Coffee counter / bistro sign
+    // Balcão de café de madeira maciça com veios
+    let bar_y = py + 72.0;
+    let bar_h = floor_y - bar_y;
+    let bar_w = (w * 0.65).min(170.0);
     out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="70" height="24" rx="3" fill="#ffffff" stroke="#111111" stroke-width="1.5" />"##,
-        px + w - 82.0,
-        py + 38.0
+        r##"<rect x="{px:.1}" y="{bar_y:.1}" width="{bar_w:.1}" height="{bar_h:.1}" fill="#f2ede4" stroke="#111111" stroke-width="2.2" />"##
     ));
+    // Prancha de mogno superior do balcão
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-family="'Comic Sans MS', cursive, sans-serif" font-size="9" font-weight="bold" fill="#111111">CAFÉ CCS</text>"##,
-        px + w - 74.0,
-        py + 54.0
+        r##"<rect x="{px:.1}" y="{:.1}" width="{:.1}" height="8.0" fill="#e8dfcf" stroke="#111111" stroke-width="2.0" />"##,
+        bar_y - 8.0, bar_w + 6.0
     ));
-
-    // Hanging ivy / leaves from pergola
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} q 5 12 2 20 q -4 -6 -1 -12 M {:.1} {:.1} q 6 10 3 18" fill="none" stroke="#2ea44f" stroke-width="1.5" />"##,
-        px + 24.0,
-        py + 26.0,
-        px + 36.0,
-        py + 26.0
-    ));
-
-    // Floor line
-    let floor_y = py + h - 16.0;
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.5" stroke-dasharray="10,3" />"##,
-        px + w
-    ));
-
-    // Bistro coffee cup on small side stand
-    let stand_x = px + 18.0;
-    let stand_y = floor_y - 38.0;
-    // Small round table surface
-    out.push_str(&format!(
-        r##"<ellipse cx="{:.1}" cy="{stand_y:.1}" rx="22" ry="5" fill="#ffffff" stroke="#111111" stroke-width="1.8" />"##,
-        stand_x + 15.0
-    ));
-    // Table leg
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{stand_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />"##,
-        stand_x + 15.0,
-        stand_x + 15.0
-    ));
-    // Coffee cup & saucer
-    let cup_x = stand_x + 12.0;
-    let cup_y = stand_y - 2.0;
-    out.push_str(&format!(
-        r##"<rect x="{cup_x:.1}" y="{:.1}" width="8" height="6" rx="1" fill="#ffffff" stroke="#111111" stroke-width="1" />"##,
-        cup_y - 6.0
-    ));
-    // Steam curl
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} q 2 -6 -2 -10" fill="none" stroke="#888888" stroke-width="1" />"##,
-        cup_x + 4.0,
-        cup_y - 8.0
-    ));
-
-    out.push_str("</g>");
-    out
-}
-
-/// Laboratório (Laboratory) - Lab bench, glassware, microscope, reagent shelf
-fn render_laboratory_svg(px: f64, py: f64, w: f64, h: f64) -> String {
-    let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-laboratory">"##);
-
-    // Wall tint with tile grid lines
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f6f8fa" />"##
-    ));
-
-    // Tiled wall pattern
-    let tile_size = 28.0;
-    let max_y = py + h - 60.0;
-    let mut ty = py + 12.0;
-    while ty < max_y {
-        out.push_str(&format!(
-            r##"<line x1="{px:.1}" y1="{ty:.1}" x2="{:.1}" y2="{ty:.1}" stroke="#e1e4e8" stroke-width="1" />"##,
-            px + w
-        ));
-        ty += tile_size;
-    }
-    let mut tx = px + 14.0;
-    while tx < px + w {
-        out.push_str(&format!(
-            r##"<line x1="{tx:.1}" y1="{py:.1}" x2="{tx:.1}" y2="{max_y:.1}" stroke="#e1e4e8" stroke-width="1" />"##
-        ));
-        tx += tile_size;
-    }
-
-    // Reagent shelf near top
-    let shelf_y = py + 34.0;
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{shelf_y:.1}" width="{:.1}" height="5" fill="#24292e" stroke="#111111" stroke-width="1.5" />"##,
-        px + 14.0,
-        w - 28.0
-    ));
-    // Chemical bottles on shelf
-    for i in 0..5 {
-        let bot_x = px + 24.0 + (i as f64 * 36.0);
-        let bot_h = if i % 2 == 0 { 16.0 } else { 12.0 };
-        out.push_str(&format!(
-            r##"<rect x="{bot_x:.1}" y="{:.1}" width="10" height="{bot_h:.1}" rx="1" fill="#ffffff" stroke="#111111" stroke-width="1.2" />"##,
-            shelf_y - bot_h
-        ));
-        // Bottle cap
-        out.push_str(&format!(
-            r##"<rect x="{:.1}" y="{:.1}" width="6" height="3" fill="#24292e" />"##,
-            bot_x + 2.0,
-            shelf_y - bot_h - 3.0
-        ));
-    }
-
-    // Lab bench countertop
-    let bench_y = py + h - 55.0;
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{bench_y:.1}" width="{w:.1}" height="8" fill="#d1d5da" stroke="#111111" stroke-width="1.8" />"##
-    ));
-
-    // Microscope on the right side of bench
-    let mic_x = px + w - 46.0;
-    let mic_base_y = bench_y;
-    // Base
-    out.push_str(&format!(
-        r##"<rect x="{mic_x:.1}" y="{:.1}" width="24" height="4" rx="1" fill="#24292e" stroke="#111111" stroke-width="1" />"##,
-        mic_base_y - 4.0
-    ));
-    // Arm
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} q -8 -16 2 -26 l 8 0" fill="none" stroke="#24292e" stroke-width="3" />"##,
-        mic_x + 18.0,
-        mic_base_y - 4.0
-    ));
-    // Eyepiece tube
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.5" />"##,
-        mic_x + 16.0,
-        mic_base_y - 34.0,
-        mic_x + 24.0,
-        mic_base_y - 42.0
-    ));
-
-    // Erlenmeyer flask on the left side of bench
-    let flask_x = px + 22.0;
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} l 5 -16 l 0 -6 l 4 0 l 0 6 l 5 16 Z" fill="#ffffff" stroke="#111111" stroke-width="1.5" stroke-linejoin="round" />"##,
-        flask_x,
-        bench_y,
-    ));
-    // Liquid inside flask
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} l 2.5 -8 l 9 0 l 2.5 8 Z" fill="#b3e1f7" stroke="none" />"##,
-        flask_x + 2.0,
-        bench_y - 1.0,
-    ));
-
-    // Floor line
-    let floor_y = py + h - 16.0;
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.5" stroke-dasharray="10,3" />"##,
-        px + w
-    ));
-
-    out.push_str("</g>");
-    out
-}
-
-/// Sala / Quarto (Room) - Window, wall picture, classic rug
-fn render_room_svg(px: f64, py: f64, w: f64, h: f64) -> String {
-    let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-room">"##);
-
-    // Warm wall
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafbfc" />"##
-    ));
-
-    // Picture frame on the wall
-    let pic_x = px + (w / 2.0) - 26.0;
-    let pic_y = py + 26.0;
-    out.push_str(&format!(
-        r##"<rect x="{pic_x:.1}" y="{pic_y:.1}" width="52" height="38" fill="#ffffff" stroke="#111111" stroke-width="2" />"##
-    ));
-    // Mini landscape inside picture
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="6" fill="#ffe58f" stroke="#111111" stroke-width="0.8" />"##,
-        pic_x + 14.0,
-        pic_y + 14.0
-    ));
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} l 14 -12 l 14 12 l 10 -8 l 10 8" fill="none" stroke="#111111" stroke-width="1.2" />"##,
-        pic_x + 4.0,
-        pic_y + 32.0
-    ));
-
-    // Floor line
-    let floor_y = py + h - 16.0;
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.5" stroke-dasharray="10,3" />"##,
-        px + w
-    ));
-
-    // Patterned rug on floor
-    out.push_str(&format!(
-        r##"<ellipse cx="{:.1}" cy="{:.1}" rx="80" ry="10" fill="#f0f6fc" stroke="#111111" stroke-width="1.5" stroke-dasharray="6,3" />"##,
-        px + (w / 2.0),
-        floor_y + 4.0
-    ));
-
-    out.push_str("</g>");
-    out
-}
-
-/// Pastoral Vector (Rolling hills, fence, tree) - Clean vector recreation
-fn render_pastoral_vector_svg(px: f64, py: f64, w: f64, h: f64) -> String {
-    let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-pastoral">"##);
-
-    // Sky
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fcfcfc" />"##
-    ));
-
-    // Sun / Cloud
-    let sun_x = px + w - 40.0;
-    let sun_y = py + 30.0;
-    out.push_str(&format!(
-        r##"<circle cx="{sun_x:.1}" cy="{sun_y:.1}" r="14" fill="#ffffff" stroke="#111111" stroke-width="1.5" />"##
-    ));
-
-    // Distant rolling hills
-    out.push_str(&format!(
-        r##"<path d="M {px:.1} {:.1} q 70 -35 140 0 q 70 -30 140 5 L {:.1} {:.1} L {px:.1} {:.1} Z" fill="#f6f8fa" stroke="#111111" stroke-width="1.5" />"##,
-        py + 130.0,
-        px + w,
-        py + h,
-        py + h
-    ));
-
-    // Post and rail fence in midground
-    let fence_y = py + 155.0;
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{fence_y:.1}" x2="{:.1}" y2="{fence_y:.1}" stroke="#111111" stroke-width="1.5" />"##,
-        px + w
-    ));
-    for i in 0..6 {
-        let post_x = px + 15.0 + (i as f64 * 46.0);
-        out.push_str(&format!(
-            r##"<line x1="{post_x:.1}" y1="{:.1}" x2="{post_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="2" />"##,
-            fence_y - 8.0,
-            fence_y + 16.0
-        ));
-    }
-
-    // Floor line
-    let floor_y = py + h - 16.0;
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.5" stroke-dasharray="10,3" />"##,
-        px + w
-    ));
-
-    out.push_str("</g>");
-    out
-}
-
-/// Hospital Universitário (HU/UFSC) - Iconic brutalist entrance canopy, signage, building facade & campus palms
-fn render_hu_fachada_svg(px: f64, py: f64, w: f64, h: f64) -> String {
-    let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-hu-fachada">"##);
-
-    // Sky background
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f4f7fb" />"##
-    ));
-
-    // Distant hospital main block (Bloco do HU)
-    let bld_x = px + 15.0;
-    let bld_y = py + 20.0;
-    let bld_w = w - 30.0;
-    let bld_h = 100.0;
-    out.push_str(&format!(
-        r##"<rect x="{bld_x:.1}" y="{bld_y:.1}" width="{bld_w:.1}" height="{bld_h:.1}" fill="#e6edf5" stroke="#111111" stroke-width="2" />"##
-    ));
-
-    // Roof equipment / technical block
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="40" height="12" fill="#d0d7de" stroke="#111111" stroke-width="1.8" />"##,
-        bld_x + 20.0,
-        bld_y - 12.0
-    ));
-
-    // Ribbon windows (Janelas em fita dos andares do HU)
-    for floor_idx in 0..2 {
-        let win_y = bld_y + 16.0 + (floor_idx as f64 * 26.0);
-        out.push_str(&format!(
-            r##"<rect x="{:.1}" y="{win_y:.1}" width="{:.1}" height="14" fill="#ffffff" stroke="#111111" stroke-width="1.5" />"##,
-            bld_x + 8.0,
-            bld_w - 16.0
-        ));
-        // Vertical mullions / dividers
-        let num_panes = 8;
-        let pane_step = (bld_w - 16.0) / (num_panes as f64);
-        for p in 1..num_panes {
-            let div_x = bld_x + 8.0 + (p as f64 * pane_step);
+    // Painéis de madeira do balcão com hachuras
+    for j in 0..3 {
+        let pnl_x = px + 12.0 + (j as f64 * 48.0);
+        if pnl_x + 38.0 < px + bar_w {
             out.push_str(&format!(
-                r##"<line x1="{div_x:.1}" y1="{win_y:.1}" x2="{div_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />"##,
-                win_y + 14.0
+                r##"<rect x="{pnl_x:.1}" y="{:.1}" width="38.0" height="{:.1}" fill="none" stroke="#111111" stroke-width="1.2" />"##,
+                bar_y + 10.0, bar_h - 20.0
+            ));
+            ink_hatch_lines(
+                &mut out,
+                pnl_x + 4.0,
+                bar_y + 16.0,
+                pnl_x + 34.0,
+                bar_y + bar_h - 14.0,
+                7.0,
+            );
+        }
+    }
+
+    // Máquina de expresso italiana profissional sobre o balcão
+    let m_x = px + 22.0;
+    let m_y = bar_y - 42.0;
+    out.push_str(&format!(
+        r##"<rect x="{m_x:.1}" y="{m_y:.1}" width="42.0" height="34.0" fill="#eae8e1" stroke="#111111" stroke-width="1.8" rx="2" />"##
+    ));
+    // Manômetro circular duplo e grupo de extração com cachimbo
+    out.push_str(&format!(
+        r##"<circle cx="{:.1}" cy="{:.1}" r="4.0" fill="#ffffff" stroke="#111111" stroke-width="1.1" />"##,
+        m_x + 12.0, m_y + 10.0
+    ));
+    out.push_str(&format!(
+        r##"<circle cx="{:.1}" cy="{:.1}" r="4.0" fill="#ffffff" stroke="#111111" stroke-width="1.1" />"##,
+        m_x + 24.0, m_y + 10.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} l 0 10 l 6 0 l 0 -10 l 12 3" fill="none" stroke="#111111" stroke-width="1.6" />"##,
+        m_x + 16.0, m_y + 20.0
+    ));
+    // Xícara de café fumegante sobre a grade
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="10.0" height="7.0" fill="#ffffff" stroke="#111111" stroke-width="1.1" rx="1" />"##,
+        m_x + 14.0, m_y + 30.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} q -3 -6 0 -10 q 3 -4 0 -8" fill="none" stroke="#111111" stroke-width="0.9" opacity="0.75" />"##,
+        m_x + 19.0, m_y + 28.0
+    ));
+
+    // Vitrine de vidro de salgados ao lado
+    let v_x = m_x + 52.0;
+    out.push_str(&format!(
+        r##"<path d="M {v_x:.1} {bar_y:.1} l 0 -28 l 30 0 l 6 28 z" fill="#f4f7f6" stroke="#111111" stroke-width="1.6" />"##
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" opacity="0.6" />"##,
+        v_x + 4.0, bar_y - 24.0, v_x + 26.0, bar_y - 4.0
+    ));
+
+    // Piso com mosaico em xadrez de nanquim
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.8" />"##,
+        px + w
+    ));
+    for k in 0..5 {
+        let tx = px + bar_w + (k as f64 * 22.0);
+        if tx < px + w {
+            out.push_str(&format!(
+                r##"<line x1="{tx:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.9" />"##,
+                tx - 16.0, py + h
             ));
         }
     }
 
-    // Concrete canopy / entrance portico (Marquise do HU) projecting forward
-    let portico_x = px + 35.0;
-    let portico_y = py + 84.0;
-    let portico_w = w - 70.0;
-    let portico_h = 20.0;
+    out.push_str("</g>");
+    out
+}
 
-    // Canopy slab
-    out.push_str(&format!(
-        r##"<rect x="{portico_x:.1}" y="{portico_y:.1}" width="{portico_w:.1}" height="{portico_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="2.5" rx="1" />"##
-    ));
+/// 3. Laboratório UFSC - Azulejos com rejunte de nanquim, microscópio detalhado, vidrarias graduadas com menisco e suporte universal
+fn render_laboratory_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let floor_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-laboratory">"##);
 
-    // Official lettering on the canopy beam
-    let font_title = r##"font-family="'Helvetica Neue', Arial, sans-serif" font-size="6.5" font-weight="bold" fill="#0969da" letter-spacing="0.5""##;
-    let font_sub = r##"font-family="'Helvetica Neue', Arial, sans-serif" font-size="5" font-weight="bold" fill="#24292e" letter-spacing="0.8""##;
+    // Fundo de azulejos claros de laboratório com rejunte de nanquim
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" {font_title}>HOSPITAL UNIVERSITÁRIO</text>"##,
-        portico_x + (portico_w / 2.0),
-        portico_y + 9.5
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f9fafb" />"##
     ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" {font_sub}>PROF. POLYDORO ERNANI DE SÃO THIAGO • UFSC</text>"##,
-        portico_x + (portico_w / 2.0),
-        portico_y + 16.5
-    ));
-
-    // Emergency red cross emblem on the left of canopy
-    let cross_x = portico_x + 8.0;
-    let cross_y = portico_y + 5.5;
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="9" height="3" fill="#cf222e" rx="0.5" />"##,
-        cross_x - 3.0,
-        cross_y + 3.0
-    ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="3" height="9" fill="#cf222e" rx="0.5" />"##,
-        cross_x, cross_y
-    ));
-
-    // Robust structural support columns (Pilares de concreto)
-    let col1_x = portico_x + 16.0;
-    let col2_x = portico_x + portico_w - 22.0;
-    let floor_y = py + h - 16.0;
-
-    for col_x in [col1_x, col2_x] {
+    let tile_w = 26.0;
+    let tile_h = 20.0;
+    let mut ty = py;
+    while ty < floor_y - 30.0 {
         out.push_str(&format!(
-            r##"<rect x="{col_x:.1}" y="{:.1}" width="6" height="{:.1}" fill="#eaeef2" stroke="#111111" stroke-width="2" />"##,
-            portico_y + portico_h,
-            floor_y - (portico_y + portico_h)
+            r##"<line x1="{px:.1}" y1="{ty:.1}" x2="{:.1}" y2="{ty:.1}" stroke="#222222" stroke-width="0.5" opacity="0.4" />"##,
+            px + w
         ));
+        ty += tile_h;
+    }
+    let mut tx = px;
+    while tx < px + w {
+        out.push_str(&format!(
+            r##"<line x1="{tx:.1}" y1="{py:.1}" x2="{tx:.1}" y2="{:.1}" stroke="#222222" stroke-width="0.5" opacity="0.4" />"##,
+            floor_y - 30.0
+        ));
+        tx += tile_w;
     }
 
-    // Glass entrance doors under canopy
-    let door_x = portico_x + 26.0;
-    let door_w = portico_w - 52.0;
-    let door_y = portico_y + portico_h;
-    let door_h = floor_y - door_y;
+    // Bancada de laboratório pesada com tampo de granito cinza e chanfro
+    let bench_y = py + 68.0;
+    let bench_h = floor_y - bench_y;
     out.push_str(&format!(
-        r##"<rect x="{door_x:.1}" y="{door_y:.1}" width="{door_w:.1}" height="{door_h:.1}" fill="#f6f8fa" stroke="#111111" stroke-width="1.8" />"##
+        r##"<rect x="{px:.1}" y="{bench_y:.1}" width="{w:.1}" height="{bench_h:.1}" fill="#e8eaed" stroke="#111111" stroke-width="2.2" />"##
     ));
-    // Automatic sliding door center line & handles
-    let door_mid_x = door_x + (door_w / 2.0);
+    // Tampo superior de granito escuro com hachuras de textura
     out.push_str(&format!(
-        r##"<line x1="{door_mid_x:.1}" y1="{door_y:.1}" x2="{door_mid_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.5" />"##
+        r##"<rect x="{px:.1}" y="{:.1}" width="{w:.1}" height="8.0" fill="#2d3748" stroke="#111111" stroke-width="2.0" />"##,
+        bench_y - 8.0
+    ));
+    // Gaveteiros de laboratório com puxadores de concha em nanquim
+    for g in 0..3 {
+        let gx = px + 14.0 + (g as f64 * (w / 3.2));
+        if gx + 45.0 < px + w {
+            out.push_str(&format!(
+                r##"<rect x="{gx:.1}" y="{:.1}" width="42.0" height="{:.1}" fill="none" stroke="#111111" stroke-width="1.2" />"##,
+                bench_y + 10.0, bench_h - 18.0
+            ));
+            out.push_str(&format!(
+                r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.0" stroke-linecap="round" />"##,
+                gx + 14.0, bench_y + 22.0, gx + 28.0, bench_y + 22.0
+            ));
+        }
+    }
+
+    // Microscópio óptico binocular sobre a bancada
+    let mic_x = px + (w * 0.28).min(75.0);
+    let mic_y = bench_y - 8.0;
+    // Base em ferradura pesada
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {mic_y:.1} c -4 0 -12 -3 -12 -8 l 24 0 c 0 5 -8 8 -12 8 z" fill="#1b2028" stroke="#111111" stroke-width="1.6" />"##,
+        mic_x
+    ));
+    // Coluna do braço curvo e parafusos micrométricos estriados
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} q 8 -18 2 -32 l -10 -4" fill="none" stroke="#111111" stroke-width="3.0" />"##,
+        mic_x, mic_y - 8.0
     ));
     out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="1.5" height="12" fill="#111111" />"##,
-        door_mid_x - 4.0,
-        door_y + 14.0
+        r##"<circle cx="{:.1}" cy="{:.1}" r="3.2" fill="#d1d5db" stroke="#111111" stroke-width="1.0" />"##,
+        mic_x + 5.0, mic_y - 18.0
+    ));
+    // Platina porta-lâminas e revólver de 3 objetivas
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        mic_x - 14.0, mic_y - 22.0, mic_x + 4.0, mic_y - 22.0
     ));
     out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="1.5" height="12" fill="#111111" />"##,
-        door_mid_x + 2.5,
-        door_y + 14.0
+        r##"<path d="M {:.1} {:.1} l -4 6 l 4 0 l 0 -6 M {:.1} {:.1} l -2 6 l 3 0 l 0 -6" fill="#111111" stroke="#111111" stroke-width="1.0" />"##,
+        mic_x - 4.0, mic_y - 28.0, mic_x - 9.0, mic_y - 28.0
+    ));
+    // Tubo ocular inclinado
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.4" />"##,
+        mic_x - 8.0, mic_y - 44.0, mic_x - 14.0, mic_y - 52.0
     ));
 
-    // Tropical Campus Palm Tree on right edge (UFSC landscaping)
-    let palm_x = px + w - 16.0;
-    let palm_base_y = floor_y;
-    // Curved trunk
+    // Suporte universal com bureta graduada e erlenmeyer
+    let sup_x = mic_x + 52.0;
     out.push_str(&format!(
-        r##"<path d="M {palm_x:.1} {palm_base_y:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#24292e" stroke-width="3" stroke-linecap="round" />"##,
-        palm_x - 6.0,
-        palm_base_y - 60.0,
-        palm_x - 4.0,
-        palm_base_y - 120.0
-    ));
-    // Palm fronds
-    let crown_x = palm_x - 4.0;
-    let crown_y = palm_base_y - 120.0;
-    out.push_str(&format!(
-        r##"<path d="M {crown_x:.1} {crown_y:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#2da44e" stroke-width="2" stroke-linecap="round" />"##,
-        crown_x - 25.0, crown_y - 15.0, crown_x - 35.0, crown_y + 12.0
+        r##"<line x1="{sup_x:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        mic_y, sup_x + 22.0, mic_y
     ));
     out.push_str(&format!(
-        r##"<path d="M {crown_x:.1} {crown_y:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#2da44e" stroke-width="2" stroke-linecap="round" />"##,
-        crown_x - 18.0, crown_y - 25.0, crown_x - 28.0, crown_y - 10.0
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.8" />"##,
+        sup_x + 11.0, mic_y, sup_x + 11.0, mic_y - 48.0
+    ));
+    // Garra metálica segurando erlenmeyer com líquido e menisco hachurado
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} l 3 -10 l 6 0 l 3 10 z" fill="#f0fdf4" stroke="#111111" stroke-width="1.2" />"##,
+        sup_x + 6.0, mic_y
     ));
     out.push_str(&format!(
-        r##"<path d="M {crown_x:.1} {crown_y:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#2da44e" stroke-width="2" stroke-linecap="round" />"##,
-        crown_x + 15.0, crown_y - 20.0, crown_x + 20.0, crown_y - 5.0
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" opacity="0.7" />"##,
+        sup_x + 8.0, mic_y - 4.0, sup_x + 16.0, mic_y - 4.0
     ));
 
-    // Ground baseline & access ramp lines
+    // Piso com rodapé
     out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />"##,
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.6" />"##,
         px + w
-    ));
-    // Curb / sidewalk line
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#8c959f" stroke-width="1.2" stroke-dasharray="8,4" />"##,
-        floor_y + 6.0,
-        px + w,
-        floor_y + 6.0
     ));
 
     out.push_str("</g>");
     out
 }
 
-/// RU (Restaurante Universitário UFSC) - Dining hall, large glass windows, stainless steel tables, round stools & authentic bandejão
-fn render_ru_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+/// 4. HU Fachada UFSC - Arquitetura brutalista do Hospital Universitário Polydoro Ernani com brises-soleils ritmicos, marquise suspensa, palmeiras e ambulância
+fn render_hu_fachada_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-ru">"##);
+    let ground_y = py + h - 24.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-hu-fachada">"##);
 
-    // Warm high-ceiling dining hall background
+    // Céu e silhueta geral
     out.push_str(&format!(
         r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafbfc" />"##
     ));
 
-    // Ceiling industrial beams & pendant strip lighting
-    for i in 0..4 {
-        let beam_x = px + 15.0 + (i as f64 * 65.0);
-        out.push_str(&format!(
-            r##"<line x1="{beam_x:.1}" y1="{py:.1}" x2="{beam_x:.1}" y2="{:.1}" stroke="#d0d7de" stroke-width="1.5" />"##,
-            py + 22.0
-        ));
-    }
-    // Hanging tube lamps
+    // Nuvens estilizadas em arco clássico de nanquim
     out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="4" fill="#ffffff" stroke="#111111" stroke-width="1.2" rx="1" />"##,
-        px + 20.0,
-        py + 20.0,
-        w - 40.0
+        r##"<path d="M {:.1} {:.1} q 16 -12 32 0 q 14 -10 28 0" fill="none" stroke="#222222" stroke-width="1.1" opacity="0.6" />"##,
+        px + 20.0, py + 16.0
     ));
 
-    // Panoramic dining hall glass windows overlooking campus
-    let win_x = px + 12.0;
-    let win_y = py + 30.0;
-    let win_w = w - 24.0;
-    let win_h = 58.0;
+    // Prédio principal horizontal do Hospital Universitário Polydoro Ernani
+    let bldg_x = px + 12.0;
+    let bldg_y = py + 24.0;
+    let bldg_w = w - 24.0;
+    let bldg_h = 74.0;
+
     out.push_str(&format!(
-        r##"<rect x="{win_x:.1}" y="{win_y:.1}" width="{win_w:.1}" height="{win_h:.1}" fill="#f0f6fc" stroke="#111111" stroke-width="2" />"##
+        r##"<rect x="{bldg_x:.1}" y="{bldg_y:.1}" width="{bldg_w:.1}" height="{bldg_h:.1}" fill="#f1f3f5" stroke="#111111" stroke-width="2.2" />"##
     ));
-    // Window mullions (vertical)
-    let num_cols = 5;
-    let col_w = win_w / (num_cols as f64);
-    for c in 1..num_cols {
-        let line_x = win_x + (c as f64 * col_w);
+
+    // Brises-soleils horizontais e verticais icônicos do HU
+    for f in 0..3 {
+        let fy = bldg_y + 8.0 + (f as f64 * 22.0);
         out.push_str(&format!(
-            r##"<line x1="{line_x:.1}" y1="{win_y:.1}" x2="{line_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.5" />"##,
+            r##"<line x1="{bldg_x:.1}" y1="{fy:.1}" x2="{:.1}" y2="{fy:.1}" stroke="#111111" stroke-width="1.6" />"##,
+            bldg_x + bldg_w
+        ));
+        // Aletas verticais dos brises
+        for v in 0..12 {
+            let vx = bldg_x + 8.0 + (v as f64 * ((bldg_w - 16.0) / 11.0));
+            out.push_str(&format!(
+                r##"<line x1="{vx:.1}" y1="{fy:.1}" x2="{vx:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.0" />"##,
+                fy + 16.0
+            ));
+            // Sombra hachurada sob a aleta
+            out.push_str(&format!(
+                r##"<line x1="{:.1}" y1="{fy:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.6" opacity="0.45" />"##,
+                vx + 1.2, vx + 1.2, fy + 16.0
+            ));
+        }
+    }
+
+    // Marquise monumental suspensa da entrada de emergência e recepção
+    let marq_x = bldg_x + (bldg_w * 0.35);
+    let marq_y = bldg_y + bldg_h - 4.0;
+    let marq_w = (bldg_w * 0.32).min(85.0);
+    out.push_str(&format!(
+        r##"<polygon points="{marq_x:.1},{marq_y:.1} {:.1},{marq_y:.1} {:.1},{:.1} {:.1},{:.1}" fill="#e9ecef" stroke="#111111" stroke-width="2.0" />"##,
+        marq_x + marq_w, marq_x + marq_w + 10.0, marq_y + 12.0, marq_x - 10.0, marq_y + 12.0
+    ));
+    ink_hatch_lines(
+        &mut out,
+        marq_x - 8.0,
+        marq_y + 13.0,
+        marq_x + marq_w + 8.0,
+        marq_y + 18.0,
+        4.0,
+    );
+
+    // Palmeiras imperiais esguias no canteiro frontal
+    let palm_x = bldg_x + 14.0;
+    out.push_str(&format!(
+        r##"<line x1="{palm_x:.1}" y1="{ground_y:.1}" x2="{palm_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        py + 18.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {palm_x:.1} {:.1} q -18 -8 -26 4 M {palm_x:.1} {:.1} q 18 -8 26 4 M {palm_x:.1} {:.1} q 0 -18 8 -24" fill="none" stroke="#222222" stroke-width="1.3" />"##,
+        py + 20.0, py + 20.0, py + 20.0
+    ));
+
+    // Ambulância do HU estilizada em linhas de nanquim no estacionamento
+    let amb_x = bldg_x + bldg_w - 65.0;
+    let amb_y = ground_y - 18.0;
+    out.push_str(&format!(
+        r##"<path d="M {amb_x:.1} {amb_y:.1} l 38 0 l 8 8 l 0 10 l -46 0 z" fill="#ffffff" stroke="#111111" stroke-width="1.6" />"##
+    ));
+    // Rodas da ambulância com calotas
+    out.push_str(&format!(
+        r##"<circle cx="{:.1}" cy="{ground_y:.1}" r="4.0" fill="#222222" stroke="#111111" stroke-width="1.2" />"##,
+        amb_x + 10.0
+    ));
+    out.push_str(&format!(
+        r##"<circle cx="{:.1}" cy="{ground_y:.1}" r="4.0" fill="#222222" stroke="#111111" stroke-width="1.2" />"##,
+        amb_x + 36.0
+    ));
+    // Cruz da saúde desenhada em nanquim na lateral (sem fonte digital)
+    let cx_x = amb_x + 20.0;
+    let cx_y = amb_y + 6.0;
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} h 2 v -2 h 2 v 2 h 2 v 2 h -2 v 2 h -2 v -2 h -2 z" fill="#111111" stroke="#111111" stroke-width="0.8" />"##,
+        cx_x + 1.0, cx_y
+    ));
+
+    // Calçamento e linha do chão
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        px + w
+    ));
+
+    out.push_str("</g>");
+    out
+}
+
+/// 5. RU UFSC - Vão monumental do Restaurante Universitário, tesouras de aço no teto, esteira de bandejas de inox e mesas em perspectiva profunda
+fn render_ru_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let floor_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-ru">"##);
+
+    // Salão iluminado
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#faf9f6" />"##
+    ));
+
+    // Estrutura metálica industrial em treliça espacial no teto do RU
+    for i in 0..5 {
+        let tx = px + 10.0 + (i as f64 * (w / 4.2));
+        out.push_str(&format!(
+            r##"<line x1="{tx:.1}" y1="{py:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.8" />"##,
+            tx + 18.0, py + 26.0
+        ));
+        out.push_str(&format!(
+            r##"<line x1="{:.1}" y1="{py:.1}" x2="{tx:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.8" />"##,
+            tx + 36.0, py + 26.0
+        ));
+    }
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        py + 26.0, px + w, py + 26.0
+    ));
+
+    // Janelões envidraçados ao fundo do salão
+    let win_y = py + 32.0;
+    let win_h = 42.0;
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{win_y:.1}" width="{:.1}" height="{win_h:.1}" fill="#f2f5f4" stroke="#111111" stroke-width="1.4" />"##,
+        w * 0.6
+    ));
+    for p in 1..4 {
+        let p_x = px + (p as f64 * ((w * 0.6) / 4.0));
+        out.push_str(&format!(
+            r##"<line x1="{p_x:.1}" y1="{win_y:.1}" x2="{p_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.0" />"##,
             win_y + win_h
         ));
     }
-    // Trees silhouette outside window
+
+    // Mesas de fórmica compridas com bancos integrados em ponto de fuga
+    let vp_x = px + (w * 0.35);
+    let vp_y = py + 55.0;
+    for m in 0..3 {
+        let start_x = px + 10.0 + (m as f64 * 32.0);
+        out.push_str(&format!(
+            r##"<polygon points="{start_x:.1},{floor_y:.1} {:.1},{floor_y:.1} {:.1},{vp_y:.1} {:.1},{vp_y:.1}" fill="#f0ece1" stroke="#111111" stroke-width="1.5" />"##,
+            start_x + 22.0, vp_x + (m as f64 * 8.0) + 4.0, vp_x + (m as f64 * 8.0)
+        ));
+    }
+
+    // Balcão de distribuição e esteira de devolução de bandejas à direita
+    let cntr_x = px + (w * 0.65).min(w - 70.0);
+    let cntr_y = py + 68.0;
+    let cntr_w = px + w - cntr_x;
+    let cntr_h = floor_y - cntr_y;
     out.push_str(&format!(
-        r##"<path d="M {win_x:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#2da44e" stroke-width="1.5" opacity="0.65" />"##,
-        win_y + win_h - 4.0,
-        win_x + 30.0, win_y + win_h - 28.0, win_x + 60.0, win_y + win_h - 10.0,
-        win_x + 110.0, win_y + win_h - 35.0, win_x + 150.0, win_y + win_h - 8.0,
-        win_x + 185.0, win_y + win_h - 25.0, win_x + win_w, win_y + win_h - 12.0
+        r##"<rect x="{cntr_x:.1}" y="{cntr_y:.1}" width="{cntr_w:.1}" height="{cntr_h:.1}" fill="#e8eaed" stroke="#111111" stroke-width="2.2" />"##
+    ));
+    // Trilho de inox para escorregar bandejas
+    out.push_str(&format!(
+        r##"<line x1="{cntr_x:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        cntr_y - 4.0, px + w, cntr_y - 4.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{cntr_x:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        cntr_y - 8.0, px + w, cntr_y - 8.0
     ));
 
-    // Official RU sign on upper right wall
-    let sign_x = px + w - 75.0;
-    let sign_y = py + 36.0;
+    // A emblemática bandeja de inox do bandejão com as cavidades para refeição
+    let tray_x = cntr_x + 10.0;
+    let tray_y = cntr_y - 14.0;
     out.push_str(&format!(
-        r##"<rect x="{sign_x:.1}" y="{sign_y:.1}" width="65" height="24" fill="#ffffff" stroke="#111111" stroke-width="1.5" rx="2" />"##
+        r##"<rect x="{tray_x:.1}" y="{tray_y:.1}" width="34.0" height="18.0" rx="3" fill="#ffffff" stroke="#111111" stroke-width="1.6" />"##
     ));
-    let font_ru = r##"font-family="'Helvetica Neue', Arial, sans-serif" font-size="6.5" font-weight="bold" fill="#0969da""##;
-    let font_ru_sub =
-        r##"font-family="'Helvetica Neue', Arial, sans-serif" font-size="4.8" fill="#57606a""##;
+    // Cavidades individuais na bandeja
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" {font_ru}>RU TRINDADE</text>"##,
-        sign_x + 32.5,
-        sign_y + 10.0
+        r##"<rect x="{:.1}" y="{:.1}" width="14.0" height="12.0" rx="2" fill="#f8f9fa" stroke="#111111" stroke-width="1.0" />"##,
+        tray_x + 3.0, tray_y + 3.0
     ));
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" {font_ru_sub}>DEVOLVA SUA BANDEJA</text>"##,
-        sign_x + 32.5,
-        sign_y + 18.5
+        r##"<circle cx="{:.1}" cy="{:.1}" r="4.0" fill="#f8f9fa" stroke="#111111" stroke-width="1.0" />"##,
+        tray_x + 24.0, tray_y + 8.0
     ));
 
-    // Floor baseline
-    let floor_y = py + h - 16.0;
+    // Linha do piso
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        px + w
+    ));
+
+    out.push_str("</g>");
+    out
+}
+
+/// 6. Hall do CCS UFSC - Pilares monumentais de concreto aparente com textura de cofragem, jardim de inverno interno com costelas-de-adão e mural estudantil
+fn render_hall_ccs_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let floor_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-hall-ccs">"##);
+
+    // Fundo do hall
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafaf8" />"##
+    ));
+
+    // Passarela suspensa do segundo andar com guarda-corpo tubular
+    let pass_y = py + 38.0;
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{pass_y:.1}" width="{w:.1}" height="12.0" fill="#eae8e1" stroke="#111111" stroke-width="2.0" />"##
+    ));
+    for r in 0..14 {
+        let rx = px + 6.0 + (r as f64 * (w / 13.0));
+        out.push_str(&format!(
+            r##"<line x1="{rx:.1}" y1="{:.1}" x2="{rx:.1}" y2="{pass_y:.1}" stroke="#111111" stroke-width="1.2" />"##,
+            pass_y - 16.0
+        ));
+    }
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.8" />"##,
+        pass_y - 16.0, px + w, pass_y - 16.0
+    ));
+
+    // Pilares monumentais de concreto armado com textura de fôrma de madeira
+    let pilar_x = px + (w * 0.22).min(50.0);
+    out.push_str(&format!(
+        r##"<rect x="{pilar_x:.1}" y="{pass_y:.1}" width="28.0" height="{:.1}" fill="#f0eee6" stroke="#111111" stroke-width="2.2" />"##,
+        floor_y - pass_y
+    ));
+    // Texturas horizontais de cofragem no pilar
+    for k in 0..8 {
+        let ky = pass_y + 12.0 + (k as f64 * 16.0);
+        if ky < floor_y {
+            out.push_str(&format!(
+                r##"<line x1="{pilar_x:.1}" y1="{ky:.1}" x2="{:.1}" y2="{ky:.1}" stroke="#111111" stroke-width="0.8" opacity="0.5" />"##,
+                pilar_x + 28.0
+            ));
+        }
+    }
+
+    // O icônico jardim de inverno do CCS com mureta de pedra e costelas-de-adão
+    let jard_x = px + w - 85.0;
+    let jard_y = floor_y - 36.0;
+    // Mureta de pedras curvas
+    out.push_str(&format!(
+        r##"<path d="M {jard_x:.1} {floor_y:.1} q 15 -18 45 -12 q 25 4 40 12 z" fill="#e2ded4" stroke="#111111" stroke-width="1.8" />"##
+    ));
+    // Costelas-de-adão (Monstera) com recortes de folha em bico de pena
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} q -8 -22 14 -32 q 12 14 -14 32 M {:.1} {:.1} l -6 -6 M {:.1} {:.1} l -6 -4" fill="none" stroke="#222222" stroke-width="1.5" />"##,
+        jard_x + 22.0, jard_y + 14.0, jard_x + 26.0, jard_y - 6.0, jard_x + 28.0, jard_y - 16.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} q 12 -20 30 -16 q -4 20 -30 16" fill="none" stroke="#222222" stroke-width="1.4" />"##,
+        jard_x + 36.0, jard_y + 12.0
+    ));
+
+    // Mural de avisos estudantis com cartazes sobrepostos desenhados à mão
+    let mrl_x = pilar_x + 38.0;
+    let mrl_y = pass_y + 24.0;
+    out.push_str(&format!(
+        r##"<rect x="{mrl_x:.1}" y="{mrl_y:.1}" width="42.0" height="30.0" fill="#fdfbf7" stroke="#111111" stroke-width="1.3" />"##
+    ));
+    out.push_str(&format!(
+        r##"<polygon points="{:.1},{:.1} {:.1},{:.1} {:.1},{:.1} {:.1},{:.1}" fill="#f7f4ed" stroke="#111111" stroke-width="1.1" />"##,
+        mrl_x + 6.0, mrl_y + 4.0, mrl_x + 22.0, mrl_y + 2.0, mrl_x + 20.0, mrl_y + 18.0, mrl_x + 4.0, mrl_y + 18.0
+    ));
+    ink_hatch_lines(
+        &mut out,
+        mrl_x + 6.0,
+        mrl_y + 8.0,
+        mrl_x + 18.0,
+        mrl_y + 16.0,
+        3.0,
+    );
+
+    // Linha do piso
     out.push_str(&format!(
         r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.8" />"##,
         px + w
     ));
 
-    // Perspective stainless steel table with round fixed stools (Mesas de Inox do RU)
-    let tbl_x = px + 18.0;
-    let tbl_y = py + 112.0;
-    let tbl_w = w - 36.0;
-    let tbl_h = 24.0;
-
-    // Table top (metallic inox finish)
-    out.push_str(&format!(
-        r##"<path d="M {tbl_x:.1} {tbl_y:.1} L {:.1} {tbl_y:.1} L {:.1} {:.1} L {:.1} {:.1} Z" fill="#eaeef2" stroke="#111111" stroke-width="2" />"##,
-        tbl_x + tbl_w,
-        tbl_x + tbl_w + 6.0,
-        tbl_y + tbl_h,
-        tbl_x - 6.0,
-        tbl_y + tbl_h
-    ));
-    // Table edge bevel highlight
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffffff" stroke-width="1.5" />"##,
-        tbl_x - 5.0,
-        tbl_y + 2.0,
-        tbl_x + tbl_w + 5.0,
-        tbl_y + 2.0
-    ));
-
-    // Table vertical tubular legs down to floor
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="5" height="{:.1}" fill="#8c959f" stroke="#111111" stroke-width="1.5" />"##,
-        tbl_x + 30.0,
-        tbl_y + tbl_h,
-        floor_y - (tbl_y + tbl_h)
-    ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="5" height="{:.1}" fill="#8c959f" stroke="#111111" stroke-width="1.5" />"##,
-        tbl_x + tbl_w - 35.0,
-        tbl_y + tbl_h,
-        floor_y - (tbl_y + tbl_h)
-    ));
-
-    // Fixed round stools (Bancos redondos do RU)
-    for i in 0..3 {
-        let stool_cx = tbl_x + 22.0 + (i as f64 * 72.0);
-        let stool_cy = tbl_y + tbl_h + 12.0;
-        // Stool support tube
-        out.push_str(&format!(
-            r##"<line x1="{stool_cx:.1}" y1="{stool_cy:.1}" x2="{stool_cx:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="3" />"##
-        ));
-        // Stool seat
-        out.push_str(&format!(
-            r##"<ellipse cx="{stool_cx:.1}" cy="{stool_cy:.1}" rx="14" ry="4.5" fill="#f6f8fa" stroke="#111111" stroke-width="1.8" />"##
-        ));
-    }
-
-    // THE ICONIC BANDEJÃO DE INOX (UFSC Stainless Steel Cafeteria Tray) on the table!
-    let tray_x = tbl_x + 16.0;
-    let tray_y = tbl_y + 4.0;
-    let tray_w = 64.0;
-    let tray_h = 16.0;
-
-    // Outer tray
-    out.push_str(&format!(
-        r##"<rect x="{tray_x:.1}" y="{tray_y:.1}" width="{tray_w:.1}" height="{tray_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="1.8" rx="2" />"##
-    ));
-    // Tray compartments (Arroz/Feijão, Guarnição, Salada)
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="22" height="10" fill="#eaeef2" stroke="#111111" stroke-width="1" rx="1.5" />"##,
-        tray_x + 4.0,
-        tray_y + 3.0
-    ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="16" height="10" fill="#eaeef2" stroke="#111111" stroke-width="1" rx="1.5" />"##,
-        tray_x + 28.0,
-        tray_y + 3.0
-    ));
-    // Round indent for water/juice cup
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="4" fill="#eaeef2" stroke="#111111" stroke-width="1" />"##,
-        tray_x + 52.0,
-        tray_y + 8.0
-    ));
-    // Water/Juice plastic cup
-    out.push_str(&format!(
-        r##"<polygon points="{:.1},{:.1} {:.1},{:.1} {:.1},{:.1} {:.1},{:.1}" fill="#ffffff" stroke="#111111" stroke-width="1" />"##,
-        tray_x + 49.0, tray_y + 8.0,
-        tray_x + 55.0, tray_y + 8.0,
-        tray_x + 54.0, tray_y + 1.0,
-        tray_x + 50.0, tray_y + 1.0
-    ));
-    // Fork and spoon beside tray
-    let fork_x = tray_x + tray_w + 5.0;
-    let fork_y = tray_y + 2.0;
-    out.push_str(&format!(
-        r##"<line x1="{fork_x:.1}" y1="{fork_y:.1}" x2="{fork_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />"##,
-        fork_y + 12.0
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{fork_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />"##,
-        fork_x + 4.0,
-        fork_x + 4.0,
-        fork_y + 12.0
-    ));
-
     out.push_str("</g>");
     out
 }
 
-/// Hall do CCS (Centro de Ciências da Saúde) - Brutalist concrete pillars, open staircase, student notice board & potted flora
-fn render_hall_ccs_svg(px: f64, py: f64, w: f64, h: f64) -> String {
-    let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-hall-ccs">"##);
-
-    // Architectural background
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f6f8fa" />"##
-    ));
-
-    // Floor line
-    let floor_y = py + h - 16.0;
-
-    // Heavy Brutalist Concrete Columns (Pilares de Concreto da UFSC)
-    let pilar1_x = px + 12.0;
-    let pilar_w = 26.0;
-    out.push_str(&format!(
-        r##"<rect x="{pilar1_x:.1}" y="{py:.1}" width="{pilar_w:.1}" height="{:.1}" fill="#eaeef2" stroke="#111111" stroke-width="2" />"##,
-        floor_y - py
-    ));
-    // Concrete formwork texture lines (marcas de ripas de concreto aparente)
-    for l in 1..7 {
-        let line_y = py + (l as f64 * 25.0);
-        if line_y < floor_y {
-            out.push_str(&format!(
-                r##"<line x1="{pilar1_x:.1}" y1="{line_y:.1}" x2="{:.1}" y2="{line_y:.1}" stroke="#d0d7de" stroke-width="1.2" />"##,
-                pilar1_x + pilar_w
-            ));
-        }
-    }
-
-    // Overhead structural concrete crossbeam
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="22" fill="#d0d7de" stroke="#111111" stroke-width="2" />"##
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#afb8c1" stroke-width="1" />"##,
-        py + 18.0,
-        px + w,
-        py + 18.0
-    ));
-
-    // Open staircase ascending to 2nd floor (Escadaria do Hall do CCS)
-    let stair_x = px + 48.0;
-    let stair_top_y = py + 34.0;
-    let num_steps = 7;
-    let step_dx = 14.0;
-    let step_dy = 14.0;
-
-    let mut step_path = format!(
-        "M {stair_x:.1} {:.1}",
-        stair_top_y + (num_steps as f64 * step_dy)
-    );
-    for s in 0..num_steps {
-        let curr_y = stair_top_y + ((num_steps - s) as f64 * step_dy);
-        let curr_x = stair_x + (s as f64 * step_dx);
-        step_path.push_str(&format!(
-            " L {:.1} {:.1} L {:.1} {:.1}",
-            curr_x,
-            curr_y - step_dy,
-            curr_x + step_dx,
-            curr_y - step_dy
-        ));
-    }
-    out.push_str(&format!(
-        r##"<path d="{step_path}" fill="none" stroke="#111111" stroke-width="2" />"##
-    ));
-    // Industrial black metal handrail (Corrimão tubular preto)
-    let rail_start_x = stair_x - 4.0;
-    let rail_start_y = stair_top_y + (num_steps as f64 * step_dy) - 18.0;
-    let rail_end_x = stair_x + (num_steps as f64 * step_dx) + 4.0;
-    let rail_end_y = stair_top_y - 18.0;
-    out.push_str(&format!(
-        r##"<line x1="{rail_start_x:.1}" y1="{rail_start_y:.1}" x2="{rail_end_x:.1}" y2="{rail_end_y:.1}" stroke="#111111" stroke-width="2.5" />"##
-    ));
-    // Railing upright posts
-    for p in 0..4 {
-        let px_pos = rail_start_x + (p as f64 * 32.0);
-        let py_pos = rail_start_y - (p as f64 * 28.0);
-        out.push_str(&format!(
-            r##"<line x1="{px_pos:.1}" y1="{py_pos:.1}" x2="{px_pos:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.5" />"##,
-            py_pos + 18.0
-        ));
-    }
-
-    // Student Bulletin Board (Mural de Avisos do CCS) on the right wall
-    let board_x = px + w - 85.0;
-    let board_y = py + 38.0;
-    let board_w = 75.0;
-    let board_h = 72.0;
-
-    // Cork/Aluminum frame
-    out.push_str(&format!(
-        r##"<rect x="{board_x:.1}" y="{board_y:.1}" width="{board_w:.1}" height="{board_h:.1}" fill="#fff8e7" stroke="#111111" stroke-width="2" rx="1.5" />"##
-    ));
-    // Header tag "MURAL CCS"
-    out.push_str(&format!(
-        r##"<rect x="{board_x:.1}" y="{board_y:.1}" width="{board_w:.1}" height="10" fill="#1f2328" />"##
-    ));
-    let font_board = r##"font-family="'Helvetica Neue', Arial, sans-serif" font-size="5" font-weight="bold" fill="#ffffff""##;
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" {font_board}>MURAL • CCS / UFSC</text>"##,
-        board_x + (board_w / 2.0),
-        board_y + 7.5
-    ));
-
-    // Pinned Academic Flyers / Posters
-    // Flyer 1: Semana Acadêmica
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="30" height="24" fill="#ffffff" stroke="#111111" stroke-width="1" rx="0.5" />"##,
-        board_x + 5.0,
-        board_y + 14.0
-    ));
-    let font_flyer = r##"font-family="'Comic Sans MS', sans-serif" font-size="3.8" font-weight="bold" fill="#0969da""##;
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" {font_flyer}>SEMANA</text>"##,
-        board_x + 7.0,
-        board_y + 20.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" {font_flyer}>ACADÊMICA</text>"##,
-        board_x + 7.0,
-        board_y + 25.0
-    ));
-    // Mini thumb pin (percevejo)
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="1.5" fill="#cf222e" stroke="#111111" stroke-width="0.8" />"##,
-        board_x + 20.0,
-        board_y + 14.0
-    ));
-
-    // Flyer 2: Bolsa de IC / Monitoria
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="32" height="24" fill="#ddf4ff" stroke="#111111" stroke-width="1" rx="0.5" />"##,
-        board_x + 38.0,
-        board_y + 14.0
-    ));
-    let font_ic = r##"font-family="'Comic Sans MS', sans-serif" font-size="3.8" font-weight="bold" fill="#1a7f37""##;
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" {font_ic}>VAGA IC</text>"##,
-        board_x + 41.0,
-        board_y + 21.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-size="3" fill="#24292e">Farmácia / Med</text>"##,
-        board_x + 41.0,
-        board_y + 27.0
-    ));
-    // Mini thumb pin
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="1.5" fill="#0969da" stroke="#111111" stroke-width="0.8" />"##,
-        board_x + 54.0,
-        board_y + 14.0
-    ));
-
-    // Flyer 3: Anúncio com picotes para rasgar na base
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="42" height="22" fill="#ffffff" stroke="#111111" stroke-width="1" rx="0.5" />"##,
-        board_x + 8.0,
-        board_y + 42.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-size="3.8" font-weight="bold" fill="#24292e">GRUPO DE ESTUDOS</text>"##,
-        board_x + 11.0,
-        board_y + 49.0
-    ));
-    // Slits / tear-off tabs (tiras picotadas de telefone)
-    for t in 0..5 {
-        let tab_x = board_x + 11.0 + (t as f64 * 7.0);
-        out.push_str(&format!(
-            r##"<line x1="{tab_x:.1}" y1="{:.1}" x2="{tab_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" />"##,
-            board_y + 57.0,
-            board_y + 64.0
-        ));
-    }
-
-    // Concrete waiting bench at bottom right
-    let bench_x = board_x;
-    let bench_y = floor_y - 12.0;
-    out.push_str(&format!(
-        r##"<rect x="{bench_x:.1}" y="{bench_y:.1}" width="70" height="12" fill="#e6edf5" stroke="#111111" stroke-width="1.8" />"##
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{bench_x:.1}" y1="{bench_y:.1}" x2="{:.1}" y2="{bench_y:.1}" stroke="#111111" stroke-width="2.2" />"##,
-        bench_x + 70.0
-    ));
-
-    // Potted Monstera / Tropical Plant in the Hall (Costela-de-Adão)
-    let pot_x = pilar1_x + pilar_w + 6.0;
-    let pot_y = floor_y - 16.0;
-    // Pot
-    out.push_str(&format!(
-        r##"<polygon points="{:.1},{:.1} {:.1},{:.1} {:.1},{:.1} {:.1},{:.1}" fill="#afb8c1" stroke="#111111" stroke-width="1.8" />"##,
-        pot_x, pot_y + 16.0,
-        pot_x + 16.0, pot_y + 16.0,
-        pot_x + 19.0, pot_y,
-        pot_x - 3.0, pot_y
-    ));
-    // Monstera leaves
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="#e6ffed" stroke="#1a7f37" stroke-width="1.8" />"##,
-        pot_x + 8.0, pot_y,
-        pot_x - 12.0, pot_y - 20.0,
-        pot_x - 18.0, pot_y - 32.0,
-        pot_x + 2.0, pot_y - 24.0,
-        pot_x + 8.0, pot_y
-    ));
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="#e6ffed" stroke="#1a7f37" stroke-width="1.8" />"##,
-        pot_x + 8.0, pot_y,
-        pot_x + 24.0, pot_y - 22.0,
-        pot_x + 30.0, pot_y - 34.0,
-        pot_x + 14.0, pot_y - 22.0,
-        pot_x + 8.0, pot_y
-    ));
-
-    // Floor line and perspective floor joint
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />"##,
-        px + w
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#afb8c1" stroke-width="1" stroke-dasharray="8,4" />"##,
-        px + 50.0,
-        px + 10.0,
-        floor_y + 14.0
-    ));
-
-    out.push_str("</g>");
-    out
-}
-
-/// Enfermaria / Leito do HU (Hospital Ward / Clinic) - Hospital bed, IV drip stand, medical gas panel & swinging door
+/// 7. HU Enfermaria - Leito hospitalar articulado de ferro, suporte telescópico de soro com gotejador, régua de gases na parede e biombo pregueado
 fn render_hu_enfermaria_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
+    let floor_y = py + h - 22.0;
     out.push_str(r##"<g class="backdrop-vector backdrop-hu-enfermaria">"##);
 
-    // Sterile hospital wall background
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fbfcfd" />"##
-    ));
-
-    // Wall bumper guard rail (Faixa bate-maca vinílica)
-    let rail_y = py + 92.0;
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{rail_y:.1}" width="{w:.1}" height="8" fill="#e1e4e8" stroke="#111111" stroke-width="1.2" />"##
-    ));
-
-    // Hospital swinging double doors on the left (Porta vai-e-vem)
-    let door_x = px + 12.0;
-    let door_y = py + 26.0;
-    let door_w = 44.0;
-    let floor_y = py + h - 16.0;
-    let door_h = floor_y - door_y;
-
-    out.push_str(&format!(
-        r##"<rect x="{door_x:.1}" y="{door_y:.1}" width="{door_w:.1}" height="{door_h:.1}" fill="#f6f8fa" stroke="#111111" stroke-width="2" />"##
-    ));
-    // Door split
-    let door_mid_x = door_x + (door_w / 2.0);
-    out.push_str(&format!(
-        r##"<line x1="{door_mid_x:.1}" y1="{door_y:.1}" x2="{door_mid_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.5" />"##
-    ));
-    // Circular glass portholes (Visores redondos da porta hospitalar)
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="6.5" fill="#e6edf5" stroke="#111111" stroke-width="1.5" />"##,
-        door_x + 11.0,
-        door_y + 24.0
-    ));
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="6.5" fill="#e6edf5" stroke="#111111" stroke-width="1.5" />"##,
-        door_x + 33.0,
-        door_y + 24.0
-    ));
-    // Stainless steel push plates (Placas de empurrar)
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="4" height="20" fill="#d0d7de" stroke="#111111" stroke-width="1" />"##,
-        door_mid_x - 6.0,
-        door_y + 44.0
-    ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="4" height="20" fill="#d0d7de" stroke="#111111" stroke-width="1" />"##,
-        door_mid_x + 2.0,
-        door_y + 44.0
-    ));
-
-    // Medical Gas Wall Console (Painel de Gases Medicinais: O2, Vácuo, Ar)
-    let panel_x = px + 68.0;
-    let panel_y = py + 34.0;
-    out.push_str(&format!(
-        r##"<rect x="{panel_x:.1}" y="{panel_y:.1}" width="46" height="20" fill="#ffffff" stroke="#111111" stroke-width="1.8" rx="2" />"##
-    ));
-    // Green O2 outlet (Oxigênio)
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="3.5" fill="#2da44e" stroke="#111111" stroke-width="1" />"##,
-        panel_x + 10.0,
-        panel_y + 10.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-size="3" font-weight="bold" fill="#111111">O&#8322;</text>"##,
-        panel_x + 10.0,
-        panel_y + 18.0
-    ));
-    // Yellow Air outlet (Ar comprimido)
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="3.5" fill="#d4a72c" stroke="#111111" stroke-width="1" />"##,
-        panel_x + 23.0,
-        panel_y + 10.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-size="3" font-weight="bold" fill="#111111">AR</text>"##,
-        panel_x + 23.0,
-        panel_y + 18.0
-    ));
-    // Grey Vacuum outlet (Vácuo)
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="3.5" fill="#8c959f" stroke="#111111" stroke-width="1" />"##,
-        panel_x + 36.0,
-        panel_y + 10.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-size="3" font-weight="bold" fill="#111111">VAC</text>"##,
-        panel_x + 36.0,
-        panel_y + 18.0
-    ));
-
-    // Patient Medical Chart Clipboard (Prancheta de Prontuário)
-    let clip_x = panel_x + 56.0;
-    let clip_y = py + 32.0;
-    out.push_str(&format!(
-        r##"<rect x="{clip_x:.1}" y="{clip_y:.1}" width="18" height="24" fill="#ffffff" stroke="#111111" stroke-width="1.5" rx="1" />"##
-    ));
-    // Metal clip on top
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="8" height="3.5" fill="#57606a" stroke="#111111" stroke-width="1" rx="0.5" />"##,
-        clip_x + 5.0,
-        clip_y - 2.0
-    ));
-    // Chart lines (ECG heartbeat rhythm line)
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} l 2 0 l 2 -4 l 2 8 l 2 -4 l 4 0" fill="none" stroke="#cf222e" stroke-width="1" />"##,
-        clip_x + 3.0,
-        clip_y + 12.0
-    ));
-
-    // Hospital Bed / Stretcher (Maca Hospitalar com Rodinhas) on the right
-    let bed_x = px + w - 88.0;
-    let bed_y = py + 118.0;
-    let bed_w = 78.0;
-    let _bed_h = 24.0;
-
-    // Bed mattress & inclined pillow/backrest
-    out.push_str(&format!(
-        r##"<path d="M {bed_x:.1} {bed_y:.1} L {:.1} {:.1} L {:.1} {:.1} L {:.1} {:.1} L {bed_x:.1} {:.1} Z" fill="#ffffff" stroke="#111111" stroke-width="2" rx="2" />"##,
-        bed_x + 18.0, bed_y - 10.0,
-        bed_x + bed_w, bed_y - 10.0,
-        bed_x + bed_w, bed_y + 14.0,
-        bed_y + 14.0
-    ));
-    // Mattress seam & pillow
-    out.push_str(&format!(
-        r##"<ellipse cx="{:.1}" cy="{:.1}" rx="8" ry="4" fill="#f0f6fc" stroke="#111111" stroke-width="1.2" />"##,
-        bed_x + bed_w - 14.0,
-        bed_y - 4.0
-    ));
-    // Tubular metal frame under mattress
-    out.push_str(&format!(
-        r##"<line x1="{bed_x:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.5" />"##,
-        bed_y + 14.0,
-        bed_x + bed_w,
-        bed_y + 14.0
-    ));
-    // Legs & casters / wheels
-    let leg1_x = bed_x + 12.0;
-    let leg2_x = bed_x + bed_w - 14.0;
-    for lx in [leg1_x, leg2_x] {
-        out.push_str(&format!(
-            r##"<line x1="{lx:.1}" y1="{:.1}" x2="{lx:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />"##,
-            bed_y + 14.0
-        ));
-        out.push_str(&format!(
-            r##"<circle cx="{lx:.1}" cy="{floor_y:.1}" r="3" fill="#57606a" stroke="#111111" stroke-width="1.2" />"##
-        ));
-    }
-
-    // IV Drip Stand (Haste de Soro com Bolsa e Tubo)
-    let iv_x = bed_x - 12.0;
-    let iv_top_y = py + 30.0;
-    // Central pole
-    out.push_str(&format!(
-        r##"<line x1="{iv_x:.1}" y1="{iv_top_y:.1}" x2="{iv_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.8" />"##
-    ));
-    // Double hanger hooks at top
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {iv_x:.1} {iv_top_y:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="2" />"##,
-        iv_x - 8.0, iv_top_y + 5.0,
-        iv_x - 6.0, iv_top_y - 4.0,
-        iv_x + 6.0, iv_top_y - 4.0,
-        iv_x + 8.0, iv_top_y + 5.0
-    ));
-    // IV Bag (Bolsa de Solução / Soro)
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="10" height="16" fill="#e6edf5" stroke="#111111" stroke-width="1.2" rx="2" />"##,
-        iv_x - 13.0,
-        iv_top_y + 4.0
-    ));
-    // Fluid level & measurement marks
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#0969da" stroke-width="1.5" />"##,
-        iv_x - 11.0, iv_top_y + 12.0,
-        iv_x - 5.0, iv_top_y + 12.0
-    ));
-    // Dangling IV tube down toward the bed
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="1" stroke-dasharray="3,1" />"##,
-        iv_x - 8.0, iv_top_y + 20.0,
-        iv_x, iv_top_y + 50.0,
-        bed_x + 6.0, bed_y + 6.0
-    ));
-    // Wheeled base (tri-pod base)
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.5" />"##,
-        iv_x - 10.0,
-        iv_x + 10.0
-    ));
-
-    // Floor baseline & sanitary baseboard
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />"##,
-        px + w
-    ));
-
-    out.push_str("</g>");
-    out
-}
-
-/// Biblioteca Universitária (BU UFSC) - Grand bookshelves in receding perspective, study carrels & "SILÊNCIO" sign
-fn render_bu_ufsc_svg(px: f64, py: f64, w: f64, h: f64) -> String {
-    let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-bu-ufsc">"##);
-
-    // Warm quiet study hall background
+    // Parede de enfermaria asséptica e calma
     out.push_str(&format!(
         r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafbfc" />"##
     ));
 
-    let floor_y = py + h - 16.0;
-
-    // Receding tall bookshelves on the left (Estantes monumentais da BU)
-    let num_shelves = 4;
-    for s in 0..num_shelves {
-        let shelf_y = py + 24.0 + (s as f64 * 28.0);
-        let shelf_w = 75.0;
+    // Régua hospitalar de gases medicinais na parede (oxigênio, ar e vácuo em nanquim)
+    let reg_x = px + (w * 0.35);
+    let reg_y = py + 38.0;
+    out.push_str(&format!(
+        r##"<rect x="{reg_x:.1}" y="{reg_y:.1}" width="65.0" height="12.0" fill="#f1f3f5" stroke="#111111" stroke-width="1.4" rx="2" />"##
+    ));
+    for i in 0..3 {
+        let cx = reg_x + 12.0 + (i as f64 * 18.0);
         out.push_str(&format!(
-            r##"<rect x="{px:.1}" y="{shelf_y:.1}" width="{shelf_w:.1}" height="24" fill="#f6f8fa" stroke="#111111" stroke-width="1.8" />"##
+            r##"<circle cx="{cx:.1}" cy="{:.1}" r="3.2" fill="#ffffff" stroke="#111111" stroke-width="1.2" />"##,
+            reg_y + 6.0
         ));
-        // Book spines inside shelf
-        let mut bx = px + 4.0;
-        let mut b_count = 0;
-        while bx < px + shelf_w - 6.0 {
-            let bw = if b_count % 3 == 0 {
-                6.0
-            } else if b_count % 2 == 0 {
-                4.5
-            } else {
-                7.5
-            };
-            let bh = 18.0 - (b_count % 4) as f64;
-            let fill = if b_count % 2 == 0 {
-                "#eaeef2"
-            } else {
-                "#ffffff"
-            };
-            out.push_str(&format!(
-                r##"<rect x="{bx:.1}" y="{:.1}" width="{bw:.1}" height="{bh:.1}" fill="{fill}" stroke="#111111" stroke-width="1" />"##,
-                shelf_y + 24.0 - bh
-            ));
-            bx += bw + 1.2;
-            b_count += 1;
-        }
     }
 
-    // Classic BU hanging sign "SILÊNCIO / SILENCE"
-    let sign_x = px + (w / 2.0) - 30.0;
-    let sign_y = py + 22.0;
-    // Hanging chains
+    // Biombo hospitalar dobrável de três corpos à esquerda com cortina pregueada
+    let bio_x = px + 12.0;
+    let bio_w = (w * 0.28).min(65.0);
+    let bio_h = 92.0;
     out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{py:.1}" x2="{:.1}" y2="{sign_y:.1}" stroke="#111111" stroke-width="1.2" stroke-dasharray="2,2" />"##,
-        sign_x + 10.0, sign_x + 10.0
+        r##"<rect x="{bio_x:.1}" y="{:.1}" width="{bio_w:.1}" height="{bio_h:.1}" fill="#f8faf9" stroke="#111111" stroke-width="1.8" />"##,
+        floor_y - bio_h
     ));
+    // Pregas verticais da cortina com hachuras de sombra
+    for k in 1..4 {
+        let kx = bio_x + (k as f64 * (bio_w / 4.0));
+        out.push_str(&format!(
+            r##"<line x1="{kx:.1}" y1="{:.1}" x2="{kx:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.0" />"##,
+            floor_y - bio_h
+        ));
+        out.push_str(&format!(
+            r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="0.6" opacity="0.45" />"##,
+            kx + 2.0, floor_y - bio_h + 8.0, kx + 2.0
+        ));
+    }
+
+    // Leito hospitalar articulado
+    let bed_x = bio_x + bio_w + 14.0;
+    let bed_y = floor_y - 42.0;
+    let bed_w = (px + w - bed_x - 16.0).max(75.0);
+
+    // Cabeceira tubular de ferro curva
     out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{py:.1}" x2="{:.1}" y2="{sign_y:.1}" stroke="#111111" stroke-width="1.2" stroke-dasharray="2,2" />"##,
-        sign_x + 50.0, sign_x + 50.0
+        r##"<path d="M {bed_x:.1} {floor_y:.1} l 0 -36 q 6 -8 16 -8 l 0 44" fill="none" stroke="#111111" stroke-width="2.2" />"##
     ));
-    // Sign plate
+    // Colchão hospitalar com vincos de lençol
     out.push_str(&format!(
-        r##"<rect x="{sign_x:.1}" y="{sign_y:.1}" width="60" height="20" fill="#ffffff" stroke="#111111" stroke-width="2" rx="2" />"##
+        r##"<rect x="{:.1}" y="{bed_y:.1}" width="{:.1}" height="12.0" rx="3" fill="#ffffff" stroke="#111111" stroke-width="1.6" />"##,
+        bed_x + 8.0, bed_w - 10.0
     ));
-    let font_silence = r##"font-family="'Helvetica Neue', Arial, sans-serif" font-size="7" font-weight="bold" fill="#cf222e" letter-spacing="1""##;
-    let font_bu =
-        r##"font-family="'Helvetica Neue', Arial, sans-serif" font-size="4.5" fill="#57606a""##;
+    // Grade de proteção articulada
+    for g in 0..4 {
+        let gx = bed_x + 18.0 + (g as f64 * 14.0);
+        out.push_str(&format!(
+            r##"<line x1="{gx:.1}" y1="{bed_y:.1}" x2="{gx:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.3" />"##,
+            bed_y - 10.0
+        ));
+    }
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" {font_silence}>🤫 SILÊNCIO</text>"##,
-        sign_x + 30.0,
-        sign_y + 11.5
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" {font_bu}>BU • UFSC</text>"##,
-        sign_x + 30.0,
-        sign_y + 17.5
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.6" />"##,
+        bed_x + 16.0, bed_y - 10.0, bed_x + 62.0, bed_y - 10.0
     ));
 
-    // Study Carrel (Baia de Estudo Individual de Madeira) on the right
-    let carrel_x = px + w - 80.0;
-    let carrel_y = py + 104.0;
-    let carrel_w = 70.0;
-    let carrel_h = 32.0;
-
-    // Wooden partition back & side
+    // Suporte de soro com rodízios, frasco e equipo com câmara de gotejamento
+    let sup_x = bed_x - 6.0;
     out.push_str(&format!(
-        r##"<rect x="{carrel_x:.1}" y="{carrel_y:.1}" width="{carrel_w:.1}" height="{carrel_h:.1}" fill="#f6f8fa" stroke="#111111" stroke-width="2" rx="1" />"##
+        r##"<line x1="{sup_x:.1}" y1="{floor_y:.1}" x2="{sup_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.8" />"##,
+        py + 18.0
     ));
-    // Desk surface
-    let desk_y = carrel_y + 18.0;
+    // Rodízios na base
     out.push_str(&format!(
-        r##"<line x1="{carrel_x:.1}" y1="{desk_y:.1}" x2="{:.1}" y2="{desk_y:.1}" stroke="#111111" stroke-width="2.5" />"##,
-        carrel_x + carrel_w
+        r##"<line x1="{:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        sup_x - 6.0, sup_x + 6.0
     ));
-    // Open textbook on the desk
+    // Frasco de soro invertido e mangueira flexível
     out.push_str(&format!(
-        r##"<polygon points="{:.1},{:.1} {:.1},{:.1} {:.1},{:.1} {:.1},{:.1} {:.1},{:.1}" fill="#ffffff" stroke="#111111" stroke-width="1.2" />"##,
-        carrel_x + 14.0, desk_y - 2.0,
-        carrel_x + 24.0, desk_y - 5.0,
-        carrel_x + 34.0, desk_y - 2.0,
-        carrel_x + 24.0, desk_y + 1.0,
-        carrel_x + 14.0, desk_y - 2.0
+        r##"<path d="M {:.1} {:.1} l 8 0 l 0 14 q -4 4 -8 0 z" fill="#f8fafc" stroke="#111111" stroke-width="1.3" />"##,
+        sup_x - 4.0, py + 22.0
     ));
-    // Articulated desk reading lamp
-    let lamp_base_x = carrel_x + carrel_w - 18.0;
     out.push_str(&format!(
-        r##"<path d="M {lamp_base_x:.1} {desk_y:.1} L {:.1} {:.1} L {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="1.5" />"##,
-        lamp_base_x - 6.0, desk_y - 12.0,
-        lamp_base_x - 14.0, desk_y - 8.0
-    ));
-    // Lamp shade
-    out.push_str(&format!(
-        r##"<polygon points="{:.1},{:.1} {:.1},{:.1} {:.1},{:.1}" fill="#24292e" stroke="#111111" stroke-width="1" />"##,
-        lamp_base_x - 18.0, desk_y - 10.0,
-        lamp_base_x - 10.0, desk_y - 6.0,
-        lamp_base_x - 14.0, desk_y - 5.0
+        r##"<path d="M {sup_x:.1} {:.1} q 8 20 -2 36" fill="none" stroke="#111111" stroke-width="0.9" opacity="0.8" />"##,
+        py + 38.0
     ));
 
-    // Carrel legs down to floor
-    let leg_right_x = carrel_x + carrel_w;
-    out.push_str(&format!(
-        r##"<line x1="{carrel_x:.1}" y1="{:.1}" x2="{carrel_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />"##,
-        carrel_y + carrel_h
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{leg_right_x:.1}" y1="{:.1}" x2="{leg_right_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />"##,
-        carrel_y + carrel_h
-    ));
-
-    // Floor line
+    // Linha do piso
     out.push_str(&format!(
         r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.8" />"##,
         px + w
@@ -1412,218 +840,208 @@ fn render_bu_ufsc_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     out
 }
 
-/// Praça da Cidadania (UFSC) - Reitoria facade, palm trees, street lamps, and cobblestone plaza
+/// 8. BU UFSC - Perspectiva monumental de corredor de estantes de livros, lombadas individuais em bico de pena, mesas de leitura e laje nervurada
+fn render_bu_ufsc_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let floor_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-bu-ufsc">"##);
+
+    // Fundo do salão
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fbfaf7" />"##
+    ));
+
+    // Teto de laje nervurada de concreto (caixotões clássicos dos anos 70 da BU)
+    for c in 0..6 {
+        let cx = px + (c as f64 * (w / 5.0));
+        out.push_str(&format!(
+            r##"<rect x="{cx:.1}" y="{py:.1}" width="{:.1}" height="18.0" fill="#f2efe6" stroke="#111111" stroke-width="1.3" />"##,
+            w / 5.2
+        ));
+    }
+
+    // Perspectiva convergente para o ponto de fuga central
+    let vp_x = px + (w / 2.0);
+    let vp_y = py + 65.0;
+
+    // Estante de livros monumental à esquerda (de alto a baixo)
+    let left_w = (w * 0.38).min(90.0);
+    out.push_str(&format!(
+        r##"<polygon points="{px:.1},{:.1} {:.1},{:.1} {:.1},{floor_y:.1} {px:.1},{floor_y:.1}" fill="#ede9de" stroke="#111111" stroke-width="2.2" />"##,
+        py + 18.0, px + left_w, vp_y - 20.0, px + left_w
+    ));
+    // Prateleiras e lombadas de livros na estante da esquerda
+    for p in 0..5 {
+        let py_start = py + 26.0 + (p as f64 * 20.0);
+        let py_end = vp_y - 15.0 + (p as f64 * 10.0);
+        out.push_str(&format!(
+            r##"<line x1="{px:.1}" y1="{py_start:.1}" x2="{:.1}" y2="{py_end:.1}" stroke="#111111" stroke-width="1.5" />"##,
+            px + left_w
+        ));
+        // Lombadas de livros verticais
+        for b in 0..7 {
+            let bx = px + 6.0 + (b as f64 * 11.0);
+            if bx < px + left_w - 4.0 {
+                out.push_str(&format!(
+                    r##"<line x1="{bx:.1}" y1="{py_start:.1}" x2="{bx:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.1" />"##,
+                    py_start - 12.0
+                ));
+                // Hachuras finas na lombada
+                out.push_str(&format!(
+                    r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.6" opacity="0.5" />"##,
+                    bx + 2.0, py_start - 10.0, bx + 2.0, py_start - 2.0
+                ));
+            }
+        }
+    }
+
+    // Estante monumental à direita
+    let right_x = px + w - left_w;
+    out.push_str(&format!(
+        r##"<polygon points="{:.1},{:.1} {:.1},{:.1} {:.1},{floor_y:.1} {:.1},{floor_y:.1}" fill="#ede9de" stroke="#111111" stroke-width="2.2" />"##,
+        px + w, py + 18.0, right_x, vp_y - 20.0, right_x, px + w
+    ));
+    for p in 0..5 {
+        let py_start = py + 26.0 + (p as f64 * 20.0);
+        let py_end = vp_y - 15.0 + (p as f64 * 10.0);
+        out.push_str(&format!(
+            r##"<line x1="{:.1}" y1="{py_start:.1}" x2="{right_x:.1}" y2="{py_end:.1}" stroke="#111111" stroke-width="1.5" />"##,
+            px + w
+        ));
+        for b in 0..7 {
+            let bx = right_x + 6.0 + (b as f64 * 11.0);
+            if bx < px + w - 4.0 {
+                out.push_str(&format!(
+                    r##"<line x1="{bx:.1}" y1="{py_start:.1}" x2="{bx:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.1" />"##,
+                    py_start - 12.0
+                ));
+            }
+        }
+    }
+
+    // Mesa de estudo individual de madeira no corredor central
+    let desk_w = 48.0;
+    let desk_x = vp_x - (desk_w / 2.0);
+    let desk_y = floor_y - 24.0;
+    out.push_str(&format!(
+        r##"<rect x="{desk_x:.1}" y="{desk_y:.1}" width="{desk_w:.1}" height="6.0" fill="#dfd8c8" stroke="#111111" stroke-width="1.6" />"##
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.8" />"##,
+        desk_x + 4.0, desk_y + 6.0, desk_x + 4.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.8" />"##,
+        desk_x + desk_w - 4.0, desk_y + 6.0, desk_x + desk_w - 4.0
+    ));
+    // Luminária de mesa clássica tipo banqueiro
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {desk_y:.1} l 0 -12 q 4 -4 10 0" fill="none" stroke="#111111" stroke-width="1.4" />"##,
+        desk_x + 12.0
+    ));
+
+    // Linhas de fuga do piso de granilite
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        px + w
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{vp_x:.1}" y1="{vp_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.0" opacity="0.5" />"##,
+        vp_x - 30.0, py + h
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{vp_x:.1}" y1="{vp_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.0" opacity="0.5" />"##,
+        vp_x + 30.0, py + h
+    ));
+
+    out.push_str("</g>");
+    out
+}
+
+/// 9. Praça da Cidadania UFSC - A lendária Concha Acústica com gomos parabolicos, canteiros sinuosos de Burle Marx, postes republicanos e silhueta da Reitoria
 fn render_praca_cidadania_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-praca-cidadania">\"##);
+    let ground_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-praca-cidadania">"##);
 
-    // Sky tint
+    // Céu claro de Florianópolis
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f4f8fb" />\"##
-    ));
-
-    // Distant birds in sky
-    let bird1_x = px + (w * 0.45);
-    let bird1_y = py + 14.0;
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#666666" stroke-width="1.2" stroke-linecap="round" />"##,
-        bird1_x, bird1_y,
-        bird1_x + 4.0, bird1_y - 3.0, bird1_x + 8.0, bird1_y,
-        bird1_x + 12.0, bird1_y - 3.0, bird1_x + 16.0, bird1_y
-    ));
-    let bird2_x = px + (w * 0.52);
-    let bird2_y = py + 20.0;
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#777777" stroke-width="1.0" stroke-linecap="round" />"##,
-        bird2_x, bird2_y,
-        bird2_x + 3.0, bird2_y - 2.5, bird2_x + 6.0, bird2_y,
-        bird2_x + 9.0, bird2_y - 2.5, bird2_x + 12.0, bird2_y
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafbfc" />"##
     ));
 
-    let floor_y = py + h - 16.0;
-
-    // Reitoria UFSC Facade in background
-    let reit_x = px + 44.0;
-    let reit_w = w - 80.0;
-    let reit_y = py + 26.0;
-    let reit_h = floor_y - reit_y - 28.0;
-
-    // Building main body
+    // Silhueta dos morros da ilha e da Reitoria ao longe
     out.push_str(&format!(
-        r##"<rect x="{reit_x:.1}" y="{reit_y:.1}" width="{reit_w:.1}" height="{reit_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="2.5" />\"##
+        r##"<path d="M {px:.1} {:.1} q 40 -16 90 -8 q 60 -18 110 -4" fill="none" stroke="#222222" stroke-width="1.2" opacity="0.6" />"##,
+        ground_y - 65.0
     ));
-    // Parapet roof rim
+    // Fachada distante do prédio da Reitoria
+    let reit_x = px + (w * 0.55);
     out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="6" fill="#e1e4e8" stroke="#111111" stroke-width="1.8" />\"##,
-        reit_x - 3.0, reit_y - 4.0, reit_w + 6.0
+        r##"<rect x="{reit_x:.1}" y="{:.1}" width="55.0" height="28.0" fill="#f4f5f7" stroke="#111111" stroke-width="1.2" />"##,
+        ground_y - 62.0
     ));
 
-    // Ribbon windows across the building (Modernist concrete & glass)
-    let win_y1 = reit_y + 10.0;
-    let win_y2 = reit_y + 26.0;
-    let win_w = reit_w - 16.0;
+    // A icônica Concha Acústica da UFSC em primeiro plano
+    let concha_x = px + 16.0;
+    let concha_w = (w * 0.58).min(140.0);
+    let concha_h = 75.0;
+    let concha_y = ground_y - concha_h;
+
+    // Arco parabólico externo da concha
     out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{win_y1:.1}" width="{win_w:.1}" height="10" fill="#24292e" stroke="#111111" stroke-width="1.5" />\"##,
-        reit_x + 8.0
+        r##"<path d="M {concha_x:.1} {ground_y:.1} Q {:.1} {:.1} {:.1} {ground_y:.1} Z" fill="#edeae1" stroke="#111111" stroke-width="2.5" />"##,
+        concha_x + (concha_w / 2.0), concha_y - 12.0, concha_x + concha_w
     ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{win_y2:.1}" width="{win_w:.1}" height="10" fill="#24292e" stroke="#111111" stroke-width="1.5" />\"##,
-        reit_x + 8.0
-    ));
-    // Window vertical mullions
-    let mullion_step = 18.0;
-    let mut mx = reit_x + 16.0;
-    while mx < reit_x + win_w {
+    // Gomos internos de reflexão acústica em nanquim
+    for g in 1..4 {
+        let span = concha_w * (1.0 - (g as f64 * 0.22));
+        let gx = concha_x + ((concha_w - span) / 2.0);
+        let gy = concha_y + (g as f64 * 12.0);
         out.push_str(&format!(
-            r##"<line x1="{mx:.1}" y1="{win_y1:.1}" x2="{mx:.1}" y2="{:.1}" stroke="#8c959f" stroke-width="1" />\"##,
-            win_y1 + 10.0
+            r##"<path d="M {gx:.1} {ground_y:.1} Q {:.1} {gy:.1} {:.1} {ground_y:.1}" fill="none" stroke="#111111" stroke-width="1.4" />"##,
+            gx + (span / 2.0), gx + span
         ));
-        out.push_str(&format!(
-            r##"<line x1="{mx:.1}" y1="{win_y2:.1}" x2="{mx:.1}" y2="{:.1}" stroke="#8c959f" stroke-width="1" />\"##,
-            win_y2 + 10.0
-        ));
-        mx += mullion_step;
+        // Hachura sutil da concavidade da concha
+        ink_hatch_lines(
+            &mut out,
+            gx + 4.0,
+            gy + 4.0,
+            gx + span - 4.0,
+            gy + 12.0,
+            5.0,
+        );
     }
-
-    // Central Portico / Entrance
-    let port_w = 48.0;
-    let port_x = reit_x + (reit_w / 2.0) - (port_w / 2.0);
-    let port_y = reit_y + 38.0;
-    let port_h = reit_h - 38.0;
+    // Palco elevado da concha acústica com degraus em meia-lua
     out.push_str(&format!(
-        r##"<rect x="{port_x:.1}" y="{port_y:.1}" width="{port_w:.1}" height="{port_h:.1}" fill="#f6f8fa" stroke="#111111" stroke-width="2" />\"##
-    ));
-    // Glass doors
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="36" height="{:.1}" fill="#e6edf5" stroke="#111111" stroke-width="1.5" />\"##,
-        port_x + 6.0, port_y + 8.0, port_h - 8.0
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />\"##,
-        port_x + 24.0, port_y + 8.0, port_x + 24.0, port_y + port_h
+        r##"<rect x="{concha_x:.1}" y="{:.1}" width="{concha_w:.1}" height="8.0" fill="#ded9cb" stroke="#111111" stroke-width="1.8" />"##,
+        ground_y - 8.0
     ));
 
-    // Sign plate: UFSC REITORIA
-    let sign_w = 44.0;
-    let sign_x = reit_x + (reit_w / 2.0) - (sign_w / 2.0);
-    let sign_y = port_y - 9.0;
+    // Canteiros paisagísticos de linhas orgânicas (Burle Marx) à direita
+    let cant_x = concha_x + concha_w + 12.0;
     out.push_str(&format!(
-        r##"<rect x="{sign_x:.1}" y="{sign_y:.1}" width="{sign_w:.1}" height="8" fill="#1b1f23" rx="1" />\"##
+        r##"<path d="M {cant_x:.1} {ground_y:.1} q 18 -18 36 -6 q 20 12 34 6" fill="none" stroke="#111111" stroke-width="1.6" />"##
     ));
+    // Árvore de ipê com copa expressiva em bico de pena
+    let tree_x = cant_x + 22.0;
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="4.5" font-weight="bold" fill="#ffffff" letter-spacing="0.5">UFSC REITORIA</text>\"##,
-        sign_x + (sign_w / 2.0), sign_y + 5.5
-    ));
-
-    // Two Flagpoles with waving flags
-    let flag1_x = port_x + 10.0;
-    out.push_str(&format!(
-        r##"<line x1="{flag1_x:.1}" y1="{reit_y:.1}" x2="{flag1_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.5" />\"##,
-        reit_y - 18.0
-    ));
-    out.push_str(&format!(
-        r##"<path d="M {flag1_x:.1} {:.1} q 6 -3 12 0 q -6 4 -12 2 Z" fill="#2da44e" stroke="#111111" stroke-width="1" />\"##,
-        reit_y - 18.0
+        r##"<path d="M {tree_x:.1} {ground_y:.1} l 0 -36 q -14 -12 -12 -24 q 16 2 24 18 q 16 -12 24 6 q -8 20 -28 14" fill="#f5f7f4" stroke="#111111" stroke-width="1.8" />"##
     ));
 
-    let flag2_x = port_x + port_w - 10.0;
+    // Poste de iluminação republicano clássico
+    let post_x = px + w - 18.0;
     out.push_str(&format!(
-        r##"<line x1="{flag2_x:.1}" y1="{reit_y:.1}" x2="{flag2_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.5" />\"##,
-        reit_y - 18.0
+        r##"<line x1="{post_x:.1}" y1="{ground_y:.1}" x2="{post_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        ground_y - 52.0
     ));
     out.push_str(&format!(
-        r##"<path d="M {flag2_x:.1} {:.1} q 6 -3 12 0 q -6 4 -12 2 Z" fill="#0969da" stroke="#111111" stroke-width="1" />\"##,
-        reit_y - 18.0
-    ));
-
-    // Iconic UFSC Imperial Palm Tree (Left side)
-    let palm_x = px + 22.0;
-    let palm_top_y = py + 18.0;
-    // Trunk
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {floor_y:.1} Q {:.1} {:.1} {:.1} {palm_top_y:.1} L {:.1} {palm_top_y:.1} Q {:.1} {:.1} {:.1} {floor_y:.1} Z" fill="#5c4d3c" stroke="#111111" stroke-width="2" />\"##,
-        palm_x - 3.5, palm_x - 1.0, (floor_y + palm_top_y) / 2.0, palm_x - 2.0,
-        palm_x + 2.0, palm_x + 1.0, (floor_y + palm_top_y) / 2.0, palm_x + 3.5
-    ));
-    // Palm fronds arching out
-    let fronds = [
-        (-22.0, -8.0),
-        (-16.0, -18.0),
-        (0.0, -22.0),
-        (16.0, -18.0),
-        (22.0, -8.0),
-        (-24.0, 4.0),
-        (24.0, 4.0),
-    ];
-    for (fdx, fdy) in fronds {
-        out.push_str(&format!(
-            r##"<path d="M {palm_x:.1} {palm_top_y:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" />\"##,
-            palm_x + (fdx * 0.5), palm_top_y + (fdy * 0.4),
-            palm_x + fdx, palm_top_y + fdy
-        ));
-    }
-
-    // Modern Double Globe Campus Street Lamp (Poste da Praça)
-    let lamp_x = px + w - 30.0;
-    let lamp_head_y = py + 34.0;
-    // Pole
-    out.push_str(&format!(
-        r##"<line x1="{lamp_x:.1}" y1="{lamp_head_y:.1}" x2="{lamp_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.5" />\"##
-    ));
-    // Base ring
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="8" height="4" fill="#24292e" stroke="#111111" stroke-width="1.2" rx="1" />\"##,
-        lamp_x - 4.0, floor_y - 4.0
-    ));
-    // T-bar
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{lamp_head_y:.1}" x2="{:.1}" y2="{lamp_head_y:.1}" stroke="#111111" stroke-width="2.2" />\"##,
-        lamp_x - 10.0, lamp_x + 10.0
-    ));
-    // Globes
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="4.5" fill="#ffffff" stroke="#111111" stroke-width="1.5" />\"##,
-        lamp_x - 10.0, lamp_head_y - 3.5
-    ));
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{:.1}" r="4.5" fill="#ffffff" stroke="#111111" stroke-width="1.5" />\"##,
-        lamp_x + 10.0, lamp_head_y - 3.5
+        r##"<circle cx="{post_x:.1}" cy="{:.1}" r="4.0" fill="#ffffff" stroke="#111111" stroke-width="1.2" />"##,
+        ground_y - 52.0
     ));
 
-    // Wooden park bench in foreground right
-    let bench_x = px + w - 75.0;
-    let bench_y = floor_y - 22.0;
-    let bench_w = 34.0;
-    // Cast iron legs
+    // Calçamento da Praça da Cidadania
     out.push_str(&format!(
-        r##"<path d="M {bench_x:.1} {floor_y:.1} L {:.1} {bench_y:.1} L {:.1} {floor_y:.1}" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" />\"##,
-        bench_x + 3.0, bench_x + 6.0
-    ));
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {floor_y:.1} L {:.1} {bench_y:.1} L {:.1} {floor_y:.1}" fill="none" stroke="#111111" stroke-width="2" stroke-linecap="round" />\"##,
-        bench_x + bench_w - 6.0, bench_x + bench_w - 3.0, bench_x + bench_w
-    ));
-    // Wooden slats (3 slats)
-    for i in 0..3 {
-        let slat_y = bench_y + (i as f64 * 3.5);
-        out.push_str(&format!(
-            r##"<rect x="{bench_x:.1}" y="{slat_y:.1}" width="{bench_w:.1}" height="2.5" fill="#d4a373" stroke="#111111" stroke-width="1" rx="0.5" />\"##
-        ));
-    }
-
-    // Plaza paving flagstone perspective lines
-    let mut line_x = px + 10.0;
-    while line_x < px + w {
-        out.push_str(&format!(
-            r##"<line x1="{line_x:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#afb8c1" stroke-width="1" stroke-dasharray="8,5" />\"##,
-            line_x - 8.0, floor_y + 14.0
-        ));
-        line_x += 35.0;
-    }
-
-    // Floor groundline
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
         px + w
     ));
 
@@ -1631,475 +1049,398 @@ fn render_praca_cidadania_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     out
 }
 
-/// Centro Tecnológico (CTC - UFSC) - Brutalist concrete architecture, tech lab, server rack, cables
+/// 10. CTC UFSC - Passarela suspensa de concreto armado conectando os blocos da engenharia, vigas estruturais, tubulações industriais e bancada de hardware
 fn render_ctc_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-ctc">\"##);
+    let ground_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-ctc">"##);
 
-    // Wall tint
+    // Fundo industrial/brutalista
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f6f8fa" />\"##
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafafc" />"##
     ));
 
-    let floor_y = py + h - 16.0;
-
-    // Overhead industrial cable ladder / ventilation conduit along ceiling
-    let duct_y = py + 12.0;
+    // Blocos de concreto da engenharia no plano de fundo
+    let bldg_y = py + 22.0;
     out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{duct_y:.1}" x2="{:.1}" y2="{duct_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        r##"<rect x="{px:.1}" y="{bldg_y:.1}" width="{:.1}" height="95.0" fill="#f0f1f4" stroke="#111111" stroke-width="2.0" />"##,
+        w * 0.45
+    ));
+    for j in 0..3 {
+        let jy = bldg_y + 12.0 + (j as f64 * 26.0);
+        out.push_str(&format!(
+            r##"<rect x="{:.1}" y="{jy:.1}" width="24.0" height="14.0" fill="#ffffff" stroke="#111111" stroke-width="1.2" />"##,
+            px + 12.0
+        ));
+    }
+
+    // A icônica passarela suspensa de concreto armado que liga os blocos do CTC
+    let pass_y = py + 34.0;
+    let pass_h = 24.0;
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{pass_y:.1}" width="{w:.1}" height="{pass_h:.1}" fill="#e6e8ec" stroke="#111111" stroke-width="2.4" />"##
+    ));
+    // Guarda-corpos e aberturas rítmicas da passarela
+    for p in 0..9 {
+        let px_win = px + 8.0 + (p as f64 * (w / 8.5));
+        if px_win + 14.0 < px + w {
+            out.push_str(&format!(
+                r##"<rect x="{px_win:.1}" y="{:.1}" width="14.0" height="14.0" fill="#ffffff" stroke="#111111" stroke-width="1.3" />"##,
+                pass_y + 5.0
+            ));
+        }
+    }
+    // Vigas I e pilares chanfrados sustentando a passarela
+    let pil_x = px + (w * 0.65).min(w - 45.0);
+    out.push_str(&format!(
+        r##"<polygon points="{pil_x:.1},{:.1} {:.1},{:.1} {:.1},{ground_y:.1} {pil_x:.1},{ground_y:.1}" fill="#dadde3" stroke="#111111" stroke-width="2.2" />"##,
+        pass_y + pass_h, pil_x + 24.0, pass_y + pass_h, pil_x + 18.0
+    ));
+    ink_hatch_lines(
+        &mut out,
+        pil_x + 2.0,
+        pass_y + pass_h + 4.0,
+        pil_x + 20.0,
+        ground_y - 4.0,
+        8.0,
+    );
+
+    // Eletrocalhas e tubulações industriais correndo pela parede
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        pass_y - 6.0, px + w, pass_y - 6.0
+    ));
+
+    // Bicicletário do CTC com bicicletas universitárias em nanquim
+    let bike_x = px + 18.0;
+    let bike_y = ground_y - 12.0;
+    out.push_str(&format!(
+        r##"<circle cx="{bike_x:.1}" cy="{bike_y:.1}" r="7.0" fill="none" stroke="#111111" stroke-width="1.3" />"##
+    ));
+    out.push_str(&format!(
+        r##"<circle cx="{:.1}" cy="{bike_y:.1}" r="7.0" fill="none" stroke="#111111" stroke-width="1.3" />"##,
+        bike_x + 20.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {bike_x:.1} {bike_y:.1} l 10 -10 l 10 10 l -10 0 l -4 -10" fill="none" stroke="#111111" stroke-width="1.4" />"##
+    ));
+
+    // Calçamento intertravado do CTC
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
         px + w
     ));
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="2" />\"##,
-        duct_y + 8.0, px + w, duct_y + 8.0
-    ));
-    // Ladder cross rungs
-    let mut rung_x = px + 12.0;
-    while rung_x < px + w {
-        out.push_str(&format!(
-            r##"<line x1="{rung_x:.1}" y1="{duct_y:.1}" x2="{rung_x:.1}" y2="{:.1}" stroke="#24292e" stroke-width="1.5" />\"##,
-            duct_y + 8.0
-        ));
-        rung_x += 16.0;
-    }
-    // Bundled ethernet cable curves hanging from conduit
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#0969da" stroke-width="1.8" />\"##,
-        px + 30.0, duct_y + 8.0, px + 50.0, duct_y + 16.0, px + 70.0, duct_y + 8.0,
-        px + 90.0, duct_y + 14.0, px + 110.0, duct_y + 8.0
-    ));
-
-    // Massive Brutalist Concrete Pillar on the left
-    let pillar_w = 36.0;
-    let pillar_x = px + 14.0;
-    out.push_str(&format!(
-        r##"<rect x="{pillar_x:.1}" y="{py:.1}" width="{pillar_w:.1}" height="{:.1}" fill="#e1e4e8" stroke="#111111" stroke-width="2.5" />\"##,
-        floor_y - py
-    ));
-    // Pillar chamfered bevel lines
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{py:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#8c959f" stroke-width="1.2" stroke-dasharray="14,4" />\"##,
-        pillar_x + 6.0, pillar_x + 6.0
-    ));
-    // Concrete tie-rod formwork circles (concreto aparente)
-    let formwork_ys = [py + 30.0, py + 65.0, py + 100.0, floor_y - 25.0];
-    for f_y in formwork_ys {
-        out.push_str(&format!(
-            r##"<circle cx="{:.1}" cy="{f_y:.1}" r="2" fill="#afb8c1" stroke="#24292e" stroke-width="1" />\"##,
-            pillar_x + 18.0
-        ));
-    }
-
-    // Concrete Beam Mezzanine / Walkway Balcony in background
-    let balc_y = py + 38.0;
-    let balc_h = 10.0;
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{balc_y:.1}" width="{:.1}" height="{balc_h:.1}" fill="#d0d7de" stroke="#111111" stroke-width="2" />\"##,
-        pillar_x + pillar_w, px + w - (pillar_x + pillar_w)
-    ));
-    // Steel handrail
-    let rail_top_y = balc_y - 14.0;
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{rail_top_y:.1}" x2="{:.1}" y2="{rail_top_y:.1}" stroke="#111111" stroke-width="2" />\"##,
-        pillar_x + pillar_w, px + w
-    ));
-    // Balusters
-    let mut b_x = pillar_x + pillar_w + 14.0;
-    while b_x < px + w {
-        out.push_str(&format!(
-            r##"<line x1="{b_x:.1}" y1="{rail_top_y:.1}" x2="{b_x:.1}" y2="{balc_y:.1}" stroke="#24292e" stroke-width="1.2" />\"##
-        ));
-        b_x += 16.0;
-    }
-
-    // Laboratory Door & Window in middle
-    let door_x = px + pillar_w + 24.0;
-    let door_w = 46.0;
-    let door_y = balc_y + balc_h + 12.0;
-    let door_h = floor_y - door_y;
-    // Door frame
-    out.push_str(&format!(
-        r##"<rect x="{door_x:.1}" y="{door_y:.1}" width="{door_w:.1}" height="{door_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="2" />\"##
-    ));
-    // Glass window panel
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="34" height="42" fill="#e6edf5" stroke="#111111" stroke-width="1.5" />\"##,
-        door_x + 6.0, door_y + 8.0
-    ));
-    // Reflection glare
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffffff" stroke-width="2" />\"##,
-        door_x + 12.0, door_y + 16.0, door_x + 24.0, door_y + 36.0
-    ));
-
-    // Department Wall Sign
-    let sign_w = 54.0;
-    let sign_x = door_x + door_w + 12.0;
-    let sign_y = door_y + 2.0;
-    out.push_str(&format!(
-        r##"<rect x="{sign_x:.1}" y="{sign_y:.1}" width="{sign_w:.1}" height="22" fill="#1b1f23" stroke="#111111" stroke-width="1.5" rx="1.5" />\"##
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="5" font-weight="bold" fill="#58a6ff" letter-spacing="0.5">CTC TECNOLÓGICO</text>\"##,
-        sign_x + (sign_w / 2.0), sign_y + 9.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="3.8" fill="#c9d1d9">LAB SISTEMAS &amp; IA</text>\"##,
-        sign_x + (sign_w / 2.0), sign_y + 17.0
-    ));
-
-    // High-Tech Server Rack Cabinet on right
-    let rack_w = 32.0;
-    let rack_x = px + w - rack_w - 12.0;
-    let rack_y = floor_y - 82.0;
-    let rack_h = 82.0;
-    // Cabinet
-    out.push_str(&format!(
-        r##"<rect x="{rack_x:.1}" y="{rack_y:.1}" width="{rack_w:.1}" height="{rack_h:.1}" fill="#161b22" stroke="#111111" stroke-width="2.5" rx="2" />\"##
-    ));
-    // Server units
-    for u in 0..5 {
-        let uy = rack_y + 6.0 + (u as f64 * 14.5);
-        out.push_str(&format!(
-            r##"<rect x="{:.1}" y="{uy:.1}" width="26" height="11" fill="#21262d" stroke="#30363d" stroke-width="1" rx="1" />\"##,
-            rack_x + 3.0
-        ));
-        // Status LED lights (Green/Blue/Yellow)
-        let led_color = if u % 2 == 0 { "#238636" } else { "#1f6feb" };
-        out.push_str(&format!(
-            r##"<circle cx="{:.1}" cy="{:.1}" r="1.3" fill="{led_color}" />\"##,
-            rack_x + 7.0,
-            uy + 5.5
-        ));
-        out.push_str(&format!(
-            r##"<circle cx="{:.1}" cy="{:.1}" r="1.3" fill="#238636" />\"##,
-            rack_x + 11.5,
-            uy + 5.5
-        ));
-        // Drive slots
-        out.push_str(&format!(
-            r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#484f58" stroke-width="1" />\"##,
-            rack_x + 16.0, uy + 5.5, rack_x + 26.0, uy + 5.5
-        ));
-    }
-
-    // Floor line
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
-        px + w
-    ));
-
-    // Floor antistatic grid lines
-    let mut fg_x = px + 10.0;
-    while fg_x < px + w {
-        out.push_str(&format!(
-            r##"<line x1="{fg_x:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#afb8c1" stroke-width="1" stroke-dasharray="6,4" />\"##,
-            fg_x - 10.0, floor_y + 14.0
-        ));
-        fg_x += 30.0;
-    }
 
     out.push_str("</g>");
     out
 }
 
-/// Centro de Filosofia e Ciências Humanas (CFH - UFSC) - Bosquinho, student mural, native trees
+/// 11. CFH UFSC - O clássico "Aquário" envidraçado do CFH, murais estudantis, escadaria de convivência e eucaliptos do bosque
 fn render_cfh_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-cfh">\"##);
+    let ground_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-cfh">"##);
 
-    // Forest / outdoor air tint
+    // Fundo do campus
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f2f7f4" />\"##
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#faf9f6" />"##
     ));
 
-    let floor_y = py + h - 16.0;
-
-    // Distant brick pavilion wall of CFH building in background
-    let wall_x = px + 30.0;
-    let wall_w = w - 60.0;
-    let wall_y = py + 34.0;
-    let wall_h = floor_y - wall_y - 20.0;
-    // Brick wall fill
-    out.push_str(&format!(
-        r##"<rect x="{wall_x:.1}" y="{wall_y:.1}" width="{wall_w:.1}" height="{wall_h:.1}" fill="#faede8" stroke="#111111" stroke-width="2" />\"##
-    ));
-    // Brick joint texture lines
-    let mut b_y = wall_y + 6.0;
-    while b_y < wall_y + wall_h {
+    // Troncos altos dos eucaliptos do Bosque do CFH à esquerda
+    for i in 0..3 {
+        let ex = px + 8.0 + (i as f64 * 14.0);
         out.push_str(&format!(
-            r##"<line x1="{wall_x:.1}" y1="{b_y:.1}" x2="{:.1}" y2="{b_y:.1}" stroke="#e0b4a4" stroke-width="0.8" stroke-dasharray="10,3" />\"##,
-            wall_x + wall_w
+            r##"<line x1="{ex:.1}" y1="{py:.1}" x2="{ex:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="3.2" />"##
         ));
-        b_y += 8.0;
+        out.push_str(&format!(
+            r##"<line x1="{:.1}" y1="{py:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="0.8" opacity="0.6" stroke-dasharray="8,4" />"##,
+            ex + 1.2, ex + 1.2
+        ));
     }
-    // Concrete lintel roof over brick wall
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="7" fill="#d0d7de" stroke="#111111" stroke-width="1.8" />\"##,
-        wall_x - 4.0, wall_y - 5.0, wall_w + 8.0
-    ));
 
-    // Bosquinho Canopy Overhead (Lush organic tree curves)
-    out.push_str(&format!(
-        r##"<path d="M {px:.1} {py:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {py:.1} Z" fill="#2d6a4f" stroke="#111111" stroke-width="2.5" />\"##,
-        px + 30.0, py + 26.0, px + 70.0, py + 14.0,
-        px + 120.0, py + 28.0, px + 170.0, py + 16.0,
-        px + 220.0, py + 30.0, px + 270.0, py + 18.0,
-        px + (w - 20.0), py + 24.0, px + w
-    ));
-    // Liana / hanging vine curves
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#1b4332" stroke-width="1.8" stroke-linecap="round" />\"##,
-        px + 45.0, py + 20.0, px + 40.0, py + 38.0, px + 46.0, py + 48.0
-    ));
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#1b4332" stroke-width="1.8" stroke-linecap="round" />\"##,
-        px + 190.0, py + 22.0, px + 196.0, py + 42.0, px + 192.0, py + 52.0
-    ));
+    // Fachada do Bloco do CFH com "O Aquário" (hall envidraçado piso ao teto)
+    let aqua_x = px + 52.0;
+    let aqua_y = py + 26.0;
+    let aqua_w = (px + w - aqua_x - 10.0).max(85.0);
+    let aqua_h = ground_y - aqua_y;
 
-    // Native tree trunk on left (Bosquinho Fig tree)
-    let trunk_x = px + 16.0;
     out.push_str(&format!(
-        r##"<path d="M {trunk_x:.1} {py:.1} Q {:.1} {:.1} {:.1} {floor_y:.1} L {:.1} {floor_y:.1} Q {:.1} {:.1} {:.1} {py:.1} Z" fill="#523a28" stroke="#111111" stroke-width="2.5" />\"##,
-        trunk_x + 8.0, (py + floor_y) / 2.0, trunk_x + 4.0,
-        trunk_x + 18.0,
-        trunk_x + 16.0, (py + floor_y) / 2.0, trunk_x + 12.0
+        r##"<rect x="{aqua_x:.1}" y="{aqua_y:.1}" width="{aqua_w:.1}" height="{aqua_h:.1}" fill="#f2f5f4" stroke="#111111" stroke-width="2.2" />"##
     ));
+    // Montantes de ferro do Aquário
+    for m in 1..4 {
+        let mx = aqua_x + (m as f64 * (aqua_w / 4.0));
+        out.push_str(&format!(
+            r##"<line x1="{mx:.1}" y1="{aqua_y:.1}" x2="{mx:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="1.6" />"##
+        ));
+    }
+    // Cartazes estudantis e informativos colados no vidro do Aquário
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="22.0" height="28.0" fill="#ffffff" stroke="#111111" stroke-width="1.2" />"##,
+        aqua_x + 12.0, aqua_y + 18.0
+    ));
+    ink_hatch_lines(
+        &mut out,
+        aqua_x + 14.0,
+        aqua_y + 22.0,
+        aqua_x + 32.0,
+        aqua_y + 42.0,
+        4.0,
+    );
 
-    // Student Mural Board ("MURAL DO CFH") in center-right
-    let mural_w = 68.0;
-    let mural_h = 42.0;
-    let mural_x = px + (w / 2.0) - 20.0;
-    let mural_y = py + 42.0;
-    // Wooden frame & cork board
-    out.push_str(&format!(
-        r##"<rect x="{mural_x:.1}" y="{mural_y:.1}" width="{mural_w:.1}" height="{mural_h:.1}" fill="#d4a373" stroke="#111111" stroke-width="2" rx="1.5" />\"##
-    ));
-    // Header title
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" text-anchor="middle" font-family="'Helvetica Neue', Arial, sans-serif" font-size="4" font-weight="bold" fill="#111111" letter-spacing="0.5">MURAL CFH</text>\"##,
-        mural_x + (mural_w / 2.0), mural_y + 6.0
-    ));
+    // Escadaria externa de concreto onde ocorrem assembleias e rodas de conversa
+    let esc_y = ground_y - 18.0;
+    for s in 0..3 {
+        let sy = esc_y + (s as f64 * 6.0);
+        let sx = aqua_x + 6.0 - (s as f64 * 8.0);
+        out.push_str(&format!(
+            r##"<line x1="{sx:.1}" y1="{sy:.1}" x2="{:.1}" y2="{sy:.1}" stroke="#111111" stroke-width="1.8" />"##,
+            aqua_x + aqua_w
+        ));
+    }
 
-    // Overlapping Student Posters / Flyers
-    // Poster 1: Assembleia
+    // Linha do chão
     out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="18" height="14" fill="#ffffff" stroke="#111111" stroke-width="1" />\"##,
-        mural_x + 5.0, mural_y + 9.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-family="'Helvetica Neue', Arial, sans-serif" font-size="3" font-weight="bold" fill="#cf222e">ASSEMBLEIA</text>\"##,
-        mural_x + 6.0, mural_y + 14.0
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#57606a" stroke-width="0.8" />\"##,
-        mural_x + 6.0, mural_y + 18.0, mural_x + 20.0, mural_y + 18.0
-    ));
-
-    // Poster 2: Cineclube
-    out.push_str(&format!(
-        r##"<g transform="rotate(-3, {:.1}, {:.1})">\"##,
-        mural_x + 28.0,
-        mural_y + 10.0
-    ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="18" height="15" fill="#fdf0d5" stroke="#111111" stroke-width="1" />\"##,
-        mural_x + 25.0, mural_y + 9.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-family="'Helvetica Neue', Arial, sans-serif" font-size="3" font-weight="bold" fill="#003049">CINECLUBE</text>\"##,
-        mural_x + 26.5, mural_y + 15.0
-    ));
-    out.push_str("</g>");
-
-    // Poster 3: Festa no Bosquinho / Sarau
-    out.push_str(&format!(
-        r##"<g transform="rotate(4, {:.1}, {:.1})">\"##,
-        mural_x + 48.0,
-        mural_y + 14.0
-    ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="16" height="18" fill="#ffd166" stroke="#111111" stroke-width="1" />\"##,
-        mural_x + 46.0, mural_y + 12.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-family="'Helvetica Neue', Arial, sans-serif" font-size="3" font-weight="bold" fill="#111111">SARAU</text>\"##,
-        mural_x + 48.0, mural_y + 19.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-family="'Helvetica Neue', Arial, sans-serif" font-size="2.4" fill="#333333">BOSQUINHO</text>\"##,
-        mural_x + 47.0, mural_y + 24.0
-    ));
-    out.push_str("</g>");
-
-    // Rustic wooden picnic bench under the trees on the right
-    let tbl_x = px + w - 55.0;
-    let tbl_y = floor_y - 20.0;
-    // Table slab
-    out.push_str(&format!(
-        r##"<rect x="{tbl_x:.1}" y="{tbl_y:.1}" width="42" height="3" fill="#8d6e63" stroke="#111111" stroke-width="1.5" />\"##
-    ));
-    // A-frame legs
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{tbl_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
-        tbl_x + 8.0, tbl_x + 3.0
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{tbl_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
-        tbl_x + 34.0, tbl_x + 39.0
-    ));
-
-    // Floor line
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
         px + w
     ));
-
-    // Gravel pathway dots & pebbles (saibro)
-    let pebbles = [
-        (px + 45.0, floor_y + 4.0),
-        (px + 85.0, floor_y + 8.0),
-        (px + 140.0, floor_y + 5.0),
-        (px + 200.0, floor_y + 9.0),
-        (px + 260.0, floor_y + 4.0),
-    ];
-    for (pb_x, pb_y) in pebbles {
-        out.push_str(&format!(
-            r##"<circle cx="{pb_x:.1}" cy="{pb_y:.1}" r="1.5" fill="#8c959f" />\"##
-        ));
-    }
 
     out.push_str("</g>");
     out
 }
 
-/// Bairro Pantanal / Bacia do Itacorubi (UFSC) - Morro da Cruz, stream, bike lane, and iconic capybara
+/// 12. Pantanal UFSC - Córrego sinuoso da Trindade, vegetação de taboas, margem de seixos e os morros da ilha em densas hachuras
 fn render_pantanal_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
-    out.push_str(r##"<g class="backdrop-vector backdrop-pantanal">\"##);
+    let ground_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-pantanal">"##);
 
-    // Sky tint
+    // Céu sobre a bacia do Itacorubi/Pantanal
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f1f6fb" />\"##
-    ));
-
-    let floor_y = py + h - 16.0;
-
-    // Morro da Cruz (Mountain Ridge) in background with antenna tower
-    let morro_y = py + 30.0;
-    out.push_str(&format!(
-        r##"<path d="M {px:.1} {morro_y:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} L {:.1} {floor_y:.1} L {px:.1} {floor_y:.1} Z" fill="#e2ede5" stroke="#111111" stroke-width="2" />\"##,
-        px + (w * 0.25), morro_y - 18.0, px + (w * 0.55), morro_y - 6.0,
-        px + (w * 0.78), morro_y - 14.0, px + w, morro_y + 4.0,
-        px + w
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafbfc" />"##
     ));
 
-    // Antenna Tower on the ridge crest
-    let ant_x = px + (w * 0.25);
-    let ant_top_y = morro_y - 32.0;
+    // Morro da Cruz e Maciço da Costeira ao fundo com densas tramas de hachuras
     out.push_str(&format!(
-        r##"<line x1="{ant_x:.1}" y1="{ant_top_y:.1}" x2="{ant_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.8" />\"##,
-        morro_y - 18.0
+        r##"<path d="M {px:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} T {:.1} {:.1}" fill="#f1f5f2" stroke="#111111" stroke-width="1.8" />"##,
+        ground_y - 45.0, px + (w * 0.35), ground_y - 85.0, px + (w * 0.7), ground_y - 60.0, px + w, ground_y - 75.0
     ));
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />\"##,
-        ant_x - 3.5, ant_top_y + 5.0, ant_x + 3.5, ant_top_y + 5.0
-    ));
-    out.push_str(&format!(
-        r##"<circle cx="{ant_x:.1}" cy="{ant_top_y:.1}" r="1.5" fill="#cf222e" />\"##
-    ));
+    ink_hatch_lines(
+        &mut out,
+        px + 10.0,
+        ground_y - 75.0,
+        px + w - 10.0,
+        ground_y - 50.0,
+        6.0,
+    );
 
-    // Riparian wetland / Córrego da UFSC water bank
-    let stream_y = floor_y - 32.0;
+    // Córrego do manguezal com águas calmas e reflexos
+    let water_y = ground_y - 14.0;
     out.push_str(&format!(
-        r##"<path d="M {px:.1} {stream_y:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {stream_y:.1} L {:.1} {floor_y:.1} L {px:.1} {floor_y:.1} Z" fill="#d8e8e6" stroke="#111111" stroke-width="1.8" />\"##,
-        px + (w * 0.3), stream_y + 6.0, px + (w * 0.6), stream_y - 4.0,
-        px + (w * 0.85), stream_y + 5.0, px + w,
-        px + w
+        r##"<path d="M {px:.1} {ground_y:.1} q 40 -12 90 -4 q 50 8 110 -6" fill="none" stroke="#111111" stroke-width="1.6" />"##
     ));
-    // Water ripples
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />\"##,
-        px + 40.0, stream_y + 10.0, px + 80.0, stream_y + 10.0
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffffff" stroke-width="1.5" stroke-linecap="round" />\"##,
-        px + 140.0, stream_y + 12.0, px + 190.0, stream_y + 12.0
-    ));
-
-    // Marsh reeds & cattails (Taboas do Pantanal)
-    let reed_bases = [px + 22.0, px + 30.0, px + w - 45.0, px + w - 32.0];
-    for rx in reed_bases {
+    for k in 0..4 {
+        let rx = px + 15.0 + (k as f64 * 42.0);
         out.push_str(&format!(
-            r##"<path d="M {rx:.1} {floor_y:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#2d6a4f" stroke-width="1.8" stroke-linecap="round" />\"##,
-            rx - 3.0, floor_y - 18.0, rx - 1.0, floor_y - 32.0
-        ));
-        out.push_str(&format!(
-            r##"<rect x="{:.1}" y="{:.1}" width="2.5" height="9" fill="#582f0e" rx="1.2" />\"##,
-            rx - 2.25,
-            floor_y - 28.0
+            r##"<line x1="{rx:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" opacity="0.6" />"##,
+            water_y + (k as f64 * 3.0), rx + 24.0, water_y + (k as f64 * 3.0)
         ));
     }
 
-    // Iconic UFSC Capybara (Resting calmly on the grass near water)
-    let capy_x = px + w - 85.0;
-    let capy_y = floor_y - 18.0;
-    // Capybara body (plump, rounded back)
+    // Touceiras altas de taboas (Typha) e capim nativo na margem
+    let grass_x = px + (w * 0.22).min(55.0);
+    for t in 0..4 {
+        let gx = grass_x + (t as f64 * 8.0);
+        out.push_str(&format!(
+            r##"<path d="M {gx:.1} {ground_y:.1} q -4 -28 2 -48 M {gx:.1} {ground_y:.1} q 6 -24 10 -42" fill="none" stroke="#222222" stroke-width="1.2" />"##
+        ));
+        // Espiga cilíndrica de taboa na ponta
+        out.push_str(&format!(
+            r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="3.2" stroke-linecap="round" />"##,
+            gx + 2.0, ground_y - 48.0, gx + 2.0, ground_y - 36.0
+        ));
+    }
+
+    // Tronco caído na margem (onde descansam capivaras e jacarés)
+    let log_x = px + w - 75.0;
     out.push_str(&format!(
-        r##"<path d="M {capy_x:.1} {floor_y:.1} C {:.1} {:.1} {:.1} {:.1} {:.1} {capy_y:.1} C {:.1} {:.1} {:.1} {:.1} {:.1} {floor_y:.1} Z" fill="#7f5539" stroke="#111111" stroke-width="2" stroke-linejoin="round" />\"##,
-        capy_x - 4.0, floor_y - 14.0, capy_x - 14.0, capy_y + 2.0, capy_x + 10.0,
-        capy_x + 22.0, capy_y - 2.0, capy_x + 28.0, floor_y - 10.0, capy_x + 28.0
-    ));
-    // Capybara head & snout (facing left)
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Z" fill="#9c6644" stroke="#111111" stroke-width="1.8" stroke-linejoin="round" />\"##,
-        capy_x - 4.0, capy_y + 4.0,
-        capy_x - 14.0, capy_y + 2.0, capy_x - 12.0, capy_y + 10.0,
-        capy_x - 4.0, capy_y + 12.0, capy_x - 4.0, capy_y + 4.0
-    ));
-    // Cute small ear
-    out.push_str(&format!(
-        r##"<ellipse cx="{:.1}" cy="{:.1}" rx="2" ry="1.5" fill="#582f0e" stroke="#111111" stroke-width="1" />\"##,
-        capy_x - 3.0, capy_y + 3.0
-    ));
-    // Calm closed eye (sleeping/relaxed)
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="1.2" stroke-linecap="round" />\"##,
-        capy_x - 9.0, capy_y + 6.0, capy_x - 7.5, capy_y + 7.0, capy_x - 6.0, capy_y + 6.0
+        r##"<path d="M {log_x:.1} {ground_y:.1} q 25 -8 55 -4 l -2 6 q -28 -2 -53 4 z" fill="#eae5d8" stroke="#111111" stroke-width="1.6" />"##
     ));
 
-    // Campus Bike Lane (Ciclovia da UFSC) in foreground
+    // Linha de solo da margem
     out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />\"##,
+        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
         px + w
-    ));
-    // Dashed center line of bike path
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#ffd166" stroke-width="2" stroke-dasharray="10,6" />\"##,
-        floor_y + 7.0, px + w, floor_y + 7.0
-    ));
-
-    // Stenciled Bicycle Icon on lane
-    let bike_x = px + 60.0;
-    let bike_y = floor_y + 7.0;
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{bike_y:.1}" r="3.5" fill="none" stroke="#ffffff" stroke-width="1" />\"##,
-        bike_x - 6.0
-    ));
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{bike_y:.1}" r="3.5" fill="none" stroke="#ffffff" stroke-width="1" />\"##,
-        bike_x + 6.0
-    ));
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {bike_y:.1} L {:.1} {:.1} L {:.1} {bike_y:.1} L {:.1} {:.1} L {:.1} {:.1}" fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="round" />\"##,
-        bike_x - 6.0, bike_x - 1.0, bike_y - 4.0, bike_x + 6.0, bike_x + 2.0, bike_y - 5.0, bike_x + 4.0, bike_y - 5.0
     ));
 
     out.push_str("</g>");
     out
 }
 
-/// Bosque do CFH - Eucaliptos imponentes com hachuras de casca, luz filtrada, bancos de concreto e terra batida
+/// 13. Pastoral Comic Chat - Homenagem à obra de Jim Woodring: colinas suaves hachuradas, cerca rústica de ripas tortas de madeira e árvore retorcida
+fn render_pastoral_vector_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let ground_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-pastoral">"##);
+
+    // Céu límpido de quadrinhos
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafbfc" />"##
+    ));
+
+    // Nuvens concêntricas orgânicas características de Jim Woodring
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} q 18 -16 38 -6 q 16 -18 36 -4 q 18 -14 36 2" fill="none" stroke="#222222" stroke-width="1.3" opacity="0.75" />"##,
+        px + 20.0, py + 22.0
+    ));
+
+    // Colinas onduladas com linhas de nível e hachura topográfica
+    out.push_str(&format!(
+        r##"<path d="M {px:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} T {:.1} {ground_y:.1}" fill="#f6f8f5" stroke="#111111" stroke-width="2.0" />"##,
+        ground_y - 38.0, px + (w * 0.3), ground_y - 68.0, px + (w * 0.65), ground_y - 42.0, px + w
+    ));
+    ink_hatch_lines(
+        &mut out,
+        px + 20.0,
+        ground_y - 58.0,
+        px + w - 20.0,
+        ground_y - 36.0,
+        7.0,
+    );
+
+    // A icônica cerca de madeira de mourões tortos e lascados do Comic Chat
+    for m in 0..5 {
+        let mx = px + 16.0 + (m as f64 * (w / 4.4));
+        let my = ground_y - 28.0 + if m % 2 == 0 { -4.0 } else { 3.0 };
+        // Mourão de cerca com topo chanfrado
+        out.push_str(&format!(
+            r##"<path d="M {mx:.1} {ground_y:.1} l -2 {:.1} l 6 -4 l 4 {:.1} z" fill="#f0ede4" stroke="#111111" stroke-width="1.6" />"##,
+            my - ground_y, ground_y - my + 4.0
+        ));
+    }
+    // Ripas horizontais de madeira pregadas com pregos tortos
+    out.push_str(&format!(
+        r##"<path d="M {px:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="2.2" />"##,
+        ground_y - 18.0, px + (w * 0.5), ground_y - 24.0, px + w, ground_y - 16.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {px:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="2.0" />"##,
+        ground_y - 8.0, px + (w * 0.5), ground_y - 14.0, px + w, ground_y - 6.0
+    ));
+
+    // Árvore retorcida e expressiva no plano médio à direita
+    let tree_x = px + w - 48.0;
+    out.push_str(&format!(
+        r##"<path d="M {tree_x:.1} {ground_y:.1} q -8 -22 4 -44 q -18 -8 -16 -24 q 22 -6 32 10 q 18 -10 24 14 q -12 22 -24 44 z" fill="#f4f6f2" stroke="#111111" stroke-width="2.0" />"##
+    ));
+    // Nós e fendas no tronco
+    out.push_str(&format!(
+        r##"<ellipse cx="{:.1}" cy="{:.1}" rx="2.5" ry="5.0" fill="#111111" stroke="#111111" stroke-width="1.0" />"##,
+        tree_x + 6.0, ground_y - 22.0
+    ));
+
+    // Linha do solo com tufos de grama
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        px + w
+    ));
+
+    out.push_str("</g>");
+    out
+}
+
+/// 14. Room - Estúdio de quadrinhos com prancheta inclinada, régua paralela, luminária pantográfica, frascos de nanquim e estante de zines
+fn render_room_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let floor_y = py + h - 22.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-room">"##);
+
+    // Fundo do estúdio
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#faf8f5" />"##
+    ));
+
+    // Janela com batente de madeira e cortina amarrada à esquerda
+    let win_x = px + 12.0;
+    let win_y = py + 18.0;
+    let win_w = (w * 0.28).min(65.0);
+    let win_h = 88.0;
+    out.push_str(&format!(
+        r##"<rect x="{win_x:.1}" y="{win_y:.1}" width="{win_w:.1}" height="{win_h:.1}" fill="#f2f4f8" stroke="#111111" stroke-width="2.0" />"##
+    ));
+    // Lua crescente no céu visto pela janela
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} a 6 6 0 1 0 8 8 a 8 8 0 0 1 -8 -8 z" fill="#111111" stroke="#111111" stroke-width="0.8" />"##,
+        win_x + win_w - 18.0, win_y + 12.0
+    ));
+    // Cortina recolhida com laço
+    out.push_str(&format!(
+        r##"<path d="M {win_x:.1} {win_y:.1} q 16 20 8 45 q 14 20 4 43" fill="none" stroke="#111111" stroke-width="1.6" />"##
+    ));
+
+    // Prancheta de desenho inclinada de cartunista
+    let pranc_x = win_x + win_w + 14.0;
+    let pranc_y = py + 52.0;
+    let pranc_w = (px + w - pranc_x - 14.0).max(85.0);
+
+    // Tampo inclinado com folha de tira de quadrinhos presa com fita crepe
+    out.push_str(&format!(
+        r##"<polygon points="{pranc_x:.1},{pranc_y:.1} {:.1},{:.1} {:.1},{floor_y:.1} {pranc_x:.1},{floor_y:.1}" fill="#ede8dc" stroke="#111111" stroke-width="2.2" />"##,
+        pranc_x + pranc_w, pranc_y - 12.0, pranc_x + pranc_w
+    ));
+    // Tira de quadrinhos na prancheta com quadros divididos
+    let sheet_x = pranc_x + 12.0;
+    let sheet_y = pranc_y + 8.0;
+    out.push_str(&format!(
+        r##"<rect x="{sheet_x:.1}" y="{sheet_y:.1}" width="42.0" height="26.0" fill="#ffffff" stroke="#111111" stroke-width="1.2" />"##
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{sheet_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.9" />"##,
+        sheet_x + 14.0, sheet_x + 14.0, sheet_y + 26.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{sheet_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.9" />"##,
+        sheet_x + 28.0, sheet_x + 28.0, sheet_y + 26.0
+    ));
+
+    // Pote de nanquim e canetas bico de pena sobre a mesa
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="8.0" height="10.0" fill="#111111" stroke="#111111" stroke-width="1.0" rx="1" />"##,
+        sheet_x + 48.0, sheet_y + 12.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.5" />"##,
+        sheet_x + 52.0, sheet_y + 12.0, sheet_x + 58.0, sheet_y - 6.0
+    ));
+
+    // Luminária pantográfica articulada de prancheta
+    let lamp_x = pranc_x + 4.0;
+    let lamp_y = pranc_y - 2.0;
+    out.push_str(&format!(
+        r##"<line x1="{lamp_x:.1}" y1="{lamp_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.8" />"##,
+        lamp_x + 10.0, lamp_y - 24.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.8" />"##,
+        lamp_x + 10.0, lamp_y - 24.0, lamp_x + 26.0, lamp_y - 18.0
+    ));
+    // Cúpula cônica da lâmpada
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} l 8 4 l -12 6 z" fill="#e2ded4" stroke="#111111" stroke-width="1.4" />"##,
+        lamp_x + 26.0, lamp_y - 18.0
+    ));
+
+    // Tábuas corridas do chão com pregos aparentes
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        px + w
+    ));
+
+    out.push_str("</g>");
+    out
+}
+
+/// 15. Bosque do CFH - Eucaliptos imponentes com hachuras de casca, luz filtrada, bancos de concreto e terra batida
 fn render_bosque_cfh_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
     let floor_y = py + h - 25.0;
@@ -2113,91 +1454,63 @@ fn render_bosque_cfh_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     // Distant tree trunks and dense foliage in background
     for i in 0..6 {
         let tx = px + 15.0 + (i as f64 * (w / 5.5));
-        let tw = 8.0 + ((i % 3) as f64 * 3.0);
+        let tw = 7.0 + ((i % 3) as f64 * 3.0);
         out.push_str(&format!(
-            r##"<rect x="{tx:.1}" y="{py:.1}" width="{tw:.1}" height="{:.1}" fill="#d8e2dc" stroke="#222222" stroke-width="0.8" />"##,
+            r##"<rect x="{tx:.1}" y="{py:.1}" width="{tw:.1}" height="{:.1}" fill="#e6eae6" stroke="#111111" stroke-width="1.2" />"##,
             floor_y - py
         ));
+        for k in 0..4 {
+            let hy = py + 20.0 + (k as f64 * 35.0);
+            out.push_str(&format!(
+                r##"<line x1="{tx:.1}" y1="{hy:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" opacity="0.6" />"##,
+                tx + tw, hy + 8.0
+            ));
+        }
     }
 
-    // Dense organic foliage canopy on top with nanquim hatchings
+    // Organic canopy clouds
     out.push_str(&format!(
-        r##"<path d="M {px:.1} {py:.1} Q {:.1} {:.1} {:.1} {:.1} T {:.1} {:.1} T {:.1} {:.1} L {:.1} {py:.1} Z" fill="#2d3a2e" stroke="#111111" stroke-width="1.8" />"##,
-        px + (w * 0.25), py + 35.0, px + (w * 0.5), py + 22.0,
-        px + (w * 0.75), py + 38.0, px + w, py + 20.0,
+        r##"<path d="M {px:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#222222" stroke-width="1.8" />"##,
+        py + 25.0,
+        px + (w * 0.15), py + 5.0, px + (w * 0.35), py + 22.0,
+        px + (w * 0.5), py + 8.0, px + (w * 0.7), py + 24.0,
+        px + (w * 0.85), py + 6.0, px + w, py + 20.0
+    ));
+
+    // Sun rays filtered through branches (hatch lines)
+    for r in 0..5 {
+        let rx1 = px + 30.0 + (r as f64 * 40.0);
+        let rx2 = rx1 - 25.0;
+        out.push_str(&format!(
+            r##"<line x1="{rx1:.1}" y1="{py:.1}" x2="{rx2:.1}" y2="{floor_y:.1}" stroke="#ffffff" stroke-width="1.2" stroke-dasharray="4,4" opacity="0.45" />"##
+        ));
+    }
+
+    // Concrete park bench under the eucalyptus
+    let bench_x = px + (w * 0.55).min(w - 75.0);
+    let bench_y = floor_y - 18.0;
+    out.push_str(&format!(
+        r##"<rect x="{bench_x:.1}" y="{bench_y:.1}" width="58.0" height="7.0" rx="1.5" fill="#dededc" stroke="#111111" stroke-width="1.6" />"##
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="6.0" height="11.0" fill="#dededc" stroke="#111111" stroke-width="1.4" />"##,
+        bench_x + 8.0, bench_y + 7.0
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="6.0" height="11.0" fill="#dededc" stroke="#111111" stroke-width="1.4" />"##,
+        bench_x + 44.0, bench_y + 7.0
+    ));
+
+    // Ground line & fallen leaf hatching
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
         px + w
     ));
-
-    // Foliage texture lines (hatchings)
-    for j in 0..8 {
-        let fx = px + 10.0 + (j as f64 * (w / 8.0));
-        let fy = py + 12.0 + ((j % 3) as f64 * 6.0);
+    for f in 0..8 {
+        let lx = px + 10.0 + (f as f64 * (w / 8.5));
         out.push_str(&format!(
-            r##"<path d="M {fx:.1} {fy:.1} q 10 8 20 0 q 8 10 16 2" fill="none" stroke="#1b251c" stroke-width="1.2" />"##
-        ));
-    }
-
-    // Foreground majestic Eucalyptus trunks with peeling bark texture
-    let euca1_x = px + (w * 0.18);
-    let euca1_w = 22.0;
-    out.push_str(&format!(
-        r##"<rect x="{euca1_x:.1}" y="{py:.1}" width="{euca1_w:.1}" height="{:.1}" fill="#ede0d4" stroke="#111111" stroke-width="2" />"##,
-        floor_y - py
-    ));
-    // Bark vertical hatchings
-    for k in 0..5 {
-        let hx = euca1_x + 4.0 + (k as f64 * 3.5);
-        out.push_str(&format!(
-            r##"<line x1="{hx:.1}" y1="{:.1}" x2="{hx:.1}" y2="{:.1}" stroke="#7f5539" stroke-width="1" stroke-dasharray="14,8,22,6" />"##,
-            py + 25.0, floor_y - 10.0
-        ));
-    }
-
-    let euca2_x = px + (w * 0.76);
-    let euca2_w = 26.0;
-    out.push_str(&format!(
-        r##"<rect x="{euca2_x:.1}" y="{py:.1}" width="{euca2_w:.1}" height="{:.1}" fill="#e6ccb2" stroke="#111111" stroke-width="2" />"##,
-        floor_y - py
-    ));
-    for k in 0..6 {
-        let hx = euca2_x + 4.0 + (k as f64 * 3.8);
-        out.push_str(&format!(
-            r##"<line x1="{hx:.1}" y1="{:.1}" x2="{hx:.1}" y2="{:.1}" stroke="#7f5539" stroke-width="1" stroke-dasharray="18,10,25,8" />"##,
-            py + 20.0, floor_y - 5.0
-        ));
-    }
-
-    // Classic UFSC concrete curved bench under the trees
-    let bench_x = px + (w * 0.42);
-    let bench_y = floor_y - 28.0;
-    let bench_w = 64.0;
-    out.push_str(&format!(
-        r##"<rect x="{bench_x:.1}" y="{bench_y:.1}" width="{bench_w:.1}" height="8" rx="2" fill="#d6ccc2" stroke="#111111" stroke-width="1.8" />"##
-    ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="8" height="20" fill="#b7b7a4" stroke="#111111" stroke-width="1.8" />"##,
-        bench_x + 8.0, bench_y + 8.0
-    ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="8" height="20" fill="#b7b7a4" stroke="#111111" stroke-width="1.8" />"##,
-        bench_x + bench_w - 16.0, bench_y + 8.0
-    ));
-    // Bench cast shadow
-    out.push_str(&format!(
-        r##"<ellipse cx="{:.1}" cy="{floor_y:.1}" rx="36" ry="4" fill="rgba(0,0,0,0.18)" />"##,
-        bench_x + (bench_w / 2.0)
-    ));
-
-    // Ground line: organic forest soil with fallen eucalyptus leaves
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />"##,
-        px + w
-    ));
-    for l in 0..12 {
-        let lx = px + 10.0 + (l as f64 * (w / 12.5));
-        let ly = floor_y + 4.0 + ((l % 3) as f64 * 4.0);
-        out.push_str(&format!(
-            r##"<path d="M {lx:.1} {ly:.1} q 5 -3 10 0 q -5 3 -10 0" fill="#9c6644" stroke="#111111" stroke-width="0.8" />"##
+            r##"<line x1="{lx:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.0" opacity="0.5" />"##,
+            floor_y + 3.0, lx + 6.0, floor_y + 7.0
         ));
     }
 
@@ -2205,201 +1518,145 @@ fn render_bosque_cfh_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     out
 }
 
-/// Reitoria da UFSC - Arquitetura emblemática do Prédio Central, esquadrias em fita, marquise nobre e mastros
+/// 16. Reitoria UFSC - Prédio Central com esquadrias imponentes, marquise, mastro cívico e piso cimentado
 fn render_reitoria_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
-    let floor_y = py + h - 25.0;
+    let ground_y = py + h - 22.0;
     out.push_str(r##"<g class="backdrop-vector backdrop-reitoria">"##);
-
-    // Clear sky background
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#e8f4f8" />"##
-    ));
-
-    // Main Building Façade (Yellow/Sand architectural tone of UFSC Central building)
-    let bldg_x = px + 15.0;
-    let bldg_y = py + 20.0;
-    let bldg_w = w - 30.0;
-    let bldg_h = floor_y - bldg_y;
-
-    out.push_str(&format!(
-        r##"<rect x="{bldg_x:.1}" y="{bldg_y:.1}" width="{bldg_w:.1}" height="{bldg_h:.1}" fill="#faedcd" stroke="#111111" stroke-width="2.2" />"##
-    ));
-
-    // Roof parapet / top cornice
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="8" fill="#d4a373" stroke="#111111" stroke-width="1.8" />"##,
-        bldg_x - 4.0, bldg_y - 6.0, bldg_w + 8.0
-    ));
-
-    // Ribbon windows (esquadrias em fita típicas dos anos 60 modernistas)
-    for floor_idx in 0..3 {
-        let win_y = bldg_y + 16.0 + (floor_idx as f64 * 34.0);
-        let win_h = 16.0;
-        out.push_str(&format!(
-            r##"<rect x="{:.1}" y="{win_y:.1}" width="{:.1}" height="{win_h:.1}" fill="#3d5a80" stroke="#111111" stroke-width="1.5" />"##,
-            bldg_x + 12.0, bldg_w - 24.0
-        ));
-        // Vertical mullions across windows
-        let num_panes = 8;
-        let pane_w = (bldg_w - 24.0) / num_panes as f64;
-        for p in 1..num_panes {
-            let pane_x = bldg_x + 12.0 + (p as f64 * pane_w);
-            out.push_str(&format!(
-                r##"<line x1="{pane_x:.1}" y1="{win_y:.1}" x2="{pane_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1" />"##,
-                win_y + win_h
-            ));
-        }
-        // Diagonal glass reflection hatchings
-        for r in 0..4 {
-            let rx = bldg_x + 20.0 + (r as f64 * (bldg_w / 4.2));
-            out.push_str(&format!(
-                r##"<line x1="{rx:.1}" y1="{win_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#98c1d9" stroke-width="1.2" stroke-linecap="round" />"##,
-                rx + 12.0, win_y + win_h
-            ));
-        }
-    }
-
-    // Front Portico / Marquise de Entrada
-    let portico_x = bldg_x + (bldg_w * 0.28);
-    let portico_w = bldg_w * 0.44;
-    let portico_y = floor_y - 48.0;
-    out.push_str(&format!(
-        r##"<rect x="{portico_x:.1}" y="{portico_y:.1}" width="{portico_w:.1}" height="6" fill="#ccd5ae" stroke="#111111" stroke-width="2" />"##
-    ));
-    // Entrance pillars with cross-hatching
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="8" height="42" fill="#e9edc9" stroke="#111111" stroke-width="1.8" />"##,
-        portico_x + 6.0, portico_y + 6.0
-    ));
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="8" height="42" fill="#e9edc9" stroke="#111111" stroke-width="1.8" />"##,
-        portico_x + portico_w - 14.0, portico_y + 6.0
-    ));
-    // Entrance Glass Door
-    out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="36" fill="#293241" stroke="#111111" stroke-width="1.5" />"##,
-        portico_x + 18.0, portico_y + 12.0, portico_w - 36.0
-    ));
-
-    // Three Flagpoles (Mastros da UFSC, Brasil e Santa Catarina)
-    for m in 0..3 {
-        let pole_x = px + 28.0 + (m as f64 * 16.0);
-        let pole_top_y = py + 12.0;
-        out.push_str(&format!(
-            r##"<line x1="{pole_x:.1}" y1="{pole_top_y:.1}" x2="{pole_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.8" />"##
-        ));
-        out.push_str(&format!(
-            r##"<circle cx="{pole_x:.1}" cy="{pole_top_y:.1}" r="2" fill="#ffd166" stroke="#111111" stroke-width="1" />"##
-        ));
-        // Flag
-        out.push_str(&format!(
-            r##"<polygon points="{pole_x:.1},{:.1} {:.1},{:.1} {:.1},{:.1} {pole_x:.1},{:.1}" fill="#e63946" stroke="#111111" stroke-width="1" />"##,
-            pole_top_y + 2.0, pole_x + 10.0, pole_top_y + 5.0, pole_x + 10.0, pole_top_y + 12.0, pole_top_y + 9.0
-        ));
-    }
-
-    // Ground Line & Stone Pavement Steps
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.2" />"##,
-        px + w
-    ));
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#b08968" stroke-width="1.2" stroke-dasharray="16,8" />"##,
-        floor_y + 8.0, px + w, floor_y + 8.0
-    ));
-
-    out.push_str("</g>");
-    out
-}
-
-/// Pista de Atletismo (CDS/UFSC) - Curvas da pista com raias em nanquim, gramado central e arquibancadas
-fn render_pista_atletismo_svg(px: f64, py: f64, w: f64, h: f64) -> String {
-    let mut out = String::new();
-    let floor_y = py + h - 25.0;
-    out.push_str(r##"<g class="backdrop-vector backdrop-pista-atletismo">"##);
 
     // Sky tint
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#e2f1f8" />"##
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafbfc" />"##
     ));
 
-    // Distant CDS Sports Pavilion & Bleachers (Arquibancada)
-    let bleacher_y = py + 30.0;
-    let bleacher_h = 55.0;
+    // Main facade block
+    let bldg_x = px + 14.0;
+    let bldg_y = py + 20.0;
+    let bldg_w = w - 28.0;
+    let bldg_h = 80.0;
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{bleacher_y:.1}" width="{w:.1}" height="{bleacher_h:.1}" fill="#ced4da" stroke="#111111" stroke-width="1.5" />"##
+        r##"<rect x="{bldg_x:.1}" y="{bldg_y:.1}" width="{bldg_w:.1}" height="{bldg_h:.1}" fill="#f6f8fa" stroke="#111111" stroke-width="2.2" />"##
     ));
-    // Bleacher tiers (degraus da arquibancada com hachuras)
-    for t in 1..5 {
-        let step_y = bleacher_y + (t as f64 * 11.0);
+
+    // Rhythmic architectural windows (grid of rectangular glass panes)
+    for row in 0..3 {
+        let wy = bldg_y + 10.0 + (row as f64 * 18.0);
+        for col in 0..6 {
+            let wx = bldg_x + 8.0 + (col as f64 * ((bldg_w - 16.0) / 5.5));
+            out.push_str(&format!(
+                r##"<rect x="{wx:.1}" y="{wy:.1}" width="14.0" height="11.0" fill="#ffffff" stroke="#111111" stroke-width="1.2" />"##
+            ));
+            out.push_str(&format!(
+                r##"<line x1="{wx:.1}" y1="{wy:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.6" opacity="0.4" />"##,
+                wx + 14.0, wy + 11.0
+            ));
+        }
+    }
+
+    // Extended grand canopy / entrance portico
+    let portico_x = bldg_x + (bldg_w * 0.32);
+    let portico_y = bldg_y + bldg_h - 10.0;
+    let portico_w = (bldg_w * 0.36).min(70.0);
+    out.push_str(&format!(
+        r##"<rect x="{portico_x:.1}" y="{portico_y:.1}" width="{portico_w:.1}" height="6.0" fill="#e1e4e8" stroke="#111111" stroke-width="2.0" />"##
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        portico_x + 4.0, portico_y + 6.0, portico_x + 4.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        portico_x + portico_w - 4.0, portico_y + 6.0, portico_x + portico_w - 4.0
+    ));
+
+    // Civic flagpole on the left side
+    let pole_x = bldg_x - 4.0;
+    out.push_str(&format!(
+        r##"<line x1="{pole_x:.1}" y1="{py:.1}" x2="{pole_x:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="1.8" />"##
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {pole_x:.1} {:.1} l 14 4 l -14 4 z" fill="#ffffff" stroke="#111111" stroke-width="1.2" />"##,
+        py + 8.0
+    ));
+
+    // Ground and stone pavers
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        px + w
+    ));
+    for p in 0..5 {
+        let paver_x = px + 10.0 + (p as f64 * (w / 4.5));
         out.push_str(&format!(
-            r##"<line x1="{px:.1}" y1="{step_y:.1}" x2="{:.1}" y2="{step_y:.1}" stroke="#111111" stroke-width="1.2" />"##,
-            px + w
+            r##"<line x1="{paver_x:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" opacity="0.5" />"##,
+            paver_x - 12.0, py + h
         ));
     }
 
-    // Stadium Floodlight Tower (Poste de Refletor)
-    let tower_x = px + (w * 0.85);
+    out.push_str("</g>");
+    out
+}
+
+/// 17. Pista de Atletismo CDS - Curvas de pista tartan hachuradas, postes de holofotes e arquibancadas
+fn render_pista_atletismo_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let horizon_y = py + (h * 0.42);
+    out.push_str(r##"<g class="backdrop-vector backdrop-pista-atletismo">"##);
+
+    // Open sky
     out.push_str(&format!(
-        r##"<line x1="{tower_x:.1}" y1="{py:.1}" x2="{tower_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="2" />"##,
-        floor_y - 40.0
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#fafbfc" />"##
     ));
+
+    // Background bleachers / arquibancada com degraus em perspectiva
+    let bleacher_x = px + 15.0;
+    let bleacher_w = (w * 0.55).min(110.0);
     out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{:.1}" width="20" height="8" rx="2" fill="#495057" stroke="#111111" stroke-width="1.5" />"##,
-        tower_x - 10.0, py + 8.0
+        r##"<polygon points="{bleacher_x:.1},{horizon_y:.1} {:.1},{horizon_y:.1} {:.1},{:.1} {bleacher_x:.1},{:.1}" fill="#f0f2f5" stroke="#111111" stroke-width="1.8" />"##,
+        bleacher_x + bleacher_w, bleacher_x + bleacher_w - 20.0, horizon_y - 25.0, horizon_y - 25.0
     ));
-    for lit in 0..4 {
-        let lx = tower_x - 8.0 + (lit as f64 * 4.8);
+    for s in 1..4 {
+        let sy = horizon_y - (s as f64 * 6.0);
         out.push_str(&format!(
-            r##"<circle cx="{lx:.1}" cy="{:.1}" r="1.5" fill="#ffd166" />"##,
-            py + 12.0
+            r##"<line x1="{bleacher_x:.1}" y1="{sy:.1}" x2="{:.1}" y2="{sy:.1}" stroke="#111111" stroke-width="1.0" />"##,
+            bleacher_x + bleacher_w - (s as f64 * 5.0)
         ));
     }
 
-    // Central Green Field with organic grass hatchings
-    let field_y = bleacher_y + bleacher_h;
-    let field_h = 45.0;
+    // High floodlight tower on the right
+    let flood_x = px + w - 30.0;
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{field_y:.1}" width="{w:.1}" height="{field_h:.1}" fill="#588157" stroke="#111111" stroke-width="1.5" />"##
+        r##"<line x1="{flood_x:.1}" y1="{py:.1}" x2="{:.1}" y2="{horizon_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        flood_x - 5.0
     ));
-    for g in 0..8 {
-        let gx = px + 12.0 + (g as f64 * (w / 8.5));
-        let gy = field_y + 12.0 + ((g % 3) as f64 * 8.0);
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{py:.1}" x2="{:.1}" y2="{horizon_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        flood_x + 10.0, flood_x + 5.0
+    ));
+    // Truss crossbars on floodlight
+    for b in 0..4 {
+        let by = py + 6.0 + (b as f64 * 12.0);
         out.push_str(&format!(
-            r##"<path d="M {gx:.1} {gy:.1} l 3 -6 l 3 6 l 3 -8 l 3 8" fill="none" stroke="#344e41" stroke-width="1" />"##
+            r##"<line x1="{flood_x:.1}" y1="{by:.1}" x2="{:.1}" y2="{by:.1}" stroke="#111111" stroke-width="1.0" />"##,
+            flood_x + 10.0
         ));
     }
 
-    // Running Track (Tartã avermelhado com raias brancas demarcadas)
-    let track_y = field_y + field_h;
-    let track_h = floor_y - track_y;
-    out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{track_y:.1}" width="{w:.1}" height="{track_h:.1}" fill="#bc4749" stroke="#111111" stroke-width="2" />"##
-    ));
-
-    // Track lane division lines in crisp white nanquim
-    for lane in 1..4 {
-        let lane_y = track_y + (lane as f64 * (track_h / 4.0));
+    // Curving running track lanes (linhas curvas de nanquim da pista de atletismo)
+    let track_base_y = py + h - 18.0;
+    for lane in 0..5 {
+        let offset = lane as f64 * 8.0;
         out.push_str(&format!(
-            r##"<line x1="{px:.1}" y1="{lane_y:.1}" x2="{:.1}" y2="{lane_y:.1}" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="14,10" />"##,
-            px + w
+            r##"<path d="M {px:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#111111" stroke-width="{:.1}" />"##,
+            horizon_y + 12.0 + offset,
+            px + (w * 0.4), horizon_y + 24.0 + (offset * 1.4),
+            px + w, track_base_y - (lane as f64 * 6.0),
+            if lane == 0 { 2.0 } else { 1.4 }
         ));
     }
 
-    // Track lane numbers on the ground
+    // Ground baseline
     out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-family="sans-serif" font-size="11" font-weight="900" fill="#ffffff" fill-opacity="0.8">1</text>"##,
-        px + 24.0, track_y + 14.0
-    ));
-    out.push_str(&format!(
-        r##"<text x="{:.1}" y="{:.1}" font-family="sans-serif" font-size="11" font-weight="900" fill="#ffffff" fill-opacity="0.8">2</text>"##,
-        px + 24.0, track_y + 32.0
-    ));
-
-    // Floor Line
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        r##"<line x1="{px:.1}" y1="{track_base_y:.1}" x2="{:.1}" y2="{track_base_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
         px + w
     ));
 
@@ -2407,103 +1664,59 @@ fn render_pista_atletismo_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     out
 }
 
-/// Centro de Cultura e Eventos (UFSC) - Curvas modernistas da cobertura, fachada envidraçada e esplanada
+/// 18. Centro de Cultura e Eventos UFSC - Linhas curvas modernistas, envidraçado amplo e esplanada da Praça da Cidadania
 fn render_centro_eventos_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
-    let floor_y = py + h - 25.0;
+    let ground_y = py + h - 22.0;
     out.push_str(r##"<g class="backdrop-vector backdrop-centro-eventos">"##);
 
-    // Pale sky
+    // Clean sky
     out.push_str(&format!(
-        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f1faee" />"##
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f8fafc" />"##
     ));
 
-    // Centro de Eventos Building Body
-    let bldg_x = px + 10.0;
-    let bldg_y = py + 25.0;
-    let bldg_w = w - 20.0;
+    // Monumental modern curved facade of Centro de Eventos
+    let evt_x = px + 12.0;
+    let evt_y = py + 22.0;
+    let evt_w = w - 24.0;
+    let _evt_h = 76.0;
 
-    // Curved modernist wave roof profile (A cobertura icônica em onda)
+    // Curved sweeping roofline
     out.push_str(&format!(
-        r##"<path d="M {bldg_x:.1} {bldg_y:.1} Q {:.1} {:.1} {:.1} {bldg_y:.1} T {:.1} {:.1} L {:.1} {:.1} L {bldg_x:.1} {:.1} Z" fill="#e9ecef" stroke="#111111" stroke-width="2.4" />"##,
-        bldg_x + (bldg_w * 0.3), bldg_y - 14.0, bldg_x + (bldg_w * 0.6),
-        bldg_x + bldg_w, bldg_y - 4.0,
-        bldg_x + bldg_w, floor_y,
-        floor_y
+        r##"<path d="M {evt_x:.1} {:.1} Q {:.1} {evt_y:.1} {:.1} {:.1} L {:.1} {ground_y:.1} L {evt_x:.1} {ground_y:.1} Z" fill="#f1f3f6" stroke="#111111" stroke-width="2.4" />"##,
+        evt_y + 14.0, evt_x + (evt_w * 0.45), evt_x + evt_w, evt_y + 8.0, evt_x + evt_w
     ));
 
-    // Huge expansive glass façade (Grandes panos de vidro da esplanada)
-    let glass_y = bldg_y + 18.0;
-    let glass_h = floor_y - glass_y - 12.0;
+    // Glass curtain wall with diagonal ink reflections
+    let glass_y = evt_y + 24.0;
+    let glass_h = 36.0;
     out.push_str(&format!(
-        r##"<rect x="{:.1}" y="{glass_y:.1}" width="{:.1}" height="{glass_h:.1}" fill="#457b9d" stroke="#111111" stroke-width="1.8" />"##,
-        bldg_x + 12.0, bldg_w - 24.0
+        r##"<rect x="{:.1}" y="{glass_y:.1}" width="{:.1}" height="{glass_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="1.8" />"##,
+        evt_x + 10.0, evt_w - 20.0
     ));
-
-    // Structural mullion grid
-    let cols = 6;
-    let col_w = (bldg_w - 24.0) / cols as f64;
-    for c in 1..cols {
-        let cx = bldg_x + 12.0 + (c as f64 * col_w);
+    for g in 1..6 {
+        let gx = evt_x + 10.0 + (g as f64 * ((evt_w - 20.0) / 6.0));
         out.push_str(&format!(
-            r##"<line x1="{cx:.1}" y1="{glass_y:.1}" x2="{cx:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />"##,
+            r##"<line x1="{gx:.1}" y1="{glass_y:.1}" x2="{gx:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />"##,
             glass_y + glass_h
         ));
-    }
-    let rows = 3;
-    let row_h = glass_h / rows as f64;
-    for r in 1..rows {
-        let ry = glass_y + (r as f64 * row_h);
+        // Hatch reflection line
         out.push_str(&format!(
-            r##"<line x1="{:.1}" y1="{ry:.1}" x2="{:.1}" y2="{ry:.1}" stroke="#111111" stroke-width="1" />"##,
-            bldg_x + 12.0, bldg_x + bldg_w - 12.0
+            r##"<line x1="{gx:.1}" y1="{glass_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.7" opacity="0.4" />"##,
+            gx - 12.0, glass_y + glass_h
         ));
     }
 
-    // Glass shine & light reflections in diagonal nanquim lines
-    for sh in 0..4 {
-        let sx = bldg_x + 20.0 + (sh as f64 * (bldg_w / 4.0));
-        out.push_str(&format!(
-            r##"<line x1="{sx:.1}" y1="{glass_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#a8dadc" stroke-width="1.5" stroke-linecap="round" />"##,
-            sx + 18.0, glass_y + glass_h
-        ));
-    }
-
-    // Modernist concrete canopy at main entrance
-    let canopy_x = bldg_x + (bldg_w * 0.35);
-    let canopy_w = bldg_w * 0.35;
-    let canopy_y = floor_y - 36.0;
+    // Plaza esplanade pavers in perspective
     out.push_str(&format!(
-        r##"<polygon points="{canopy_x:.1},{canopy_y:.1} {:.1},{:.1} {:.1},{:.1} {canopy_x:.1},{:.1}" fill="#adb5bd" stroke="#111111" stroke-width="2" />"##,
-        canopy_x + canopy_w, canopy_y - 6.0,
-        canopy_x + canopy_w + 10.0, canopy_y + 4.0,
-        canopy_y + 6.0
-    ));
-
-    // Planter garden on the plaza (Canteiro de flores da Praça da Cidadania)
-    let planter_x = px + 18.0;
-    let planter_y = floor_y - 14.0;
-    out.push_str(&format!(
-        r##"<rect x="{planter_x:.1}" y="{planter_y:.1}" width="42" height="12" rx="3" fill="#6c584c" stroke="#111111" stroke-width="1.5" />"##
-    ));
-    for fl in 0..5 {
-        let fl_x = planter_x + 6.0 + (fl as f64 * 7.5);
-        out.push_str(&format!(
-            r##"<circle cx="{fl_x:.1}" cy="{:.1}" r="3" fill="#e76f51" stroke="#111111" stroke-width="0.8" />"##,
-            planter_y - 2.0
-        ));
-    }
-
-    // Floor line: concrete plaza tiles with joints
-    out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
         px + w
     ));
-    for j in 0..6 {
-        let jx = px + 15.0 + (j as f64 * (w / 6.0));
+    for paver in 0..6 {
+        let px1 = px + 20.0 + (paver as f64 * (w / 5.2));
         out.push_str(&format!(
-            r##"<line x1="{jx:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#6c757d" stroke-width="1" />"##,
-            jx - 8.0, floor_y + 20.0
+            r##"<line x1="{px1:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.9" opacity="0.45" />"##,
+            px1 - 20.0, py + h
         ));
     }
 
