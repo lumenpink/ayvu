@@ -343,10 +343,11 @@ fn load_aly() -> CharacterPack {
         name: "Aly".to_string(),
         author: "Lumen Pink".to_string(),
         license: "CC-BY".to_string(),
-        description: "Aly, silhueta humanoide feminina em nanquim com estampa A no peito"
-            .to_string(),
-        balloon_anchor: Anchor { x: 0.50, y: 0.19 },
-        hand_anchor: Anchor { x: 0.71, y: 0.50 },
+        description:
+            "Aly, jovem estudante em nanquim autêntico com jaqueta casual esportiva azul-acinzentada com zíper, jeans clássico, tênis canvas e cabelos cacheados volumosos"
+                .to_string(),
+        balloon_anchor: Anchor { x: 0.50, y: 0.18 },
+        hand_anchor: Anchor { x: 0.68, y: 0.49 },
         pose_hand_anchors: HashMap::new(),
         poses,
     }

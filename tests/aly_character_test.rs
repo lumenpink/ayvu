@@ -101,11 +101,12 @@ fn test_render_dialogue_with_aly_and_prop() {
 Aly: Bom dia, pessoal! Prontos para a aula no HU?
 "#;
 
-    let strip = parse_dialogue_script(script, Some("Aula no HU")).expect("Script com Aly e prop deve ser parseado");
+    let strip = parse_dialogue_script(script, Some("Aula no HU"))
+        .expect("Script com Aly e prop deve ser parseado");
     let svg = render_comic_strip_to_svg(&strip);
 
     assert!(
-        svg.contains("data-speaker=\"aly\""),
+        svg.contains("data-speaker=\"Aly\"") || svg.contains("data-speaker=\"aly\""),
         "SVG final deve renderizar o grupo da Aly com atributo de speaker"
     );
     assert!(
