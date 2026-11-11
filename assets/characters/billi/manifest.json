@@ -3,14 +3,14 @@
   "name": "Billi",
   "author": "Lumen Pink",
   "license": "CC-BY",
-  "description": "Billi, silhueta humanoide feminina em nanquim com estampa B no peito",
+  "description": "Billi, estudante de Medicina da UFSC em nanquim aut\u00eantico com blazer de alfaiataria, piercings faciais e tatuagem de mariposa",
   "balloon_anchor": {
     "x": 0.5,
-    "y": 0.19
+    "y": 0.18
   },
   "hand_anchor": {
-    "x": 0.71,
-    "y": 0.5
+    "x": 0.65,
+    "y": 0.48
   },
   "poses": {
     "neutral": "neutral.svg",

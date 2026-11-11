@@ -1,18 +1,132 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 440" width="160" height="440">
-  <!-- Silhouette Female Body -->
-  <path d="M80,30 C60,30 52,48 52,70 C52,92 64,110 80,110 C96,110 108,92 108,70 C108,48 100,30 80,30 Z" fill="#000000"  />
-  <!-- Hair Silhouette -->
-  <path d="M52,65 C45,85 40,115 42,145 C48,150 56,130 56,115 C56,110 52,95 52,65 Z" fill="#000000"  />
-  <path d="M108,65 C115,85 120,115 118,145 C112,150 104,130 104,115 C104,110 108,95 108,65 Z" fill="#000000"  />
-  <!-- Torso and Dress / Clothes -->
-  <path d="M70,110 L90,110 L96,125 L125,145 L118,220 L108,220 L115,160 L102,175 L112,270 L128,400 L95,400 L92,430 L84,430 L84,400 L76,400 L76,430 L68,430 L65,400 L32,400 L48,270 L58,175 L45,160 L52,220 L42,220 L35,145 L64,125 Z" fill="#000000"  />
-  <!-- Chest Badge -->
-  <circle cx="80" cy="180" r="16" fill="#ffffff" stroke="#000000" stroke-width="2" />
-  <text x="80" y="186" font-family="sans-serif" font-size="18" font-weight="bold" fill="#000000" text-anchor="middle">B</text>
-  <!-- Sad Face -->
-  <line x1="68" y1="64" x2="76" y2="60" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
-  <line x1="92" y1="64" x2="84" y2="60" stroke="#ffffff" stroke-width="2" stroke-linecap="round" />
-  <circle cx="73" cy="67" r="2.5" fill="#ffffff" />
-  <circle cx="87" cy="67" r="2.5" fill="#ffffff" />
-  <path d="M74,87 Q80,81 86,87" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 440" width="160" height="440" class="character-billi character-pose-sad">
+  <!-- Billi - Traço Autêntico em Nanquim (Referência ~/ref/billi) -->
+
+  <!-- Calça de Alfaiataria (Azul-marinho escuro / grafite) -->
+  <path class="billi-pants" d="M 52 230 L 108 230 L 112 300 L 115 385 L 86 385 L 82 270 L 78 270 L 74 385 L 45 385 L 48 300 Z" fill="#1e232a" stroke="#111111" stroke-width="1.8" />
+  <!-- Vincos centrais de alfaiataria da calça -->
+  <line x1="60" y1="240" x2="58" y2="380" stroke="#111111" stroke-width="1.0" opacity="0.6" />
+  <line x1="100" y1="240" x2="102" y2="380" stroke="#111111" stroke-width="1.0" opacity="0.6" />
+
+
+  <!-- Botas pretas de couro com salto bloco -->
+  <!-- Bota esquerda -->
+  <path class="billi-boot-left" d="M 45 385 L 60 385 L 62 415 L 70 422 L 70 428 L 44 428 L 43 415 Z" fill="#141414" stroke="#111111" stroke-width="1.8" />
+  <rect x="44" y="420" width="8" height="8" fill="#0a0a0a" stroke="#111111" stroke-width="1.2" /> <!-- Salto bloco -->
+  <line x1="48" y1="410" x2="58" y2="418" stroke="#ffffff" stroke-width="0.6" opacity="0.4" /> <!-- Brilho couro -->
+  <!-- Bota direita -->
+  <path class="billi-boot-right" d="M 100 385 L 115 385 L 117 415 L 118 428 L 92 428 L 92 422 L 98 415 Z" fill="#141414" stroke="#111111" stroke-width="1.8" />
+  <rect x="108" y="420" width="8" height="8" fill="#0a0a0a" stroke="#111111" stroke-width="1.2" /> <!-- Salto bloco -->
+  <line x1="102" y1="410" x2="112" y2="418" stroke="#ffffff" stroke-width="0.6" opacity="0.4" /> <!-- Brilho couro -->
+
+
+  <!-- Colo e Pele do Decote -->
+  <path class="billi-skin-chest" d="M 68 112 L 92 112 C 92 125 94 140 80 148 C 66 140 68 125 68 112 Z" fill="#f8eedf" stroke="#111111" stroke-width="1.4" />
+
+  <!-- Tatuagem de Mariposa/Borboleta no Colo com Asas Abertas -->
+  <g class="billi-tattoo-mariposa" transform="translate(80, 134) scale(0.7)">
+    <!-- Corpo da mariposa -->
+    <ellipse cx="0" cy="0" rx="2" ry="7" fill="#111111" />
+    <circle cx="0" cy="-8" r="1.8" fill="#111111" />
+    <!-- Antenas finas -->
+    <path d="M 0 -9 Q -3 -13 -6 -12 M 0 -9 Q 3 -13 6 -12" fill="none" stroke="#111111" stroke-width="0.8" />
+    <!-- Asas superiores detalhadas em nanquim -->
+    <path d="M -2 -4 C -12 -14 -22 -12 -24 -2 C -24 6 -14 8 -2 2 Z" fill="#1c1c1c" stroke="#111111" stroke-width="1.0" />
+    <path d="M 2 -4 C 12 -14 22 -12 24 -2 C 24 6 14 8 2 2 Z" fill="#1c1c1c" stroke="#111111" stroke-width="1.0" />
+    <!-- Hachuras finas nas asas superiores -->
+    <line x1="-5" y1="-3" x2="-16" y2="-6" stroke="#ffffff" stroke-width="0.5" opacity="0.7" />
+    <line x1="-4" y1="0" x2="-14" y2="2" stroke="#ffffff" stroke-width="0.5" opacity="0.7" />
+    <line x1="5" y1="-3" x2="16" y2="-6" stroke="#ffffff" stroke-width="0.5" opacity="0.7" />
+    <line x1="4" y1="0" x2="14" y2="2" stroke="#ffffff" stroke-width="0.5" opacity="0.7" />
+    <!-- Asas inferiores -->
+    <path d="M -2 2 C -10 6 -14 14 -8 18 C -2 18 -1 10 -1 4 Z" fill="#1c1c1c" stroke="#111111" stroke-width="0.9" />
+    <path d="M 2 2 C 10 6 14 14 8 18 C 2 18 1 10 1 4 Z" fill="#1c1c1c" stroke="#111111" stroke-width="0.9" />
+  </g>
+
+  <!-- Colar com contas pretas e pingente gótico -->
+  <path d="M 70 114 Q 80 128 90 114" fill="none" stroke="#111111" stroke-width="1.2" stroke-dasharray="2,2" />
+  <circle cx="80" cy="122" r="2.2" fill="#d1d5db" stroke="#111111" stroke-width="0.7" />
+
+  <!-- Blusa preta de base -->
+  <path class="billi-shirt" d="M 64 125 L 96 125 L 98 230 L 62 230 Z" fill="#181818" stroke="#111111" stroke-width="1.6" />
+
+
+  <!-- Blazer de Alfaiataria Preto Aberto -->
+  <!-- Corpo do blazer e lapelas chanfradas -->
+  <path class="billi-blazer-body" d="M 52 115 L 68 115 L 74 158 L 62 245 L 48 240 L 46 130 Z" fill="#111111" stroke="#111111" stroke-width="2.0" />
+  <path class="billi-blazer-body-right" d="M 108 115 L 92 115 L 86 158 L 98 245 L 112 240 L 114 130 Z" fill="#111111" stroke="#111111" stroke-width="2.0" />
+  <!-- Lapelas estruturadas do blazer com costura interna em nanquim -->
+  <polygon points="68,115 76,145 68,162 60,135" fill="#1f1f1f" stroke="#111111" stroke-width="1.4" />
+  <polygon points="92,115 84,145 92,162 100,135" fill="#1f1f1f" stroke="#111111" stroke-width="1.4" />
+  <!-- Braço esquerdo do blazer (relaxado ao lado da perna) -->
+  <path class="billi-arm-left" d="M 48 118 L 38 128 L 32 185 L 36 240 L 45 235 L 42 180 L 46 130 Z" fill="#161616" stroke="#111111" stroke-width="1.8" />
+  <!-- Mão esquerda com unhas pintadas de preto (Y: 235 a 252) -->
+  <path class="billi-hand-left" d="M 36 240 C 34 246 36 254 41 254 C 44 254 46 248 45 235 Z" fill="#f8eedf" stroke="#111111" stroke-width="1.4" />
+  <!-- Unhas pretas -->
+  <circle cx="37" cy="248" r="0.8" fill="#111111" />
+  <circle cx="39" cy="251" r="0.8" fill="#111111" />
+  <circle cx="41" cy="250" r="0.8" fill="#111111" />
+
+
+  <!-- Braço direito semi-flexionado pronto para empunhar props (hand_anchor: 104, 210) -->
+  <path class="billi-arm-right" d="M 112 118 L 126 130 L 124 185 L 110 215 L 98 205 L 112 175 L 114 130 Z" fill="#161616" stroke="#111111" stroke-width="2.0" />
+  <!-- Mão direita com pegada anatômica para props (x=104, y=210) -->
+  <path class="billi-hand-right" d="M 100 206 C 98 212 101 218 107 218 C 111 218 113 212 108 205 Z" fill="#f8eedf" stroke="#111111" stroke-width="1.4" />
+  <!-- Unhas pretas da mão direita -->
+  <circle cx="102" cy="214" r="0.8" fill="#111111" />
+  <circle cx="105" cy="216" r="0.8" fill="#111111" />
+  <circle cx="108" cy="214" r="0.8" fill="#111111" />
+
+
+  <!-- Pescoço -->
+  <path class="billi-neck" d="M 72 90 L 88 90 L 90 115 L 70 115 Z" fill="#f8eedf" stroke="#111111" stroke-width="1.4" />
+
+
+  <!-- Rosto / Mandíbula -->
+  <path class="billi-face" d="M 62 58 C 60 76 66 94 80 95 C 94 94 100 76 98 58 C 98 42 90 35 80 35 C 70 35 62 42 62 58 Z" fill="#f8eedf" stroke="#111111" stroke-width="1.8" />
+
+
+  <!-- Cabelo Curto Pixie Desfiado (base e mechas) -->
+  <path class="billi-hair-back" d="M 60 52 C 54 44 58 30 72 26 C 88 24 102 32 104 46 C 106 58 102 74 100 80 C 98 72 98 64 97 58 C 97 45 90 34 80 34 C 70 34 63 45 63 58 C 62 65 62 74 60 80 Z" fill="#1c1c1c" stroke="#111111" stroke-width="2.0" />
+  <!-- Franja curta repicada sobre a testa (fiel às fotos) -->
+  <path class="billi-hair-bangs" d="M 63 45 Q 68 54 72 48 Q 76 56 80 47 Q 85 55 90 48 Q 94 54 97 45 C 96 36 90 30 80 30 C 70 30 64 36 63 45 Z" fill="#222222" stroke="#111111" stroke-width="1.4" />
+  <!-- Mechas desfiadas com brilho de nanquim -->
+  <path d="M 68 36 Q 74 42 76 36 M 82 34 Q 86 42 88 35" fill="none" stroke="#ffffff" stroke-width="0.8" opacity="0.6" />
+
+
+  <!-- Orelha esquerda visível com argolas prateadas -->
+  <path d="M 61 60 C 58 64 58 72 61 74" fill="none" stroke="#111111" stroke-width="1.4" />
+  <circle cx="59" cy="68" r="1.8" fill="none" stroke="#d1d5db" stroke-width="1.2" /> <!-- Brinco de argola -->
+  <circle cx="58" cy="72" r="1.8" fill="none" stroke="#d1d5db" stroke-width="1.2" /> <!-- Brinco de argola -->
+
+  <!-- Piercings Faciais Identitários da Billi -->
+  <!-- 1. Piercing transversal na sobrancelha esquerda (duas esferas) -->
+  <circle class="piercing-eyebrow" cx="68" cy="48" r="1.2" fill="#f3f4f6" stroke="#111111" stroke-width="0.6" />
+  <circle class="piercing-eyebrow" cx="71" cy="45" r="1.2" fill="#f3f4f6" stroke="#111111" stroke-width="0.6" />
+  <line x1="68" y1="48" x2="71" y2="45" stroke="#111111" stroke-width="0.7" />
+
+  <!-- 2. Bridge piercing na ponte nasal entre os olhos -->
+  <circle class="piercing-bridge" cx="76" cy="60" r="1.2" fill="#f3f4f6" stroke="#111111" stroke-width="0.6" />
+  <circle class="piercing-bridge" cx="84" cy="60" r="1.2" fill="#f3f4f6" stroke="#111111" stroke-width="0.6" />
+  <line x1="76" y1="60" x2="84" y2="60" stroke="#111111" stroke-width="0.7" />
+
+  <!-- 3. Nariz com Nostril piercing na narina direita -->
+  <path d="M 79 58 L 80 68 C 78 70 76 71 78 72 C 80 73 82 72 82 70" fill="none" stroke="#111111" stroke-width="1.3" />
+  <circle class="piercing-nostril" cx="82.5" cy="70" r="1.0" fill="#f3f4f6" stroke="#111111" stroke-width="0.5" />
+
+
+  <!-- Sobrancelhas caídas em tom melancólico -->
+  <path d="M 66 52 Q 72 48 76 53" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" />
+  <path d="M 84 53 Q 88 48 94 52" fill="none" stroke="#111111" stroke-width="1.6" stroke-linecap="round" />
+
+  <!-- Olhos caídos e melancólicos -->
+  <path class="eyeliner-left" d="M 68 60 C 70 56 75 57 77 61 L 66 58 Z" fill="#111111" stroke="#111111" stroke-width="0.8" />
+  <circle cx="73" cy="59" r="1.8" fill="#111111" />
+  <path class="eyeliner-right" d="M 83 61 C 85 57 90 56 92 60 L 94 58 Z" fill="#111111" stroke="#111111" stroke-width="0.8" />
+  <circle cx="87" cy="59" r="1.8" fill="#111111" />
+
+  <!-- Cantos da boca voltados para baixo -->
+  <path d="M 74 81 Q 80 77 86 81" fill="none" stroke="#111111" stroke-width="1.8" stroke-linecap="round" />
+  <circle class="piercing-lip" cx="74" cy="83" r="1.2" fill="#f3f4f6" stroke="#111111" stroke-width="0.6" />
+  <circle class="piercing-lip" cx="86" cy="83" r="1.2" fill="#f3f4f6" stroke="#111111" stroke-width="0.6" />
+
 </svg>

@@ -294,10 +294,10 @@ fn load_billi() -> CharacterPack {
         name: "Billi".to_string(),
         author: "Lumen Pink".to_string(),
         license: "CC-BY".to_string(),
-        description: "Billi, silhueta humanoide feminina em nanquim com estampa B no peito"
+        description: "Billi, estudante de Medicina da UFSC em nanquim autêntico com blazer de alfaiataria, piercings faciais e tatuagem de mariposa"
             .to_string(),
-        balloon_anchor: Anchor { x: 0.50, y: 0.19 },
-        hand_anchor: Anchor { x: 0.71, y: 0.50 },
+        balloon_anchor: Anchor { x: 0.50, y: 0.18 },
+        hand_anchor: Anchor { x: 0.65, y: 0.48 },
         pose_hand_anchors: HashMap::new(),
         poses,
     }

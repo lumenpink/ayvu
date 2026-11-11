@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **core:** alinhar props nas maos dos personagens via ancoras anatomicas (closes #18)
 
 ### Changed
+- **character:** recriar personagem billi em nanquim autentico a partir de fotos de referencia (closes #24)
 - **core:** adotar elenco nativo (arti, sombra, billi, aly, lu, raio) em nanquim vetorial e purgar legados do comic chat (closes #22)
 - **cli:** responder com versao canonica na flag --version (closes #17)
 - **docs:** adequar README ao teto normativo de 50 linhas do GOST-20 (closes #21)

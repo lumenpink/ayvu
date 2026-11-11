@@ -28,7 +28,10 @@ fn test_billi_has_eight_authentic_ink_poses_without_placeholder_badge() {
 
         // Deve conter elementos da ilustração em nanquim (piercings, tatuagem, alfaiataria)
         assert!(
-            svg.contains("piercing") || svg.contains("butterfly") || svg.contains("mariposa") || svg.contains("blazer"),
+            svg.contains("piercing")
+                || svg.contains("butterfly")
+                || svg.contains("mariposa")
+                || svg.contains("blazer"),
             "Pose '{}' deve conter elementos anatômicos em nanquim (piercings/tatuagem/blazer)",
             pose
         );
@@ -41,26 +44,39 @@ fn test_billi_manifest_has_accurate_anatomical_anchors() {
     let billi = registry.get("billi").expect("Billi deve estar registrada");
 
     let balloon = billi.balloon_anchor;
-    assert!((balloon.x - 0.5).abs() < 0.05, "balloon_anchor.x próximo de 0.5");
-    assert!((balloon.y - 0.18).abs() < 0.05, "balloon_anchor.y próximo de 0.18");
+    assert!(
+        (balloon.x - 0.5).abs() < 0.05,
+        "balloon_anchor.x próximo de 0.5"
+    );
+    assert!(
+        (balloon.y - 0.18).abs() < 0.05,
+        "balloon_anchor.y próximo de 0.18"
+    );
 
     let hand = billi.hand_anchor;
-    assert!((hand.x - 0.65).abs() < 0.05, "hand_anchor.x próximo de 0.65");
-    assert!((hand.y - 0.48).abs() < 0.05, "hand_anchor.y próximo de 0.48");
+    assert!(
+        (hand.x - 0.65).abs() < 0.05,
+        "hand_anchor.x próximo de 0.65"
+    );
+    assert!(
+        (hand.y - 0.48).abs() < 0.05,
+        "hand_anchor.y próximo de 0.48"
+    );
 }
 
 #[test]
 fn test_render_dialogue_with_billi_and_prop() {
     let script = r#"
 [backdrop: cafe_ccs]
-Billi (happy) [cafe]: O café do CCS hoje está excelente!
+[prop: cafe@Billi]
+Billi (happy): O café do CCS hoje está excelente!
 Arti (thinking): Concordo, o expresso duplo ajuda no raciocínio.
 "#;
     let strip = parse_dialogue_script(script, Some("Encontro no Café")).expect("parse");
     let svg = render_comic_strip_to_svg(&strip);
 
     assert!(
-        svg.contains("character-billi"),
+        svg.contains("billi-blazer") || svg.contains("data-speaker=\"billi\""),
         "SVG da tirinha deve renderizar a personagem Billi"
     );
     assert!(
