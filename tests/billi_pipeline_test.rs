@@ -6,7 +6,9 @@ use ayvu::renderer::svg::render_comic_strip_to_svg;
 #[test]
 fn test_billi_all_poses_follow_comic_chat_ink_pipeline() {
     let registry = CharacterRegistry::default();
-    let billi = registry.get("billi").expect("Personagem billi deve existir");
+    let billi = registry
+        .get("billi")
+        .expect("Personagem billi deve existir");
 
     let emotions = [
         (Emotion::Neutral, "neutral"),
@@ -49,7 +51,9 @@ fn test_billi_all_poses_follow_comic_chat_ink_pipeline() {
 #[test]
 fn test_billi_poses_have_distinct_expressions() {
     let registry = CharacterRegistry::default();
-    let billi = registry.get("billi").expect("Personagem billi deve existir");
+    let billi = registry
+        .get("billi")
+        .expect("Personagem billi deve existir");
 
     let emotions = [
         Emotion::Neutral,

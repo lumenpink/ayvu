@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **core:** alinhar props nas maos dos personagens via ancoras anatomicas (closes #18)
 
 ### Changed
+- **character:** recriar billi no pipeline de nanquim e hachuras do comic chat (closes #30)
 - **backdrops:** recriar backdrop do hu no padrao comic chat a partir de fotos de referencia (closes #29)
 - **character:** diferenciar 8 poses e expressoes do arti em nanquim autentico (closes #28)
 - **character:** recriar jacare em nanquim autentico a partir de fotos de referencia (closes #27)
