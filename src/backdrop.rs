@@ -442,9 +442,12 @@ fn render_laboratory_svg(px: f64, py: f64, w: f64, h: f64) -> String {
 }
 
 /// 4. HU Fachada UFSC - Arquitetura brutalista do Hospital Universitário Polydoro Ernani com brises-soleils ritmicos, marquise suspensa, palmeiras e ambulância
+/// 4. HU Fachada UFSC - Arquitetura brutalista do Hospital Universitário Polydoro Ernani baseada nas fotos reais.
+///
+/// Inclui a placa monumental frontal, torre d'água cilíndrica, blocos de leitos em perspectiva, poste duplo e cerca de tela.
 fn render_hu_fachada_svg(px: f64, py: f64, w: f64, h: f64) -> String {
     let mut out = String::new();
-    let ground_y = py + h - 24.0;
+    let ground_y = py + h * 0.92;
     out.push_str(r##"<g class="backdrop-vector backdrop-hu-fachada">"##);
 
     // Céu e silhueta geral
@@ -454,98 +457,243 @@ fn render_hu_fachada_svg(px: f64, py: f64, w: f64, h: f64) -> String {
 
     // Nuvens estilizadas em arco clássico de nanquim
     out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} q 16 -12 32 0 q 14 -10 28 0" fill="none" stroke="#222222" stroke-width="1.1" opacity="0.6" />"##,
-        px + 20.0, py + 16.0
+        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#222222" stroke-width="1.0" opacity="0.55" />"##,
+        px + w * 0.05, py + h * 0.05,
+        px + w * 0.11, py + h * 0.02,
+        px + w * 0.17, py + h * 0.05,
+        px + w * 0.22, py + h * 0.03,
+        px + w * 0.27, py + h * 0.06
     ));
-
-    // Prédio principal horizontal do Hospital Universitário Polydoro Ernani
-    let bldg_x = px + 12.0;
-    let bldg_y = py + 24.0;
-    let bldg_w = w - 24.0;
-    let bldg_h = 74.0;
-
     out.push_str(&format!(
-        r##"<rect x="{bldg_x:.1}" y="{bldg_y:.1}" width="{bldg_w:.1}" height="{bldg_h:.1}" fill="#f1f3f5" stroke="#111111" stroke-width="2.2" />"##
+        r##"<path d="M {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1}" fill="none" stroke="#222222" stroke-width="1.0" opacity="0.55" />"##,
+        px + w * 0.53, py + h * 0.04,
+        px + w * 0.60, py + h * 0.01,
+        px + w * 0.67, py + h * 0.04,
+        px + w * 0.72, py + h * 0.02,
+        px + w * 0.78, py + h * 0.05
     ));
 
-    // Brises-soleils horizontais e verticais icônicos do HU
-    for f in 0..3 {
-        let fy = bldg_y + 8.0 + (f as f64 * 22.0);
+    // Morros de Florianópolis ao fundo (vegetação da Trindade / Maciço da Cruz)
+    let m_y = py + h * 0.28;
+    out.push_str(&format!(
+        r##"<path d="M {px:.1} {m_y:.1} Q {:.1} {:.1} {:.1} {:.1} Q {:.1} {:.1} {:.1} {:.1} L {:.1} {:.1} L {px:.1} {:.1} Z" fill="#f1f3f5" stroke="#111111" stroke-width="1.2" />"##,
+        px + w * 0.25, py + h * 0.20,
+        px + w * 0.52, py + h * 0.27,
+        px + w * 0.77, py + h * 0.18,
+        px + w, py + h * 0.25,
+        px + w, py + h * 0.37,
+        py + h * 0.37
+    ));
+    // Hachuras do morro
+    for k in 0..16 {
+        let hx = px + w * 0.04 + (k as f64 * (w * 0.06));
         out.push_str(&format!(
-            r##"<line x1="{bldg_x:.1}" y1="{fy:.1}" x2="{:.1}" y2="{fy:.1}" stroke="#111111" stroke-width="1.6" />"##,
-            bldg_x + bldg_w
+            r##"<line x1="{hx:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.6" opacity="0.35" />"##,
+            py + h * 0.27, hx - 5.0, py + h * 0.33
         ));
-        // Aletas verticais dos brises
-        for v in 0..12 {
-            let vx = bldg_x + 8.0 + (v as f64 * ((bldg_w - 16.0) / 11.0));
+    }
+
+    // Caixa d'água / Torre cilíndrica do HU à esquerda (hu-water-tower)
+    let tw_x = px + w * 0.033;
+    let tw_y = py + h * 0.167;
+    let tw_w = w * 0.053;
+    let tw_h = h * 0.60;
+    out.push_str(r##"<g class="hu-water-tower">"##);
+    out.push_str(&format!(
+        r##"<rect x="{tw_x:.1}" y="{tw_y:.1}" width="{tw_w:.1}" height="{tw_h:.1}" fill="#f8f9fa" stroke="#111111" stroke-width="1.8" />"##
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{tw_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" opacity="0.5" />"##,
+        tw_x + tw_w * 0.3, tw_x + tw_w * 0.3, tw_y + tw_h
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{tw_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" opacity="0.5" />"##,
+        tw_x + tw_w * 0.7, tw_x + tw_w * 0.7, tw_y + tw_h
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="#ffffff" stroke="#111111" stroke-width="1.4" />"##,
+        tw_x - 2.0, tw_y - 4.0, tw_w + 4.0, 6.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} h 3 v -2 h 2 v 2 h 3 v 2 h -3 v 3 h -2 v -3 h -3 z" fill="#111111" />"##,
+        tw_x + tw_w * 0.3, tw_y + 8.0
+    ));
+    out.push_str("</g>");
+
+    // Blocos do hospital em perspectiva e volumes escalonados (hu-hospital-blocks)
+    out.push_str(r##"<g class="hu-hospital-blocks">"##);
+    // Pavilhão 1 (Recuado)
+    let p1_x = px + w * 0.30;
+    let p1_y = py + h * 0.307;
+    let p1_w = w * 0.16;
+    let p1_h = h * 0.45;
+    out.push_str(&format!(
+        r##"<rect x="{p1_x:.1}" y="{p1_y:.1}" width="{p1_w:.1}" height="{p1_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="1.8" />"##
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{p1_x:.1}" y="{p1_y:.1}" width="{:.1}" height="{p1_h:.1}" fill="#f1f3f5" stroke="#111111" stroke-width="1.4" />"##,
+        p1_w * 0.3
+    ));
+    // Pavilhão 2 (Intermediário)
+    let p2_x = px + w * 0.473;
+    let p2_y = py + h * 0.267;
+    let p2_w = w * 0.193;
+    let p2_h = h * 0.50;
+    out.push_str(&format!(
+        r##"<rect x="{p2_x:.1}" y="{p2_y:.1}" width="{p2_w:.1}" height="{p2_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="2.0" />"##
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{p2_x:.1}" y="{p2_y:.1}" width="{:.1}" height="{p2_h:.1}" fill="#f1f3f5" stroke="#111111" stroke-width="1.4" />"##,
+        p2_w * 0.28
+    ));
+    // Pavilhão 3 (Frontal)
+    let p3_x = px + w * 0.68;
+    let p3_y = py + h * 0.227;
+    let p3_w = w * 0.293;
+    let p3_h = h * 0.55;
+    out.push_str(&format!(
+        r##"<rect x="{p3_x:.1}" y="{p3_y:.1}" width="{p3_w:.1}" height="{p3_h:.1}" fill="#ffffff" stroke="#111111" stroke-width="2.2" />"##
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{p3_x:.1}" y="{p3_y:.1}" width="{:.1}" height="{p3_h:.1}" fill="#f1f3f5" stroke="#111111" stroke-width="1.6" />"##,
+        p3_w * 0.25
+    ));
+    // Janelas e brises verticais nos andares do pavilhão frontal
+    for fl in 0..5 {
+        let f_y = p3_y + 14.0 + (fl as f64 * 26.0);
+        out.push_str(&format!(
+            r##"<rect x="{:.1}" y="{f_y:.1}" width="{:.1}" height="16.0" fill="#ffffff" stroke="#111111" stroke-width="1.4" />"##,
+            p3_x + p3_w * 0.3, p3_w * 0.65
+        ));
+        for br in 0..8 {
+            let br_x = p3_x + p3_w * 0.32 + (br as f64 * 6.0);
             out.push_str(&format!(
-                r##"<line x1="{vx:.1}" y1="{fy:.1}" x2="{vx:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.0" />"##,
-                fy + 16.0
-            ));
-            // Sombra hachurada sob a aleta
-            out.push_str(&format!(
-                r##"<line x1="{:.1}" y1="{fy:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.6" opacity="0.45" />"##,
-                vx + 1.2, vx + 1.2, fy + 16.0
+                r##"<line x1="{br_x:.1}" y1="{f_y:.1}" x2="{br_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" />"##,
+                f_y + 16.0
             ));
         }
     }
+    // Pilotis e marquise térrea
+    out.push_str(&format!(
+        r##"<polygon points="{:.1},{:.1} {:.1},{:.1} {:.1},{:.1} {:.1},{:.1}" fill="#f8f9fa" stroke="#111111" stroke-width="1.6" />"##,
+        p2_x - 2.0, ground_y - 46.0,
+        px + w - 8.0, ground_y - 46.0,
+        px + w - 8.0, ground_y - 34.0,
+        p2_x - 2.0, ground_y - 34.0
+    ));
+    for pil in 0..6 {
+        let pil_x = p2_x + 10.0 + (pil as f64 * 24.0);
+        out.push_str(&format!(
+            r##"<line x1="{pil_x:.1}" y1="{:.1}" x2="{pil_x:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+            ground_y - 34.0
+        ));
+    }
+    out.push_str("</g>");
 
-    // Marquise monumental suspensa da entrada de emergência e recepção
-    let marq_x = bldg_x + (bldg_w * 0.35);
-    let marq_y = bldg_y + bldg_h - 4.0;
-    let marq_w = (bldg_w * 0.32).min(85.0);
+    // Poste de iluminação icônico do HU (hu-lamp-post)
+    let lp_x = px + w * 0.113;
+    out.push_str(r##"<g class="hu-lamp-post">"##);
     out.push_str(&format!(
-        r##"<polygon points="{marq_x:.1},{marq_y:.1} {:.1},{marq_y:.1} {:.1},{:.1} {:.1},{:.1}" fill="#e9ecef" stroke="#111111" stroke-width="2.0" />"##,
-        marq_x + marq_w, marq_x + marq_w + 10.0, marq_y + 12.0, marq_x - 10.0, marq_y + 12.0
+        r##"<line x1="{lp_x:.1}" y1="{:.1}" x2="{lp_x:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        py + h * 0.217
     ));
-    ink_hatch_lines(
-        &mut out,
-        marq_x - 8.0,
-        marq_y + 13.0,
-        marq_x + marq_w + 8.0,
-        marq_y + 18.0,
-        4.0,
-    );
+    out.push_str(&format!(
+        r##"<polygon points="{:.1},{:.1} {:.1},{:.1} {:.1},{:.1} {:.1},{:.1}" fill="#ffffff" stroke="#111111" stroke-width="1.4" />"##,
+        lp_x - 6.0, py + h * 0.20, lp_x + 2.0, py + h * 0.18, lp_x + 8.0, py + h * 0.20, lp_x, py + h * 0.22
+    ));
+    out.push_str("</g>");
 
-    // Palmeiras imperiais esguias no canteiro frontal
-    let palm_x = bldg_x + 14.0;
+    // Placa monumental frontal do HU (hu-monumental-sign)
+    let s_x = px + w * 0.04;
+    let s_y = py + h * 0.227;
+    let s_w = w * 0.32;
+    let s_h = h * 0.227;
+    let post_x = s_x + s_w * 0.46;
+    out.push_str(r##"<g class="hu-monumental-sign">"##);
     out.push_str(&format!(
-        r##"<line x1="{palm_x:.1}" y1="{ground_y:.1}" x2="{palm_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="2.0" />"##,
-        py + 18.0
+        r##"<rect x="{post_x:.1}" y="{:.1}" width="5.0" height="{:.1}" fill="#111111" stroke="#111111" stroke-width="1.2" />"##,
+        s_y + s_h - 2.0, ground_y - (s_y + s_h - 2.0)
     ));
     out.push_str(&format!(
-        r##"<path d="M {palm_x:.1} {:.1} q -18 -8 -26 4 M {palm_x:.1} {:.1} q 18 -8 26 4 M {palm_x:.1} {:.1} q 0 -18 8 -24" fill="none" stroke="#222222" stroke-width="1.3" />"##,
-        py + 20.0, py + 20.0, py + 20.0
+        r##"<rect x="{s_x:.1}" y="{s_y:.1}" width="{s_w:.1}" height="{s_h:.1}" rx="2" fill="#ffffff" stroke="#111111" stroke-width="2.6" />"##
     ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="{:.1}" fill="none" stroke="#111111" stroke-width="0.8" />"##,
+        s_x + 2.0, s_y + 2.0, s_w - 4.0, s_h - 4.0
+    ));
+    // Faixa superior com brasão/cruz estilizados em nanquim
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" />"##,
+        s_x + 2.0, s_y + 10.0, s_x + s_w - 2.0, s_y + 10.0
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="10.0" height="12.0" fill="none" stroke="#111111" stroke-width="1.2" />"##,
+        s_x + 14.0, s_y + 14.0
+    ));
+    out.push_str(&format!(
+        r##"<path d="M {:.1} {:.1} h 3 v -3 h 3 v 3 h 3 v 3 h -3 v 3 h -3 v -3 h -3 z" fill="#111111" />"##,
+        s_x + 28.0, s_y + 17.0
+    ));
+    // Linhas tipográficas gravadas em nanquim
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.6" />"##,
+        s_x + 10.0, s_y + 34.0, s_x + s_w - 10.0, s_y + 34.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.6" />"##,
+        s_x + 13.0, s_y + 42.0, s_x + s_w - 13.0, s_y + 42.0
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="22.0" height="6.0" fill="#111111" />"##,
+        s_x + 16.0,
+        s_y + 50.0
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" />"##,
+        s_x + 42.0, s_y + 53.0, s_x + s_w - 16.0, s_y + 53.0
+    ));
+    out.push_str("</g>");
 
-    // Ambulância do HU estilizada em linhas de nanquim no estacionamento
-    let amb_x = bldg_x + bldg_w - 65.0;
-    let amb_y = ground_y - 18.0;
-    out.push_str(&format!(
-        r##"<path d="M {amb_x:.1} {amb_y:.1} l 38 0 l 8 8 l 0 10 l -46 0 z" fill="#ffffff" stroke="#111111" stroke-width="1.6" />"##
-    ));
-    // Rodas da ambulância com calotas
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{ground_y:.1}" r="4.0" fill="#222222" stroke="#111111" stroke-width="1.2" />"##,
-        amb_x + 10.0
-    ));
-    out.push_str(&format!(
-        r##"<circle cx="{:.1}" cy="{ground_y:.1}" r="4.0" fill="#222222" stroke="#111111" stroke-width="1.2" />"##,
-        amb_x + 36.0
-    ));
-    // Cruz da saúde desenhada em nanquim na lateral (sem fonte digital)
-    let cx_x = amb_x + 20.0;
-    let cx_y = amb_y + 6.0;
-    out.push_str(&format!(
-        r##"<path d="M {:.1} {:.1} h 2 v -2 h 2 v 2 h 2 v 2 h -2 v 2 h -2 v -2 h -2 z" fill="#111111" stroke="#111111" stroke-width="0.8" />"##,
-        cx_x + 1.0, cx_y
-    ));
+    // Cerca aramada em losangos na frente da calçada (hu-mesh-fence)
+    let fence_top = ground_y - 61.0;
+    out.push_str(r##"<g class="hu-mesh-fence">"##);
+    for p in 0..7 {
+        let px_post = px + 2.0 + (p as f64 * 22.0);
+        out.push_str(&format!(
+            r##"<line x1="{px_post:.1}" y1="{fence_top:.1}" x2="{px_post:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="1.4" />"##
+        ));
+    }
+    for m in 0..18 {
+        let mx = px + 2.0 + (m as f64 * 7.0);
+        out.push_str(&format!(
+            r##"<line x1="{mx:.1}" y1="{:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="0.5" opacity="0.4" />"##,
+            fence_top + 3.0, mx + 14.0
+        ));
+        out.push_str(&format!(
+            r##"<line x1="{:.1}" y1="{:.1}" x2="{mx:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="0.5" opacity="0.4" />"##,
+            mx + 14.0, fence_top + 3.0
+        ));
+    }
+    out.push_str("</g>");
 
-    // Calçamento e linha do chão
+    // Linha do chão / calçada
     out.push_str(&format!(
-        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.0" />"##,
+        r##"<line x1="{px:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{ground_y:.1}" stroke="#111111" stroke-width="2.2" />"##,
         px + w
     ));
+
+    // Grama e tufos de nanquim no canteiro
+    for t in 0..25 {
+        let tx = px + 4.0 + (t as f64 * 12.0);
+        out.push_str(&format!(
+            r##"<line x1="{tx:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.9" opacity="0.6" />"##,
+            tx - 3.0, ground_y - 5.0
+        ));
+        out.push_str(&format!(
+            r##"<line x1="{tx:.1}" y1="{ground_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#111111" stroke-width="0.8" opacity="0.6" />"##,
+            tx + 2.0, ground_y - 4.0
+        ));
+    }
 
     out.push_str("</g>");
     out
