@@ -542,10 +542,10 @@ fn load_jacare() -> CharacterPack {
         author: "Lumen Pink".to_string(),
         license: "CC-BY".to_string(),
         description:
-            "Jacaré-do-papo-amarelo do Córrego da Trindade, ícone lendário da UFSC em nanquim"
+            "Jacaré-de-papo-amarelo, habitante lendário dos córregos e manguezais da UFSC em nanquim autêntico preto e branco"
                 .to_string(),
-        balloon_anchor: Anchor { x: 0.75, y: 0.32 },
-        hand_anchor: Anchor { x: 0.64, y: 0.58 },
+        balloon_anchor: Anchor { x: 0.50, y: 0.18 },
+        hand_anchor: Anchor { x: 0.68, y: 0.55 },
         pose_hand_anchors: HashMap::new(),
         poses,
     }

@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **core:** alinhar props nas maos dos personagens via ancoras anatomicas (closes #18)
 
 ### Changed
+- **character:** recriar jacare em nanquim autentico a partir de fotos de referencia (closes #27)
 - **character:** recriar capivara em nanquim autentico a partir de fotos de referencia (closes #26)
 - **character:** recriar personagem aly em nanquim autentico a partir de fotos de referencia (closes #25)
 - **character:** recriar personagem billi em nanquim autentico a partir de fotos de referencia (closes #24)
