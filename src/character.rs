@@ -143,14 +143,15 @@ pub struct CharacterRegistry {
 impl Default for CharacterRegistry {
     fn default() -> Self {
         let mut registry = Self::new();
-        // Load embedded presets
-        for pack in load_embedded_presets() {
+        // 1. Discover external character packs from XDG and local runtime directories
+        for pack in crate::assets::discover_external_characters() {
             registry.register_pack(pack);
         }
-        // Also check runtime filesystem if assets directory exists
-        let assets_dir = Path::new("assets/characters");
-        if assets_dir.is_dir() {
-            let _ = registry.load_from_directory(assets_dir);
+        // 2. Load embedded official presets for any characters not overridden on disk
+        for pack in load_embedded_presets() {
+            if !registry.contains_id(&pack.id) {
+                registry.register_pack(pack);
+            }
         }
         registry
     }

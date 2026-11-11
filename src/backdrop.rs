@@ -3,6 +3,10 @@
 // Strict Ink Guidelines: Zero system fonts/labels (<text>), zero saturated paint colors, pure ink strokes & hatching.
 
 pub fn get_vector_backdrop_svg(name: &str, px: f64, py: f64, w: f64, h: f64) -> Option<String> {
+    if let Some(disk_svg) = crate::assets::load_backdrop_from_disk(name) {
+        return Some(disk_svg);
+    }
+
     match name.to_lowercase().as_str() {
         "sala_de_aula" | "classroom" | "aula" => Some(render_classroom_svg(px, py, w, h)),
         "cafe_ccs" | "cafe" | "coffee" => Some(render_cafe_ccs_svg(px, py, w, h)),

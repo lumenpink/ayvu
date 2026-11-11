@@ -72,7 +72,8 @@ fn test_discover_custom_character_from_xdg_data_home() {
     }"#;
     fs::write(char_dir.join("manifest.json"), manifest_json).expect("write manifest");
 
-    let svg_neutral = r##"<svg viewBox="0 0 100 200"><circle cx="50" cy="50" r="30" fill="#111111" /></svg>"##;
+    let svg_neutral =
+        r##"<svg viewBox="0 0 100 200"><circle cx="50" cy="50" r="30" fill="#111111" /></svg>"##;
     let svg_happy = r##"<svg viewBox="0 0 100 200"><rect x="20" y="20" width="60" height="60" fill="#111111" /></svg>"##;
     fs::write(char_dir.join("neutral.svg"), svg_neutral).expect("write neutral");
     fs::write(char_dir.join("happy.svg"), svg_happy).expect("write happy");
@@ -81,14 +82,14 @@ fn test_discover_custom_character_from_xdg_data_home() {
     std::env::set_var("XDG_DATA_DIRS", "");
 
     let custom_packs = discover_external_characters();
-    let found = custom_packs.iter().find(|p| p.manifest.id == "robozinho");
+    let found = custom_packs.iter().find(|p| p.id == "robozinho");
 
     assert!(
         found.is_some(),
         "Robozinho deve ter sido descoberto em XDG_DATA_HOME"
     );
     let robo = found.unwrap();
-    assert_eq!(robo.manifest.name, "Robozinho");
+    assert_eq!(robo.name, "Robozinho");
     assert!(robo.poses.contains_key("neutral"));
     assert!(robo.poses.contains_key("happy"));
     assert!(robo.poses["neutral"].contains(r#"circle cx="50""#));
@@ -99,8 +100,8 @@ fn test_discover_custom_character_from_xdg_data_home() {
         registry.register_pack(pack);
     }
     let resolved = registry.resolve_speaker("robozinho");
-    assert!(
-        resolved.is_some(),
+    assert_eq!(
+        resolved.id, "robozinho",
         "Registry deve resolver personagem descoberto dinamicamente"
     );
 }
@@ -134,4 +135,31 @@ fn test_discover_custom_backdrop_from_xdg() {
         "get_vector_backdrop_svg deve integrar resolução de backdrops externos em disco"
     );
     assert!(rendered.unwrap().contains("backdrop-joaquina"));
+}
+
+#[test]
+fn test_official_backdrops_exported_to_assets_directory() {
+    let list = ayvu::backdrop::list_available_backdrops();
+    let backdrops_dir = std::path::Path::new("assets/backdrops");
+    fs::create_dir_all(backdrops_dir).expect("create assets/backdrops");
+
+    for name in list {
+        let file_path = backdrops_dir.join(format!("{}.svg", name));
+        if !file_path.exists() {
+            let svg = get_vector_backdrop_svg(name, 0.0, 0.0, 300.0, 300.0)
+                .unwrap_or_else(|| panic!("Cenário '{}' não retornou SVG para exportação", name));
+            fs::write(&file_path, svg).expect("write official backdrop svg");
+        }
+        assert!(
+            file_path.is_file(),
+            "Arquivo do cenário oficial '{}.svg' deve existir no diretório de assets",
+            name
+        );
+        let content = fs::read_to_string(&file_path).expect("read official backdrop");
+        assert!(
+            content.contains("<g class=\"backdrop-vector"),
+            "Arquivo '{}.svg' deve conter elemento vetorial de cenário",
+            name
+        );
+    }
 }

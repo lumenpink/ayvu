@@ -219,7 +219,7 @@ fn render_microphone_svg() -> String {
     s.push_str(r##"<path d="M 0 16 L 0 6 Q -1 -2 4 -8 L 8 -14" fill="none" stroke="#111111" stroke-width="2.5" stroke-linecap="round" />"##);
     // Microphone capsule
     s.push_str(r##"<g transform="translate(8, -14) rotate(30)">"##);
-    s.push_str(r##"<rect x="-4" y="-10" width="8" height="12" rx="4" fill="#24292e" stroke="#111111" stroke-width="1.8" />"##);
+    s.push_str(r##"<rect x="-4" y="-10" width="8" height="12" rx="3.8" fill="#24292e" stroke="#111111" stroke-width="1.8" />"##);
     // Metallic mesh grille lines
     s.push_str(r##"<line x1="-3" y1="-6" x2="3" y2="-6" stroke="#8c959f" stroke-width="1" />"##);
     s.push_str(r##"<line x1="-3" y1="-3" x2="3" y2="-3" stroke="#8c959f" stroke-width="1" />"##);

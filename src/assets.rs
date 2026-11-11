@@ -1,7 +1,123 @@
-//! Embedded native character packs for Ayvu (Arti, Sombra, Billi, Aly, Lu, Raio)
+//! Embedded and dynamic XDG character and backdrop packs for Ayvu
 
-use crate::character::{Anchor, CharacterPack};
+use crate::character::{clean_or_extract_svg, Anchor, CharacterManifest, CharacterPack};
 use std::collections::HashMap;
+use std::fs;
+use std::path::PathBuf;
+
+/// Retorna a lista de diretórios de busca de dados ordenados pela especificação XDG Base Directory
+pub fn get_xdg_data_dirs() -> Vec<PathBuf> {
+    let mut dirs = Vec::new();
+
+    // 1. XDG_DATA_HOME (default: ~/.local/share)
+    if let Ok(val) = std::env::var("XDG_DATA_HOME") {
+        if !val.trim().is_empty() {
+            dirs.push(PathBuf::from(val).join("ayvu"));
+        }
+    } else if let Ok(home) = std::env::var("HOME") {
+        if !home.trim().is_empty() {
+            dirs.push(
+                PathBuf::from(home)
+                    .join(".local")
+                    .join("share")
+                    .join("ayvu"),
+            );
+        }
+    }
+
+    // 2. XDG_DATA_DIRS (default: /usr/local/share/:/usr/share/)
+    if let Ok(val) = std::env::var("XDG_DATA_DIRS") {
+        if !val.trim().is_empty() {
+            for entry in val.split(':') {
+                let trimmed = entry.trim();
+                if !trimmed.is_empty() {
+                    dirs.push(PathBuf::from(trimmed).join("ayvu"));
+                }
+            }
+        }
+    } else {
+        dirs.push(PathBuf::from("/usr/local/share").join("ayvu"));
+        dirs.push(PathBuf::from("/usr/share").join("ayvu"));
+    }
+
+    // 3. Fallback de desenvolvimento local
+    let local_assets = PathBuf::from("assets");
+    if !dirs.contains(&local_assets) {
+        dirs.push(local_assets);
+    }
+
+    dirs
+}
+
+/// Descobre dinamicamente pacotes de personagens externos nos diretórios XDG
+pub fn discover_external_characters() -> Vec<CharacterPack> {
+    let mut packs = Vec::new();
+    let mut discovered_ids = std::collections::HashSet::new();
+
+    for base in get_xdg_data_dirs() {
+        let chars_dir = base.join("characters");
+        if chars_dir.is_dir() {
+            if let Ok(entries) = fs::read_dir(&chars_dir) {
+                for entry in entries.flatten() {
+                    let path = entry.path();
+                    if path.is_dir() {
+                        let manifest_path = path.join("manifest.json");
+                        if manifest_path.is_file() {
+                            if let Ok(content) = fs::read_to_string(&manifest_path) {
+                                if let Ok(manifest) =
+                                    serde_json::from_str::<CharacterManifest>(&content)
+                                {
+                                    let id_lower = manifest.id.to_lowercase();
+                                    if !discovered_ids.contains(&id_lower) {
+                                        let mut poses = HashMap::new();
+                                        for (emotion_name, file_rel) in &manifest.poses {
+                                            let pose_file = path.join(file_rel);
+                                            if let Ok(pose_svg) = fs::read_to_string(&pose_file) {
+                                                poses.insert(
+                                                    emotion_name.clone(),
+                                                    clean_or_extract_svg(&pose_svg),
+                                                );
+                                            }
+                                        }
+                                        discovered_ids.insert(id_lower);
+                                        packs.push(CharacterPack {
+                                            id: manifest.id,
+                                            name: manifest.name,
+                                            author: manifest.author,
+                                            license: manifest.license,
+                                            description: manifest.description,
+                                            balloon_anchor: manifest.balloon_anchor,
+                                            hand_anchor: manifest.hand_anchor,
+                                            pose_hand_anchors: manifest.pose_hand_anchors,
+                                            poses,
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    packs.sort_by(|a, b| a.id.cmp(&b.id));
+    packs
+}
+
+/// Carrega um cenário SVG a partir dos diretórios de backdrops XDG
+pub fn load_backdrop_from_disk(name: &str) -> Option<String> {
+    let target_file = format!("{}.svg", name.to_lowercase());
+    for base in get_xdg_data_dirs() {
+        let candidate = base.join("backdrops").join(&target_file);
+        if candidate.is_file() {
+            if let Ok(content) = fs::read_to_string(&candidate) {
+                return Some(content);
+            }
+        }
+    }
+    None
+}
 
 pub fn list_available_characters() -> Vec<&'static str> {
     vec![
