@@ -42,7 +42,9 @@ fn test_render_dialogue_with_arti_expressions() {
     let script = r#"
 [backdrop: reitoria]
 Arti (happy): Olá! Que ótimo dia na UFSC.
+---
 Arti (shouting): Ei, cuidado com a capivara!
+---
 Arti (laughing): Hahaha, ela só queria um café!
 "#;
 
