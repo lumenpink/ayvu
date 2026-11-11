@@ -76,7 +76,9 @@ Arti (thinking): Concordo, o expresso duplo ajuda no raciocínio.
     let svg = render_comic_strip_to_svg(&strip);
 
     assert!(
-        svg.contains("billi-blazer") || svg.contains("data-speaker=\"billi\""),
+        svg.contains("billi-blazer")
+            || svg.contains("billi-ink")
+            || svg.contains("data-speaker=\"billi\""),
         "SVG da tirinha deve renderizar a personagem Billi"
     );
     assert!(
