@@ -491,10 +491,11 @@ fn load_capivara() -> CharacterPack {
         name: "Capivara".to_string(),
         author: "Lumen Pink".to_string(),
         license: "CC-BY".to_string(),
-        description: "Capivara da Trindade, mascote da UFSC de porte sereno e traço em nanquim"
-            .to_string(),
-        balloon_anchor: Anchor { x: 0.72, y: 0.28 },
-        hand_anchor: Anchor { x: 0.68, y: 0.62 },
+        description:
+            "Capivara, moradora clássica dos gramados e córregos da UFSC em nanquim autêntico preto e branco"
+                .to_string(),
+        balloon_anchor: Anchor { x: 0.50, y: 0.15 },
+        hand_anchor: Anchor { x: 0.70, y: 0.65 },
         pose_hand_anchors: HashMap::new(),
         poses,
     }

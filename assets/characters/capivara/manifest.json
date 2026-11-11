@@ -3,14 +3,14 @@
   "name": "Capivara",
   "author": "Lumen Pink",
   "license": "CC-BY",
-  "description": "Capivara da Trindade, mascote da UFSC de porte sereno e traço em nanquim",
+  "description": "Capivara, moradora clássica dos gramados e córregos da UFSC em nanquim autêntico preto e branco",
   "balloon_anchor": {
-    "x": 0.72,
-    "y": 0.28
+    "x": 0.50,
+    "y": 0.15
   },
   "hand_anchor": {
-    "x": 0.68,
-    "y": 0.62
+    "x": 0.70,
+    "y": 0.65
   },
   "poses": {
     "neutral": "neutral.svg",
