@@ -21,14 +21,22 @@ pub fn get_vector_backdrop_svg(name: &str, px: f64, py: f64, w: f64, h: f64) -> 
         "bu_ufsc" | "bu" | "biblioteca" | "biblioteca_universitaria" => {
             Some(render_bu_ufsc_svg(px, py, w, h))
         }
-        "praca_cidadania" | "praca" | "reitoria" | "cidadania" => {
-            Some(render_praca_cidadania_svg(px, py, w, h))
-        }
+        "praca_cidadania" | "praca" | "cidadania" => Some(render_praca_cidadania_svg(px, py, w, h)),
         "ctc" | "engenharia" | "tecnologico" => Some(render_ctc_svg(px, py, w, h)),
-        "cfh" | "bosquinho" | "humanas" => Some(render_cfh_svg(px, py, w, h)),
-        "pantanal" | "morro" | "capivara" | "itacorubi" => Some(render_pantanal_svg(px, py, w, h)),
-        "pastoral_vector" | "pastoral_vec" => Some(render_pastoral_vector_svg(px, py, w, h)),
+        "cfh" | "humanas" => Some(render_cfh_svg(px, py, w, h)),
+        "pantanal" | "morro" | "itacorubi" => Some(render_pantanal_svg(px, py, w, h)),
+        "pastoral" | "pastoral_vector" | "pastoral_vec" => {
+            Some(render_pastoral_vector_svg(px, py, w, h))
+        }
         "room" | "quarto" | "sala" => Some(render_room_svg(px, py, w, h)),
+        "bosque_cfh" | "bosque" | "bosquinho" => Some(render_bosque_cfh_svg(px, py, w, h)),
+        "reitoria" | "predio_reitoria" => Some(render_reitoria_svg(px, py, w, h)),
+        "pista_atletismo" | "atletismo" | "cds" | "pista" => {
+            Some(render_pista_atletismo_svg(px, py, w, h))
+        }
+        "centro_eventos" | "eventos" | "centro_de_eventos" => {
+            Some(render_centro_eventos_svg(px, py, w, h))
+        }
         _ => None,
     }
 }
@@ -49,6 +57,10 @@ pub fn list_available_backdrops() -> &'static [&'static str] {
         "cfh",
         "pantanal",
         "room",
+        "bosque_cfh",
+        "reitoria",
+        "pista_atletismo",
+        "centro_eventos",
     ]
 }
 
@@ -2082,6 +2094,418 @@ fn render_pantanal_svg(px: f64, py: f64, w: f64, h: f64) -> String {
         r##"<path d="M {:.1} {bike_y:.1} L {:.1} {:.1} L {:.1} {bike_y:.1} L {:.1} {:.1} L {:.1} {:.1}" fill="none" stroke="#ffffff" stroke-width="1" stroke-linecap="round" />\"##,
         bike_x - 6.0, bike_x - 1.0, bike_y - 4.0, bike_x + 6.0, bike_x + 2.0, bike_y - 5.0, bike_x + 4.0, bike_y - 5.0
     ));
+
+    out.push_str("</g>");
+    out
+}
+
+/// Bosque do CFH - Eucaliptos imponentes com hachuras de casca, luz filtrada, bancos de concreto e terra batida
+fn render_bosque_cfh_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let floor_y = py + h - 25.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-bosque-cfh">"##);
+
+    // Sky tint & soft canopy back
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f4f7f4" />"##
+    ));
+
+    // Distant tree trunks and dense foliage in background
+    for i in 0..6 {
+        let tx = px + 15.0 + (i as f64 * (w / 5.5));
+        let tw = 8.0 + ((i % 3) as f64 * 3.0);
+        out.push_str(&format!(
+            r##"<rect x="{tx:.1}" y="{py:.1}" width="{tw:.1}" height="{:.1}" fill="#d8e2dc" stroke="#222222" stroke-width="0.8" />"##,
+            floor_y - py
+        ));
+    }
+
+    // Dense organic foliage canopy on top with nanquim hatchings
+    out.push_str(&format!(
+        r##"<path d="M {px:.1} {py:.1} Q {:.1} {:.1} {:.1} {:.1} T {:.1} {:.1} T {:.1} {:.1} L {:.1} {py:.1} Z" fill="#2d3a2e" stroke="#111111" stroke-width="1.8" />"##,
+        px + (w * 0.25), py + 35.0, px + (w * 0.5), py + 22.0,
+        px + (w * 0.75), py + 38.0, px + w, py + 20.0,
+        px + w
+    ));
+
+    // Foliage texture lines (hatchings)
+    for j in 0..8 {
+        let fx = px + 10.0 + (j as f64 * (w / 8.0));
+        let fy = py + 12.0 + ((j % 3) as f64 * 6.0);
+        out.push_str(&format!(
+            r##"<path d="M {fx:.1} {fy:.1} q 10 8 20 0 q 8 10 16 2" fill="none" stroke="#1b251c" stroke-width="1.2" />"##
+        ));
+    }
+
+    // Foreground majestic Eucalyptus trunks with peeling bark texture
+    let euca1_x = px + (w * 0.18);
+    let euca1_w = 22.0;
+    out.push_str(&format!(
+        r##"<rect x="{euca1_x:.1}" y="{py:.1}" width="{euca1_w:.1}" height="{:.1}" fill="#ede0d4" stroke="#111111" stroke-width="2" />"##,
+        floor_y - py
+    ));
+    // Bark vertical hatchings
+    for k in 0..5 {
+        let hx = euca1_x + 4.0 + (k as f64 * 3.5);
+        out.push_str(&format!(
+            r##"<line x1="{hx:.1}" y1="{:.1}" x2="{hx:.1}" y2="{:.1}" stroke="#7f5539" stroke-width="1" stroke-dasharray="14,8,22,6" />"##,
+            py + 25.0, floor_y - 10.0
+        ));
+    }
+
+    let euca2_x = px + (w * 0.76);
+    let euca2_w = 26.0;
+    out.push_str(&format!(
+        r##"<rect x="{euca2_x:.1}" y="{py:.1}" width="{euca2_w:.1}" height="{:.1}" fill="#e6ccb2" stroke="#111111" stroke-width="2" />"##,
+        floor_y - py
+    ));
+    for k in 0..6 {
+        let hx = euca2_x + 4.0 + (k as f64 * 3.8);
+        out.push_str(&format!(
+            r##"<line x1="{hx:.1}" y1="{:.1}" x2="{hx:.1}" y2="{:.1}" stroke="#7f5539" stroke-width="1" stroke-dasharray="18,10,25,8" />"##,
+            py + 20.0, floor_y - 5.0
+        ));
+    }
+
+    // Classic UFSC concrete curved bench under the trees
+    let bench_x = px + (w * 0.42);
+    let bench_y = floor_y - 28.0;
+    let bench_w = 64.0;
+    out.push_str(&format!(
+        r##"<rect x="{bench_x:.1}" y="{bench_y:.1}" width="{bench_w:.1}" height="8" rx="2" fill="#d6ccc2" stroke="#111111" stroke-width="1.8" />"##
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="8" height="20" fill="#b7b7a4" stroke="#111111" stroke-width="1.8" />"##,
+        bench_x + 8.0, bench_y + 8.0
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="8" height="20" fill="#b7b7a4" stroke="#111111" stroke-width="1.8" />"##,
+        bench_x + bench_w - 16.0, bench_y + 8.0
+    ));
+    // Bench cast shadow
+    out.push_str(&format!(
+        r##"<ellipse cx="{:.1}" cy="{floor_y:.1}" rx="36" ry="4" fill="rgba(0,0,0,0.18)" />"##,
+        bench_x + (bench_w / 2.0)
+    ));
+
+    // Ground line: organic forest soil with fallen eucalyptus leaves
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2" />"##,
+        px + w
+    ));
+    for l in 0..12 {
+        let lx = px + 10.0 + (l as f64 * (w / 12.5));
+        let ly = floor_y + 4.0 + ((l % 3) as f64 * 4.0);
+        out.push_str(&format!(
+            r##"<path d="M {lx:.1} {ly:.1} q 5 -3 10 0 q -5 3 -10 0" fill="#9c6644" stroke="#111111" stroke-width="0.8" />"##
+        ));
+    }
+
+    out.push_str("</g>");
+    out
+}
+
+/// Reitoria da UFSC - Arquitetura emblemática do Prédio Central, esquadrias em fita, marquise nobre e mastros
+fn render_reitoria_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let floor_y = py + h - 25.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-reitoria">"##);
+
+    // Clear sky background
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#e8f4f8" />"##
+    ));
+
+    // Main Building Façade (Yellow/Sand architectural tone of UFSC Central building)
+    let bldg_x = px + 15.0;
+    let bldg_y = py + 20.0;
+    let bldg_w = w - 30.0;
+    let bldg_h = floor_y - bldg_y;
+
+    out.push_str(&format!(
+        r##"<rect x="{bldg_x:.1}" y="{bldg_y:.1}" width="{bldg_w:.1}" height="{bldg_h:.1}" fill="#faedcd" stroke="#111111" stroke-width="2.2" />"##
+    ));
+
+    // Roof parapet / top cornice
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="8" fill="#d4a373" stroke="#111111" stroke-width="1.8" />"##,
+        bldg_x - 4.0, bldg_y - 6.0, bldg_w + 8.0
+    ));
+
+    // Ribbon windows (esquadrias em fita típicas dos anos 60 modernistas)
+    for floor_idx in 0..3 {
+        let win_y = bldg_y + 16.0 + (floor_idx as f64 * 34.0);
+        let win_h = 16.0;
+        out.push_str(&format!(
+            r##"<rect x="{:.1}" y="{win_y:.1}" width="{:.1}" height="{win_h:.1}" fill="#3d5a80" stroke="#111111" stroke-width="1.5" />"##,
+            bldg_x + 12.0, bldg_w - 24.0
+        ));
+        // Vertical mullions across windows
+        let num_panes = 8;
+        let pane_w = (bldg_w - 24.0) / num_panes as f64;
+        for p in 1..num_panes {
+            let pane_x = bldg_x + 12.0 + (p as f64 * pane_w);
+            out.push_str(&format!(
+                r##"<line x1="{pane_x:.1}" y1="{win_y:.1}" x2="{pane_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="1" />"##,
+                win_y + win_h
+            ));
+        }
+        // Diagonal glass reflection hatchings
+        for r in 0..4 {
+            let rx = bldg_x + 20.0 + (r as f64 * (bldg_w / 4.2));
+            out.push_str(&format!(
+                r##"<line x1="{rx:.1}" y1="{win_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#98c1d9" stroke-width="1.2" stroke-linecap="round" />"##,
+                rx + 12.0, win_y + win_h
+            ));
+        }
+    }
+
+    // Front Portico / Marquise de Entrada
+    let portico_x = bldg_x + (bldg_w * 0.28);
+    let portico_w = bldg_w * 0.44;
+    let portico_y = floor_y - 48.0;
+    out.push_str(&format!(
+        r##"<rect x="{portico_x:.1}" y="{portico_y:.1}" width="{portico_w:.1}" height="6" fill="#ccd5ae" stroke="#111111" stroke-width="2" />"##
+    ));
+    // Entrance pillars with cross-hatching
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="8" height="42" fill="#e9edc9" stroke="#111111" stroke-width="1.8" />"##,
+        portico_x + 6.0, portico_y + 6.0
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="8" height="42" fill="#e9edc9" stroke="#111111" stroke-width="1.8" />"##,
+        portico_x + portico_w - 14.0, portico_y + 6.0
+    ));
+    // Entrance Glass Door
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="{:.1}" height="36" fill="#293241" stroke="#111111" stroke-width="1.5" />"##,
+        portico_x + 18.0, portico_y + 12.0, portico_w - 36.0
+    ));
+
+    // Three Flagpoles (Mastros da UFSC, Brasil e Santa Catarina)
+    for m in 0..3 {
+        let pole_x = px + 28.0 + (m as f64 * 16.0);
+        let pole_top_y = py + 12.0;
+        out.push_str(&format!(
+            r##"<line x1="{pole_x:.1}" y1="{pole_top_y:.1}" x2="{pole_x:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="1.8" />"##
+        ));
+        out.push_str(&format!(
+            r##"<circle cx="{pole_x:.1}" cy="{pole_top_y:.1}" r="2" fill="#ffd166" stroke="#111111" stroke-width="1" />"##
+        ));
+        // Flag
+        out.push_str(&format!(
+            r##"<polygon points="{pole_x:.1},{:.1} {:.1},{:.1} {:.1},{:.1} {pole_x:.1},{:.1}" fill="#e63946" stroke="#111111" stroke-width="1" />"##,
+            pole_top_y + 2.0, pole_x + 10.0, pole_top_y + 5.0, pole_x + 10.0, pole_top_y + 12.0, pole_top_y + 9.0
+        ));
+    }
+
+    // Ground Line & Stone Pavement Steps
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        px + w
+    ));
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{:.1}" x2="{:.1}" y2="{:.1}" stroke="#b08968" stroke-width="1.2" stroke-dasharray="16,8" />"##,
+        floor_y + 8.0, px + w, floor_y + 8.0
+    ));
+
+    out.push_str("</g>");
+    out
+}
+
+/// Pista de Atletismo (CDS/UFSC) - Curvas da pista com raias em nanquim, gramado central e arquibancadas
+fn render_pista_atletismo_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let floor_y = py + h - 25.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-pista-atletismo">"##);
+
+    // Sky tint
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#e2f1f8" />"##
+    ));
+
+    // Distant CDS Sports Pavilion & Bleachers (Arquibancada)
+    let bleacher_y = py + 30.0;
+    let bleacher_h = 55.0;
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{bleacher_y:.1}" width="{w:.1}" height="{bleacher_h:.1}" fill="#ced4da" stroke="#111111" stroke-width="1.5" />"##
+    ));
+    // Bleacher tiers (degraus da arquibancada com hachuras)
+    for t in 1..5 {
+        let step_y = bleacher_y + (t as f64 * 11.0);
+        out.push_str(&format!(
+            r##"<line x1="{px:.1}" y1="{step_y:.1}" x2="{:.1}" y2="{step_y:.1}" stroke="#111111" stroke-width="1.2" />"##,
+            px + w
+        ));
+    }
+
+    // Stadium Floodlight Tower (Poste de Refletor)
+    let tower_x = px + (w * 0.85);
+    out.push_str(&format!(
+        r##"<line x1="{tower_x:.1}" y1="{py:.1}" x2="{tower_x:.1}" y2="{:.1}" stroke="#111111" stroke-width="2" />"##,
+        floor_y - 40.0
+    ));
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{:.1}" width="20" height="8" rx="2" fill="#495057" stroke="#111111" stroke-width="1.5" />"##,
+        tower_x - 10.0, py + 8.0
+    ));
+    for lit in 0..4 {
+        let lx = tower_x - 8.0 + (lit as f64 * 4.8);
+        out.push_str(&format!(
+            r##"<circle cx="{lx:.1}" cy="{:.1}" r="1.5" fill="#ffd166" />"##,
+            py + 12.0
+        ));
+    }
+
+    // Central Green Field with organic grass hatchings
+    let field_y = bleacher_y + bleacher_h;
+    let field_h = 45.0;
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{field_y:.1}" width="{w:.1}" height="{field_h:.1}" fill="#588157" stroke="#111111" stroke-width="1.5" />"##
+    ));
+    for g in 0..8 {
+        let gx = px + 12.0 + (g as f64 * (w / 8.5));
+        let gy = field_y + 12.0 + ((g % 3) as f64 * 8.0);
+        out.push_str(&format!(
+            r##"<path d="M {gx:.1} {gy:.1} l 3 -6 l 3 6 l 3 -8 l 3 8" fill="none" stroke="#344e41" stroke-width="1" />"##
+        ));
+    }
+
+    // Running Track (Tartã avermelhado com raias brancas demarcadas)
+    let track_y = field_y + field_h;
+    let track_h = floor_y - track_y;
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{track_y:.1}" width="{w:.1}" height="{track_h:.1}" fill="#bc4749" stroke="#111111" stroke-width="2" />"##
+    ));
+
+    // Track lane division lines in crisp white nanquim
+    for lane in 1..4 {
+        let lane_y = track_y + (lane as f64 * (track_h / 4.0));
+        out.push_str(&format!(
+            r##"<line x1="{px:.1}" y1="{lane_y:.1}" x2="{:.1}" y2="{lane_y:.1}" stroke="#ffffff" stroke-width="1.5" stroke-dasharray="14,10" />"##,
+            px + w
+        ));
+    }
+
+    // Track lane numbers on the ground
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" font-family="sans-serif" font-size="11" font-weight="900" fill="#ffffff" fill-opacity="0.8">1</text>"##,
+        px + 24.0, track_y + 14.0
+    ));
+    out.push_str(&format!(
+        r##"<text x="{:.1}" y="{:.1}" font-family="sans-serif" font-size="11" font-weight="900" fill="#ffffff" fill-opacity="0.8">2</text>"##,
+        px + 24.0, track_y + 32.0
+    ));
+
+    // Floor Line
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        px + w
+    ));
+
+    out.push_str("</g>");
+    out
+}
+
+/// Centro de Cultura e Eventos (UFSC) - Curvas modernistas da cobertura, fachada envidraçada e esplanada
+fn render_centro_eventos_svg(px: f64, py: f64, w: f64, h: f64) -> String {
+    let mut out = String::new();
+    let floor_y = py + h - 25.0;
+    out.push_str(r##"<g class="backdrop-vector backdrop-centro-eventos">"##);
+
+    // Pale sky
+    out.push_str(&format!(
+        r##"<rect x="{px:.1}" y="{py:.1}" width="{w:.1}" height="{h:.1}" fill="#f1faee" />"##
+    ));
+
+    // Centro de Eventos Building Body
+    let bldg_x = px + 10.0;
+    let bldg_y = py + 25.0;
+    let bldg_w = w - 20.0;
+
+    // Curved modernist wave roof profile (A cobertura icônica em onda)
+    out.push_str(&format!(
+        r##"<path d="M {bldg_x:.1} {bldg_y:.1} Q {:.1} {:.1} {:.1} {bldg_y:.1} T {:.1} {:.1} L {:.1} {:.1} L {bldg_x:.1} {:.1} Z" fill="#e9ecef" stroke="#111111" stroke-width="2.4" />"##,
+        bldg_x + (bldg_w * 0.3), bldg_y - 14.0, bldg_x + (bldg_w * 0.6),
+        bldg_x + bldg_w, bldg_y - 4.0,
+        bldg_x + bldg_w, floor_y,
+        floor_y
+    ));
+
+    // Huge expansive glass façade (Grandes panos de vidro da esplanada)
+    let glass_y = bldg_y + 18.0;
+    let glass_h = floor_y - glass_y - 12.0;
+    out.push_str(&format!(
+        r##"<rect x="{:.1}" y="{glass_y:.1}" width="{:.1}" height="{glass_h:.1}" fill="#457b9d" stroke="#111111" stroke-width="1.8" />"##,
+        bldg_x + 12.0, bldg_w - 24.0
+    ));
+
+    // Structural mullion grid
+    let cols = 6;
+    let col_w = (bldg_w - 24.0) / cols as f64;
+    for c in 1..cols {
+        let cx = bldg_x + 12.0 + (c as f64 * col_w);
+        out.push_str(&format!(
+            r##"<line x1="{cx:.1}" y1="{glass_y:.1}" x2="{cx:.1}" y2="{:.1}" stroke="#111111" stroke-width="1.2" />"##,
+            glass_y + glass_h
+        ));
+    }
+    let rows = 3;
+    let row_h = glass_h / rows as f64;
+    for r in 1..rows {
+        let ry = glass_y + (r as f64 * row_h);
+        out.push_str(&format!(
+            r##"<line x1="{:.1}" y1="{ry:.1}" x2="{:.1}" y2="{ry:.1}" stroke="#111111" stroke-width="1" />"##,
+            bldg_x + 12.0, bldg_x + bldg_w - 12.0
+        ));
+    }
+
+    // Glass shine & light reflections in diagonal nanquim lines
+    for sh in 0..4 {
+        let sx = bldg_x + 20.0 + (sh as f64 * (bldg_w / 4.0));
+        out.push_str(&format!(
+            r##"<line x1="{sx:.1}" y1="{glass_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#a8dadc" stroke-width="1.5" stroke-linecap="round" />"##,
+            sx + 18.0, glass_y + glass_h
+        ));
+    }
+
+    // Modernist concrete canopy at main entrance
+    let canopy_x = bldg_x + (bldg_w * 0.35);
+    let canopy_w = bldg_w * 0.35;
+    let canopy_y = floor_y - 36.0;
+    out.push_str(&format!(
+        r##"<polygon points="{canopy_x:.1},{canopy_y:.1} {:.1},{:.1} {:.1},{:.1} {canopy_x:.1},{:.1}" fill="#adb5bd" stroke="#111111" stroke-width="2" />"##,
+        canopy_x + canopy_w, canopy_y - 6.0,
+        canopy_x + canopy_w + 10.0, canopy_y + 4.0,
+        canopy_y + 6.0
+    ));
+
+    // Planter garden on the plaza (Canteiro de flores da Praça da Cidadania)
+    let planter_x = px + 18.0;
+    let planter_y = floor_y - 14.0;
+    out.push_str(&format!(
+        r##"<rect x="{planter_x:.1}" y="{planter_y:.1}" width="42" height="12" rx="3" fill="#6c584c" stroke="#111111" stroke-width="1.5" />"##
+    ));
+    for fl in 0..5 {
+        let fl_x = planter_x + 6.0 + (fl as f64 * 7.5);
+        out.push_str(&format!(
+            r##"<circle cx="{fl_x:.1}" cy="{:.1}" r="3" fill="#e76f51" stroke="#111111" stroke-width="0.8" />"##,
+            planter_y - 2.0
+        ));
+    }
+
+    // Floor line: concrete plaza tiles with joints
+    out.push_str(&format!(
+        r##"<line x1="{px:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{floor_y:.1}" stroke="#111111" stroke-width="2.2" />"##,
+        px + w
+    ));
+    for j in 0..6 {
+        let jx = px + 15.0 + (j as f64 * (w / 6.0));
+        out.push_str(&format!(
+            r##"<line x1="{jx:.1}" y1="{floor_y:.1}" x2="{:.1}" y2="{:.1}" stroke="#6c757d" stroke-width="1" />"##,
+            jx - 8.0, floor_y + 20.0
+        ));
+    }
 
     out.push_str("</g>");
     out

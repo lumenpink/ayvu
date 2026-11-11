@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **ci:** remover campo permissions incompativel com forgejo actions (closes #15)
 
 ### Added
+- **backdrops:** expandir catalogo de cenarios vetoriais com bosque, reitoria, pista e centro de eventos em nanquim (closes #20)
 - **feat:** adicionar personagens tematicos capivara e jacare da ufsc (closes #19)
 - **feat:** implementar suporte ao protocolo xdg e auto-updater da banca (closes #14)
 - Inicialização do repositório em conformidade com o padrão GOST.
